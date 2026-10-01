@@ -1,6 +1,5 @@
 {
-  "version": 2,
-  "name": "bloom-and-twirl-by-shaira",
+  "outputDirectory": ".",
   "cleanUrls": true,
   "headers": [
     {
