@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blooms&Twirl by Shaira | Admin Studio Console</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=block" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../src/styles/main.css">
+  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: var(--bg-page);
+      font-family: var(--font-sans);
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:'Plus Jakarta Sans',sans-serif; color:#F70077; background:#FFF5F8;">
+      <div style="font-family:'Fraunces', 'Plus Jakarta Sans', sans-serif; font-size:32px; font-weight:700; margin-bottom:12px; color:#1C1917;">Blooms<span style="color:#F70077;">&</span>Twirl</div>
+      <div style="font-size:14px; color:#826F76;">Opening Blooms&Twirl Admin Studio Console...</div>
+    </div>
+  </div>
+
+  <script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+const IconsBase = {
+  Flower: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V3m4.5 9a4.5 4.5 0 1 1-4.5 4.5M16.5 12H21m-9 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V21m-4.5-9H3"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  ),
+  Overview: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/>
+      <rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+    </svg>
+  ),
+  Orders: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+    </svg>
+  ),
+  Arrangements: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a5 5 0 0 1 5 5c0 2.3-1.5 4.3-3.6 4.9.4.7.6 1.4.6 2.1 0 2.8-2.2 5-5 5s-5-2.2-5-5c0-.7.2-1.4.6-2.1C2.5 11.3 1 9.3 1 7a5 5 0 0 1 5-5c1.8 0 3.3 1 4.1 2.4.8-1.4 2.3-2.4 4.1-2.4Z"/>
+      <path d="M12 14v8"/>
+    </svg>
+  ),
+  Inventory: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    </svg>
+  ),
+  Deliveries: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+      <path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+      <circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>
+    </svg>
+  ),
+  Customers: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  Promotions: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m20.59 13.41-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" x2="7.01" y1="7" y2="7"/>
+    </svg>
+  ),
+  Reviews: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  Reports: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>
+    </svg>
+  ),
+  Staff: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  Settings: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  ),
+  Search: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+    </svg>
+  ),
+  Plus: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  ),
+  User: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  )
+};
+
+const Icons = new Proxy(IconsBase, {
+  get: (target, prop) => {
+    if (prop in target) return target[prop];
+    return (props) => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="8"/>
+      </svg>
+    );
+  }
+});
+
+const getInitial = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem('bt_' + key + '_v2');
+    return raw ? JSON.parse(raw) : fallback;
+  } catch(e) {
+    return fallback;
+  }
+};
+
+const saveItem = (key, data) => {
+  try {
+    localStorage.setItem('bt_' + key + '_v2', JSON.stringify(data));
+  } catch(e) {}
+};
+
+function AdminApp() {
+  const [adminTab, setAdminTab] = useState('overview');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [arrangements, setArrangements] = useState(() => getInitial('arrangements', [
+    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of deep magenta peonies and eucalyptus.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true }
+  ]));
+
+  const [orders, setOrders] = useState(() => getInitial('orders', [
+    { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Session Road, Baguio City', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
+    { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Fuchsia Fable hand-tied', channel: 'Instagram', total: 4180, dueTime: '14:00', status: 'Fresh', date: '2026-10-01 08:54' }
+  ]));
+
+  const [inventory, setInventory] = useState(() => getInitial('inventory', [
+    { id: 'inv-1', name: 'Garden rose, blush', type: 'stem', inStock: 24, needed: 40, unit: 'stems', isLow: true },
+    { id: 'inv-2', name: 'Peony, coral', type: 'stem', inStock: 8, needed: 30, unit: 'stems', isLow: true },
+    { id: 'inv-3', name: 'Pink tulip', type: 'stem', inStock: 60, needed: 50, unit: 'stems', isLow: false }
+  ]));
+
+  const [deliveries, setDeliveries] = useState(() => getInitial('deliveries', [
+    { id: 'del-1', time: '09:30', recipient: 'Yuna Park', location: 'Session Road, Baguio City', courier: 'Nino', status: 'Done' },
+    { id: 'del-2', time: '10:00', recipient: 'Highland Pine Cafe', location: 'Camp 7, Baguio City', courier: 'Marisol', status: 'Rolling' }
+  ]));
+
+  const [customers, setCustomers] = useState(() => getInitial('customers', [
+    { id: 'c-1', name: 'Marisol Reyes', initials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', segment: 'Bride', ordersCount: 6, lifetimeValue: 34180, lastOrderDate: '2026-10-01', customerSinceDate: '2025-11-04' }
+  ]));
+
+  const [settings, setSettings] = useState(() => getInitial('settings', {
+    shopName: 'Bloom&Twirl by Shaira',
+    deliveryFee: 150,
+    operatingHours: '08:00–20:00',
+    phone: '+63 917 555 0142',
+    currency: 'PHP ₱',
+    paymentMethods: 4,
+    deliveryZones: 9
+  }));
+
+  const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
+  const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
+  const [editingArrangement, setEditingArrangement] = useState(null);
+  const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
+  const [editingInventoryItem, setEditingInventoryItem] = useState(null);
+  const [orderFilter, setOrderFilter] = useState('All');
+
+  useEffect(() => saveItem('orders', orders), [orders]);
+  useEffect(() => saveItem('arrangements', arrangements), [arrangements]);
+  useEffect(() => saveItem('inventory', inventory), [inventory]);
+
+  const advanceOrderStatus = (orderId, newStatus) => {
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+  };
+
+  const handleSaveArrangement = (arrData) => {
+    if (editingArrangement) {
+      setArrangements(arrangements.map(a => a.id === editingArrangement.id ? { ...a, ...arrData } : a));
+    } else {
+      setArrangements([{ id: 'arr-' + Date.now(), sold30d: 0, rating: 5.0, ...arrData }, ...arrangements]);
+    }
+    setIsArrangementModalOpen(false);
+  };
+
+  const handleSaveInventory = (itemData) => {
+    if (editingInventoryItem) {
+      setInventory(inventory.map(i => i.id === editingInventoryItem.id ? { ...i, ...itemData } : i));
+    } else {
+      setInventory([{ id: 'inv-' + Date.now(), ...itemData }, ...inventory]);
+    }
+    setIsInventoryModalOpen(false);
+  };
+
+  return (
+    <div style={{ display: 'flex', width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
+      <aside className="sidebar">
+        <div className="brand-header">
+          <div className="brand-icon-box">
+            <Icons.Flower />
+          </div>
+          <div className="brand-text">
+            <h2>Blooms<span>&</span>Twirl</h2>
+            <div className="brand-subtitle">BY SHAIRA</div>
+            <span className="admin-pill-badge">ADMIN CONSOLE</span>
+          </div>
+        </div>
+
+        <div className="nav-section-title">SHOP FLOOR</div>
+        <ul className="nav-list">
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'overview' ? 'active' : '')} onClick={() => setAdminTab('overview')}>
+              <div className="nav-label-group"><Icons.Overview /> Overview</div>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'orders' ? 'active' : '')} onClick={() => setAdminTab('orders')}>
+              <div className="nav-label-group"><Icons.Orders /> Orders</div>
+              <span className="nav-badge">{orders.length}</span>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'arrangements' ? 'active' : '')} onClick={() => setAdminTab('arrangements')}>
+              <div className="nav-label-group"><Icons.Arrangements /> Arrangements</div>
+              <span className="nav-badge">{arrangements.length}</span>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'inventory' ? 'active' : '')} onClick={() => setAdminTab('inventory')}>
+              <div className="nav-label-group"><Icons.Inventory /> Inventory</div>
+              <span className="nav-badge">{inventory.filter(i=>i.isLow).length}</span>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'deliveries' ? 'active' : '')} onClick={() => setAdminTab('deliveries')}>
+              <div className="nav-label-group"><Icons.Deliveries /> Deliveries</div>
+            </button>
+          </li>
+        </ul>
+
+        <div className="nav-section-title">ADMIN & CONFIG</div>
+        <ul className="nav-list">
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'customers' ? 'active' : '')} onClick={() => setAdminTab('customers')}>
+              <div className="nav-label-group"><Icons.Customers /> Customers CRM</div>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'settings' ? 'active' : '')} onClick={() => setAdminTab('settings')}>
+              <div className="nav-label-group"><Icons.Settings /> Settings</div>
+            </button>
+          </li>
+        </ul>
+
+        <div className="user-footer-card">
+          <div className="user-avatar-circle">S</div>
+          <div>
+            <div className="user-name">Shaira Angela Saladino</div>
+            <div className="user-role">Head Florist · Apayao Studio</div>
+          </div>
+        </div>
+      </aside>
+
+      <div className="main-wrapper">
+        <header className="topbar">
+          <div className="search-bar">
+            <Icons.Search />
+            <input 
+              type="text" 
+              placeholder="Search studio orders, inventory, blooms..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="topbar-actions">
+            <a href="../index.html" className="btn-secondary" style={{ textDecoration: 'none' }}>
+              ← Visit Store / Customer View
+            </a>
+            <button className="btn-primary" onClick={() => setIsNewOrderModalOpen(true)}>
+              <Icons.Plus /> New order
+            </button>
+          </div>
+        </header>
+
+        <main className="page-content">
+          {adminTab === 'overview' && (
+            <div>
+              <div className="page-eyebrow">STUDIO BENCH DASHBOARD</div>
+              <h1 className="page-title" style={{ marginBottom: '8px' }}>Highland Flower Studio</h1>
+              <div className="page-description" style={{ marginBottom: '24px' }}>Apayao atelier bench & Baguio flower supply logistics.</div>
+
+              <div className="stats-grid-4">
+                <div className="stat-card">
+                  <div className="stat-label">TODAY'S ORDERS</div>
+                  <div className="stat-value">{orders.length}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">REVENUE (EST)</div>
+                  <div className="stat-value">₱{orders.reduce((a,c)=>a+c.total, 0).toLocaleString()}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">COLD ROOM STEMS</div>
+                  <div className="stat-value">{inventory.reduce((a,c)=>a+c.inStock, 0)}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">ACTIVE DELIVERIES</div>
+                  <div className="stat-value">{deliveries.length}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {adminTab === 'orders' && (
+            <div>
+              <div className="page-eyebrow">ORDER REPOSITORY</div>
+              <div className="page-header-row">
+                <h1 className="page-title">Orders Book</h1>
+              </div>
+              <div className="content-card">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>ORDER ID</th>
+                      <th>CLIENT</th>
+                      <th>ARRANGEMENT</th>
+                      <th>TOTAL</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map(o => (
+                      <tr key={o.id}>
+                        <td style={{ fontWeight: '700', color: 'var(--primary)' }}>{o.id}</td>
+                        <td>{o.customerName}</td>
+                        <td>{o.arrangementName}</td>
+                        <td style={{ fontWeight: '700' }}>₱{o.total.toLocaleString()}</td>
+                        <td>
+                          <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<AdminApp />);
+  </script>
+</body>
+</html>

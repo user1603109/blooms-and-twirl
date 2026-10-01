@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blooms&Twirl by Shaira | Artisanal Floral Studio Northern Luzon</title>
+  <meta name="description" content="Blooms&Twirl by Shaira - Artisanal flower studio in Apayao, Northern Luzon. Fresh highland mountain blooms supplied directly from Baguio City. Bespoke bouquets, bridal arrangements, and express Northern Luzon delivery.">
+  
+  <!-- Google Fonts: Fraunces (Serif) & Plus Jakarta Sans with display=block to eliminate Times New Roman FOUT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=block">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=block" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="./src/styles/main.css">
+  
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* Storefront and Customer Portal enhancements */
+    .store-hero {
+      background: linear-gradient(135deg, #FFF0F4 0%, #FDE4EB 100%);
+      border-radius: var(--radius-card);
+      padding: 60px 48px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+    .store-hero-content {
+      max-width: 620px;
+      z-index: 2;
+    }
+    .store-hero h1 {
+      font-family: var(--font-serif);
+      font-size: 46px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .store-hero p {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .hero-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: #FFFFFF;
+      color: var(--primary);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      border: 1px solid var(--border-light);
+    }
+
+    /* Cart Drawer */
+    .cart-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .cart-drawer {
+      width: 100%;
+      max-width: 440px;
+      height: 100%;
+      background: #FFFFFF;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    /* Order tracker status stepper */
+    .order-tracker-stepper {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 32px 0 24px;
+    }
+    .order-tracker-stepper::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 30px;
+      right: 30px;
+      height: 3px;
+      background: var(--border-light);
+      z-index: 1;
+    }
+    .stepper-step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 3px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
+    }
+    .stepper-step.completed .step-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
+    }
+    .stepper-step.active .step-circle {
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-subtle);
+    }
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .stepper-step.completed .step-label,
+    .stepper-step.active .step-label {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* 3D Flip Card for Auth Module */
+    .flip-scene {
+      perspective: 1200px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .flip-card-face {
+      position: relative;
+      width: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius-card);
+      background: #FFFFFF;
+      padding: 36px 32px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-card);
+    }
+    .flip-card-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.06); opacity: 0.88; }
+    }
+
+    /* Landing Specific Styles */
+    .landing-hero {
+      background: radial-gradient(circle at 10% 20%, #FFF5F7 0%, #FEE8EE 50%, #FDF0F3 100%);
+      border-radius: var(--radius-card);
+      padding: 70px 48px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      text-align: left;
+    }
+    .landing-hero-content {
+      max-width: 640px;
+      z-index: 2;
+    }
+    .landing-hero h1 {
+      font-family: var(--font-serif);
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.1;
+      margin: 16px 0 16px;
+      letter-spacing: -0.8px;
+    }
+    .landing-hero h1 span {
+      color: var(--primary);
+      font-style: italic;
+    }
+    .landing-hero p {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 30px;
+      max-width: 600px;
+    }
+    .stats-pill-group {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+      justify-content: flex-start;
+    }
+    .stat-mini-pill {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-mini-pill strong {
+      color: var(--primary);
+      font-weight: 800;
+    }
+    @media (max-width: 900px) {
+      .landing-hero {
+        padding: 40px 24px;
+      }
+      .landing-hero h1 {
+        font-size: 38px;
+      }
+    }
+
+    /* Product Grid and Cards */
+    .product-grid, .arrangements-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .product-card, .arrangement-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .product-card:hover, .arrangement-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .product-img, .arrangement-image-wrap img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover .product-img, .arrangement-card:hover img {
+      transform: scale(1.04);
+    }
+    .product-body, .arrangement-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .product-title, .arrangement-name {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .product-price, .arrangement-price {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    @media (max-width: 1100px) {
+      .product-grid, .arrangements-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 640px) {
+      .product-grid, .arrangements-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Shopee-style Smart Address Picker & Modal */
+    .shopee-addr-trigger {
+      cursor: pointer;
+      background: #FFF9FA;
+      border: 1.5px solid #FFD1DF;
+      border-radius: 12px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .shopee-addr-trigger:hover, .shopee-addr-trigger:focus {
+      border-color: var(--primary);
+      background: #FFF0F5;
+      box-shadow: 0 4px 14px rgba(247, 0, 119, 0.1);
+    }
+    .shopee-tab-btn {
+      flex: 1;
+      padding: 12px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .shopee-tab-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+    .shopee-tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 700;
+    }
+    .shopee-tab-step {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #EAE3E6;
+      color: #666;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .shopee-tab-btn.active .shopee-tab-step {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+    .shopee-tab-title {
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .shopee-item-row {
+      padding: 11px 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      margin-bottom: 2px;
+    }
+    .shopee-item-row:hover {
+      background: #FFF0F5;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .shopee-item-row.selected {
+      background: #FFE6EE;
+      color: var(--primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <!-- Initial Loading indicator: styled with real fonts and active animation -->
+    <div id="loading-splash" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif; background:#FFF5F8;">
+      <div style="width:62px; height:62px; border-radius:18px; background:#FFE0EB; border:1px solid #FFC2D6; display:flex; align-items:center; justify-content:center; color:#F70077; margin-bottom:20px; box-shadow:0 8px 24px rgba(247,0,119,0.16); animation:pulse 1.8s infinite ease-in-out;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F70077" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V3m4.5 9a4.5 4.5 0 1 1-4.5 4.5M16.5 12H21m-9 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V21m-4.5-9H3"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <div id="loading-brand-title" style="font-family:'Fraunces', 'Plus Jakarta Sans', -apple-system, sans-serif; font-size:32px; font-weight:700; color:#1C1917; margin-bottom:6px; letter-spacing:-0.5px;">
+        Blooms<span style="color:#F70077;">&</span>Twirl
+      </div>
+      <div style="font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#826F76; margin-bottom:16px;">
+        BY SHAIRA · FLORAL STUDIO
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; font-size:13px; color:#826F76;">
+        <span style="display:inline-block; width:16px; height:16px; border:2.5px solid #FCD0E3; border-top-color:#F70077; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+        <span style="font-weight:600;">Opening Blooms&Twirl by Shaira...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error listener to catch and report any script or compilation errors -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('Captured window error:', e);
+      var root = document.getElementById('root');
+      if (root && root.innerHTML.indexOf('Opening Blooms&Twirl by Shaira') !== -1) {
+        root.innerHTML = '<div style="padding:40px;text-align:center;font-family:\'Plus Jakarta Sans\',sans-serif;color:#F70077;background:#FFF5F8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:48px;height:48px;border-radius:50%;background:#FFE0EB;display:flex;align-items:center;justify-content:center;color:#F70077;margin-bottom:16px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h2 style="margin-bottom:8px;font-family:\'Fraunces\',serif;">Blooms&Twirl Notice</h2><p style="color:#666;max-width:540px;margin-bottom:20px;line-height:1.6;font-size:14px;">' + (e.message || 'Please refresh to launch the floral studio.') + '</p><button onclick="localStorage.clear();location.reload()" style="padding:12px 28px;background:#F70077;color:#fff;border:none;border-radius:9999px;cursor:pointer;font-weight:700;font-size:14px;">Reset Storage & Reload</button></div>';
+      }
+    });
+  </script>
+
+  <!-- Inline Babel script to bypass file:/// protocol CORS restrictions -->
+  <script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+// --- Philippines Smart Address Lookup Database (Luzon to Visayas) ---
+// --- Philippines Smart Address Lookup Database (Complete Luzon to Visayas Network) ---
+const PHILIPPINES_ADDRESS_DATA = {
+  // =========================================================================
+  // 1. CORDILLERA ADMINISTRATIVE REGION (CAR) - Atelier Base & Flower Supplier Hub
+  // =========================================================================
+  'Cordillera (CAR)': {
+    'Apayao (Luna - Atelier Base)': ['San Isidro (Poblacion)', 'Capagaypayan', 'Lappa', 'Marag Valley', 'Quirino', 'Santa Lina', 'Shalom'],
+    'Apayao (Conner)': ['Poblacion', 'Buluan', 'Caglayan', 'Calafug', 'Cupis', 'Daga', 'Guinaang', 'Ili', 'Manag'],
+    'Apayao (Flora)': ['Poblacion East', 'Poblacion West', 'Allangigan', 'Anninipan', 'Bagutong', 'Mallig', 'Santa Maria'],
+    'Apayao (Pudtol)': ['Poblacion', 'Aga', 'Amado', 'Cabatacan', 'Doña Loreta', 'San Mariano', 'Swan'],
+    'Apayao (Kabugao - Capital)': ['Poblacion', 'Badduat', 'Baliwanan', 'Lenneng', 'Luttuacan', 'Musimut', 'Nagbabalayan'],
+    'Apayao (Santa Marcela)': ['San Marcelino (Poblacion)', 'Barocboc', 'Consuelo', 'Imelda', 'Malabanag', 'San Antonio'],
+    'Apayao (Calanasan)': ['Poblacion', 'Eleazar', 'Langnao', 'Lubong', 'Sabangan', 'Santa Elena'],
+    'Baguio City (Flower Supplier Hub)': ['Session Road / Central Business', 'Burnham - Legarda', 'Camp 7 / Kennon', 'Mines View Park', 'Loakan / Scout Barrio', 'Pacdal / Wright Park', 'Asin Road / San Luis', 'City Camp / QM', 'Bakakeng Central'],
+    'Benguet (La Trinidad - Strawberry Valley)': ['Poblacion', 'Balili (Strawberry Farm)', 'Betag', 'Km 5 / Km 6', 'Puguis', 'Wangal', 'Ambiong', 'Pico'],
+    'Benguet (Atok - Flower Capital)': ['Poblacion', 'Sayangan (Northern Blossom)', 'Paoay (Highest Point)', 'Cattubo', 'Topdac'],
+    'Benguet (Tuba)': ['Poblacion', 'Badiwan', 'Camp 1', 'Nangalisan (Hot Springs)', 'Tabaan Sur', 'Taloy Sur'],
+    'Benguet (Itogon)': ['Poblacion', 'Ucab', 'Gumatdang', 'Ampucao', 'Tuding'],
+    'Mountain Province (Sagada)': ['Poblacion', 'Demang', 'Dagdag', 'Madongo', 'Ambasing', 'Fidelisan'],
+    'Mountain Province (Bontoc)': ['Poblacion', 'Samoki', 'Bontoc Ili', 'Caluttit', 'Guina-ang'],
+    'Abra (Bangued - Capital)': ['Zone 1 (Poblacion)', 'Zone 5', 'Calaba', 'Cosili', 'Santa Rosa', 'Angad'],
+    'Abra (Bucay)': ['Poblacion', 'Pagala', 'Siblong', 'Bangcagan', 'Pakiling'],
+    'Kalinga (Tabuk City - Capital)': ['Dagupan Centro', 'Bulanao Central', 'Appas', 'Bado Dangwa', 'Casigayan', 'Agit'],
+    'Kalinga (Tinglayan - Buscalan)': ['Poblacion', 'Buscalan (Tattoo Village)', 'Bugnay', 'Dananao', 'Tulgao'],
+    'Ifugao (Banaue - Rice Terraces)': ['Poblacion', 'Batad (Heritage)', 'Bangaan', 'Bocos', 'Tam-an', 'Viewpoint'],
+    'Ifugao (Lagawe - Capital)': ['Poblacion South', 'Poblacion North', 'Boliwong', 'Caba', 'Burnay']
+  },
+
+  // =========================================================================
+  // 2. ILOCOS REGION (REGION I) - Northern Luzon Coastal Corridor
+  // =========================================================================
+  'Ilocos Region (Region I)': {
+    'La Union (San Juan - Surf Town)': ['Urbiztondo (Beachfront / Coast)', 'Ili Norte', 'Ili Sur', 'Taboc', 'Montemar', 'Panicsican'],
+    'La Union (San Fernando City)': ['Sevilla', 'Carlatan', 'Catbangen', 'Lingsat', 'Madayegdeg', 'Poro Point', 'San Agustin'],
+    'La Union (Agoo)': ['San Nicolas Norte (Poblacion)', 'San Nicolas Sur', 'Santa Monica', 'Consolacion', 'San Antonio'],
+    'La Union (Bauang)': ['Central East (Poblacion)', 'Central West', 'Baccuit Sur', 'Paringao', 'Pagudpud'],
+    'Ilocos Sur (Vigan City - Heritage)': ['Calle Crisologo / Heritage District', 'Poblacion', 'Ayusan Norte', 'Bantay Border', 'Mindoro', 'Tamag', 'Beddeng Laud'],
+    'Ilocos Sur (Candon City)': ['San Jose (Poblacion)', 'Bagani Campo', 'Calaoan', 'Darapidap (Beach)', 'Talogtog', 'Caterman'],
+    'Ilocos Sur (Narvacan)': ['Santa Lucia (Poblacion)', 'Sulvec (Coast)', 'San Antonio', 'Lungog', 'Margaay'],
+    'Ilocos Norte (Laoag City - Capital)': ['San Nicolas Border', 'Poblacion / Centro', 'Barit', 'Buttong', 'Nalbo', 'Cavite', 'Zamboanga'],
+    'Ilocos Norte (Batac City)': ['Ablan (Poblacion)', 'Callaguip', 'Lacub', 'Palpalicong', 'Ricarte', 'Valdez'],
+    'Ilocos Norte (Pagudpud - Windmills & Beach)': ['Poblacion 1', 'Saud Beachfront', 'Caparispisan', 'Balaoi', 'Burayoc'],
+    'Ilocos Norte (San Nicolas)': ['San Fernando (Poblacion)', 'San Bartolome', 'San Baltazar', 'San Francisco', 'Barangay 1'],
+    'Pangasinan (Dagupan City)': ['Downtown / Perez Blvd', 'Tapuac', 'Lucao', 'Bonuan Gueset', 'Caranglaan', 'Mayapyap', 'Pantubig'],
+    'Pangasinan (Urdaneta City)': ['Nancayasan', 'Poblacion', 'San Vicente', 'Anonas', 'Pinmaludpod', 'Catablan'],
+    'Pangasinan (San Carlos City)': ['Poblacion', 'Talang', 'Mabalbalino', 'Magliba', 'Rizal', 'Palaris'],
+    'Pangasinan (Alaminos City - Hundred Islands)': ['Poblacion', 'Lucap (Wharf Hub)', 'Bani Border', 'Telbang', 'Pandayan', 'Cayucay'],
+    'Pangasinan (Lingayen - Capital)': ['Poblacion', 'Maniboc', 'Libsong East', 'Libsong West', 'Baay'],
+    'Pangasinan (Rosales)': ['Zone I (Poblacion)', 'Carmen East', 'Carmen West', 'Coliling', 'Tomana']
+  },
+
+  // =========================================================================
+  // 3. CAGAYAN VALLEY (REGION II) - Northeast Luzon Agricultural Basin
+  // =========================================================================
+  'Cagayan Valley (Region II)': {
+    'Cagayan (Tuguegarao City)': ['Centro (Poblacion)', 'Caritan Centro', 'Caggay', 'Pengue-Ruyu', 'Buntun', 'Ugac Sur', 'San Gabriel'],
+    'Cagayan (Aparri)': ['Centro 1 (Poblacion)', 'Macanaya', 'Toran', 'Punta', 'Maura', 'Minanga'],
+    'Cagayan (Santa Ana - Port Irene)': ['Centro (Poblacion)', 'San Vicente', 'Casambalangan', 'Palawig', 'Tangatan'],
+    'Cagayan (Lal-lo)': ['Centro (Poblacion)', 'Bagumbayan', 'Magapit', 'Maxingal', 'Tucalana'],
+    'Isabela (Ilagan City - Capital)': ['Centro Poblacion', 'Alibagu', 'Baligatan', 'Calamagui 1st', 'San Vicente', 'Guinatan'],
+    'Isabela (Santiago City)': ['Centro West', 'Victory Norte', 'Calaocan', 'Batal', 'Rizal', 'Villasis'],
+    'Isabela (Cauayan City)': ['District 1 (Poblacion)', 'Cabaruan', 'Tagaran', 'San Fermin', 'Minante 1', 'Turayong'],
+    'Isabela (Roxas)': ['Bantug (Poblacion)', 'Munoz', 'Rizal', 'San Pedro', 'Vira'],
+    'Nueva Vizcaya (Bayombong - Capital)': ['District IV (Poblacion)', 'Bonfal West', 'Don Domingo', 'Magsaysay', 'Casat'],
+    'Nueva Vizcaya (Solano)': ['Poblacion South', 'Poblacion North', 'Aggub', 'Gaddani', 'Roxas'],
+    'Quirino (Cabarroguis - Capital)': ['Zamora (Poblacion)', 'Mangandingay', 'San Marcos', 'Villamor', 'Gundaway'],
+    'Quirino (Diffun)': ['Aurora East (Poblacion)', 'Aurora West', 'Andres Bonifacio', 'Maria Clara'],
+    'Batanes (Basco - Capital)': ['Kayvaluganan (Poblacion)', 'Kaychanarianan', 'San Antonio', 'Ihubok II', 'Chanarian']
+  },
+
+  // =========================================================================
+  // 4. CENTRAL LUZON (REGION III) - Plains & Commercial Corridors
+  // =========================================================================
+  'Central Luzon (Region III)': {
+    'Aurora (Baler - Capital & Surf)': ['Poblacion 1', 'Sabang Beachfront', 'Buhangin', 'Suklayin', 'Reserva', 'Zabali'],
+    'Aurora (Maria Aurora)': ['San Joaquin (Poblacion)', 'Florida', 'Galintuja', 'Malasin', 'Wenceslao'],
+    'Aurora (Casiguran)': ['Barangay 1 (Poblacion)', 'Calangcuasan', 'Dibacong', 'San Ildefonso'],
+    'Pampanga (San Fernando City - Capital)': ['Dolores', 'San Agustin', 'Telabastagan', 'Sindalan', 'San Jose', 'Maimpis', 'Del Pilar'],
+    'Pampanga (Angeles City)': ['Balibago (Fields Ave)', 'Malabanias', 'Cutcut', 'Sto. Rosario', 'Pandan', 'Anunas', 'Pulung Maragul'],
+    'Pampanga (Mabalacat City - Clark)': ['Dau', 'Camachiles', 'Mabiga', 'Poblacion', 'Lakandula', 'Clark Freeport'],
+    'Bulacan (Malolos City - Capital)': ['Catmon', 'San Gabriel', 'Bulihan', 'Cofradia', 'Dakila', 'Guinhawa', 'Mojon'],
+    'Bulacan (San Jose del Monte)': ['Tungkong Mangga', 'Muzon', 'Graceville', 'Kaypian', 'Gaya-Gaya', 'Sapang Palay'],
+    'Bulacan (Meycauayan City)': ['Calvario (Poblacion)', 'Bancal', 'Malhacan', 'Saluysoy', 'Camalig'],
+    'Bulacan (Baliuag)': ['Poblacion', 'Tangos', 'Concepcion', 'Subic', 'Tibag'],
+    'Bulacan (Santa Maria)': ['Poblacion', 'Bagbaguin', 'Caypombo', 'Pulong Buhangin', 'Santa Clara'],
+    'Tarlac (Tarlac City - Capital)': ['San Sebastian', 'Matatalaib', 'San Nicolas', 'San Vicente', 'Maliwalo', 'Sepung Calzada'],
+    'Tarlac (Capas)': ['Cutcut 1st (Poblacion)', 'Santo Rosario', 'O\'Donnell', 'Cristo Rey', 'Aranguren'],
+    'Nueva Ecija (Cabanatuan City)': ['Sangitan East', 'Kapitan Pepe', 'Barrera', 'Mabini Homesite', 'Zulueta', 'Bitas'],
+    'Nueva Ecija (Gapan City)': ['San Vicente (Poblacion)', 'Bungo', 'San Nicolas', 'Pambuan', 'Santa Cruz'],
+    'Bataan (Balanga City - Capital)': ['Poblacion', 'Cupang North', 'Tuyo', 'Puerto Rivas', 'Bagumbayan', 'Doña Francisca'],
+    'Bataan (Mariveles - Freeport)': ['Poblacion', 'Alas-asin', 'Baseco Country', 'Maligaya', 'Balon Anito'],
+    'Zambales (Olongapo City / Subic Bay)': ['Barretto', 'East Bajac-Bajac', 'West Tapinac', 'New Asinan', 'Kalalake', 'Subic Bay Freeport Zone'],
+    'Zambales (Iba - Capital)': ['Poblacion', 'Palanginan', 'Amungan', 'Dirita', 'Lipay']
+  },
+
+  // =========================================================================
+  // 5. CALABARZON (REGION IV-A) - Southern Tagalog Heartland
+  // =========================================================================
+  'CALABARZON (Region IV-A)': {
+    'Cavite (Tagaytay City)': ['Maharlika West', 'Mendez Crossing East', 'Silang Junction', 'Kaybagal South', 'Iruhin Central', 'Sungay North'],
+    'Cavite (Dasmariñas City)': ['Salitran I', 'Paliparan III', 'San Agustin II', 'Zone IV (Poblacion)', 'Burol Central', 'Langkaan I'],
+    'Cavite (Bacoor City)': ['Molino III', 'Molino I', 'Habay II', 'Panapaan', 'Talaba VII', 'Queens Row Central'],
+    'Cavite (Imus City)': ['Anabu II-B', 'Bucandala', 'Malagasang I-G', 'Tanzang Luma', 'Alapan I-A', 'Palico I'],
+    'Cavite (General Trias City)': ['San Francisco', 'Manggahan', 'Tejero', 'Navarro', 'Pasong Camachile I'],
+    'Cavite (Silang)': ['Poblacion I', 'Biga I', 'Lalaan I', 'Tubuan I', 'Hoyo'],
+    'Laguna (Santa Rosa City - Nuvali)': ['Balibago (Complex)', 'Don Jose (Nuvali)', 'Tagapo', 'Dita', 'Macabling', 'Malitlit'],
+    'Laguna (Calamba City)': ['Pansol (Hot Springs)', 'Real', 'Canlubang', 'Parian', 'Halang', 'Bucal', 'Mayapa'],
+    'Laguna (San Pedro City)': ['Poblacion', 'San Vicente', 'Pacita Complex 1', 'Landayan', 'San Antonio'],
+    'Laguna (Biñan City)': ['Poblacion', 'San Antonio', 'San Francisco', 'Canlalay', 'Malamig'],
+    'Laguna (Los Baños - UPLB)': ['Batong Malake', 'College / UPLB', 'Bayog', 'San Antonio', 'Timugan'],
+    'Laguna (San Pablo City)': ['Poblacion', 'San Roque', 'San Gabriel', 'Del Remedio', 'Concepcion'],
+    'Batangas (Batangas City - Capital)': ['Kumintang Ibaba', 'Alangilan', 'Poblacion', 'Bolbok', 'Gulod Itaas', 'Calicanto'],
+    'Batangas (Lipa City)': ['Sabang', 'Marawoy', 'Tambler', 'Mataas Na Lupa', 'Banaybanay', 'Lodlod'],
+    'Batangas (Tanauan City)': ['Poblacion 1', 'Darasa', 'Sambak', 'Trapiche', 'Natatas'],
+    'Batangas (Nasugbu)': ['Poblacion 1', 'Wawa', 'Balaytigue (Punta Fuego)', 'Bilaran', 'Kaylaway'],
+    'Rizal (Antipolo City - Capital)': ['San Roque', 'Mayamot', 'Mambugan', 'Dela Paz', 'Cupang', 'Dalig', 'Beverly Hills'],
+    'Rizal (Cainta)': ['San Roque (Poblacion)', 'San Andres', 'Santo Domingo', 'Santa Rosa', 'San Juan'],
+    'Rizal (Taytay)': ['San Juan (Poblacion)', 'Dolores', 'San Isidro', 'Muzon'],
+    'Quezon (Lucena City - Capital)': ['Iyam', 'Gulang-Gulang', 'Dalahican', 'Cotta', 'Ibabang Dupay', 'Market View'],
+    'Quezon (Tayabas City)': ['San Roque (Poblacion)', 'Ilasan', 'Alitao', 'Lalo', 'Mateuna']
+  },
+
+  // =========================================================================
+  // 6. MIMAROPA (REGION IV-B) - Island Provinces & Tourist Gateways
+  // =========================================================================
+  'MIMAROPA (Region IV-B)': {
+    'Palawan (Puerto Princesa City)': ['San Pedro', 'Santa Monica', 'Bancao-Bancao', 'Tiniguiban', 'San Jose', 'Tagburos'],
+    'Palawan (El Nido - Bacuit Bay)': ['Buena Suerte (Poblacion)', 'Corong-Corong Beach', 'Masagana', 'Villa Libertad', 'Bebeladan'],
+    'Palawan (Coron)': ['Poblacion 1', 'Bancuang', 'Tagumpay', 'Bintuan', 'Guadalupe'],
+    'Oriental Mindoro (Calapan City)': ['San Vicente Central', 'Ilaya', 'Ibaba East', 'Tawiran', 'Balingayan', 'Suqui'],
+    'Oriental Mindoro (Puerto Galera)': ['Poblacion', 'White Beach (San Isidro)', 'Sabang', 'Aninuan', 'Palangan'],
+    'Occidental Mindoro (San Jose)': ['Central (Poblacion)', 'Pag-asa', 'San Roque', 'Labangan Poblacion', 'Caminawit'],
+    'Marinduque (Boac - Capital)': ['Mataas Na Bayan', 'Murallon', 'Mercado', 'San Miguel', 'Bantad'],
+    'Romblon (Romblon Capital)': ['Poblacion I', 'Capaclan', 'Sawang', 'Agbaluto', 'Bagacay'],
+    'Romblon (Odiongan - Tablas)': ['Liwayway (Poblacion)', 'Budiong', 'Dapawan', 'Tulong']
+  },
+
+  // =========================================================================
+  // 7. BICOL REGION (REGION V) - Southern Luzon Volcano & Heritage Belt
+  // =========================================================================
+  'Bicol Region (Region V)': {
+    'Albay (Legazpi City - Mayon View)': ['Old Albay District', 'Bitano', 'Gogon', 'Rawis', 'Cruzada', 'Bogtong', 'Padang'],
+    'Albay (Daraga - Cagsawa Ruins)': ['Poblacion', 'Busay (Cagsawa)', 'Bañag', 'Tagas', 'Kimantong'],
+    'Albay (Tabaco City)': ['Poblacion', 'San Roque', 'Tagas', 'Fatima', 'Bommbon'],
+    'Camarines Sur (Naga City)': ['Concepcion Pequeña', 'San Felipe', 'Magsaysay Ave', 'Triangulo', 'Dayangdang', 'Peñafrancia', 'Balatas'],
+    'Camarines Sur (Pili - Capital)': ['San Agustin (Poblacion)', 'Cadlan', 'Palestina', 'Himaao', 'San Jose'],
+    'Camarines Norte (Daet - Capital)': ['Gahonon', 'Magang', 'San Vicente', 'Camambugan', 'Bagasbas (Surfing Beach)'],
+    'Sorsogon (Sorsogon City - Capital)': ['Piot', 'Bitan-o', 'Cabid-an', 'Balogo', 'Talisay', 'Almendras-Cogon'],
+    'Catanduanes (Virac - Capital)': ['Concepcion', 'Rawis', 'San Roque', 'Gogon Centro', 'Francia'],
+    'Masbate (Masbate City - Capital)': ['Centro (Poblacion)', 'Bantigue', 'Ibingay', 'Espinosa', 'Bagumbayan']
+  },
+
+  // =========================================================================
+  // 8. WESTERN VISAYAS (REGION VI) - Sugarlandia, Boracay & Ilonggo Hub
+  // =========================================================================
+  'Western Visayas (Region VI)': {
+    'Iloilo (Iloilo City - Capital)': ['Mandurriao (Megaworld Iloilo Business Park)', 'Jaro (Heritage Plaza)', 'City Proper', 'Molo (Cathedral)', 'La Paz (Batchoy Hub)', 'Arevalo (Villa)', 'Lapuz'],
+    'Iloilo (Oton)': ['Poblacion', 'Buray', 'Trapiche', 'Botong', 'Tagbac Norte'],
+    'Iloilo (Passi City)': ['Poblacion Ilawod', 'Poblacion Ilaya', 'Salngan', 'Gematay', 'Man-it'],
+    'Negros Occidental (Bacolod City - Smiles)': ['Mandalagan (Lacson St)', 'Villamonte', 'Bata', 'Mansilingan', 'Taculing', 'Singcang-Airport', 'Tangub', 'Estefania'],
+    'Negros Occidental (Silay City - Heritage)': ['Poblacion 1', 'Mambulac', 'Rizal', 'Guinhalaran', 'Balaring'],
+    'Negros Occidental (Talisay City - The Ruins)': ['Zone 1 (Poblacion)', 'Zone 12 (The Ruins)', 'Bubog', 'Concepcion', 'Matab-ang'],
+    'Aklan (Boracay Island / Malay)': ['Balabag (Station 2 Hub)', 'Yapak (Station 1 Luxury)', 'Manoc-Manoc (Station 3)', 'Poblacion Malay (Caticlan Airport)'],
+    'Aklan (Kalibo - Capital)': ['Poblacion', 'Andagao', 'Estancia', 'New Buswang', 'Old Buswang'],
+    'Capiz (Roxas City - Seafood Capital)': ['Baybay (Seafood Strip)', 'Inzo Arnaldo (Poblacion)', 'Tiza', 'Tanque', 'Banica', 'Dinginan'],
+    'Antique (San Jose de Buenavista - Capital)': ['Fundador', 'Malandog', 'Maybato Norte', 'San Angel', 'Atabay'],
+    'Guimaras (Jordan - Mango Capital)': ['Poblacion', 'San Miguel', 'Hosking', 'Rizal', 'Alaguisoc']
+  },
+
+  // =========================================================================
+  // 9. CENTRAL VISAYAS (REGION VII) - Queen City & Island Paradises
+  // =========================================================================
+  'Central Visayas (Region VII)': {
+    'Cebu (Cebu City - Queen City)': ['Lahug (Cebu IT Park)', 'Banilad', 'Guadalupe', 'Mabolo', 'Kasambagan', 'Capitol Site', 'Talamban', 'Kamputhaw', 'Punta Princesa'],
+    'Cebu (Mandaue City)': ['Subangdaku', 'Tipolo', 'Bakilid', 'Banilad', 'Centro (Poblacion)', 'Cabancalan', 'Maguikay', 'Alang-alang'],
+    'Cebu (Lapu-Lapu City / Mactan)': ['Punta Engaño (Resort Strip)', 'Maribago', 'Basak', 'Agus', 'Poblacion', 'Gun-ob', 'Pajo', 'Marigondon'],
+    'Cebu (Talisay City)': ['Poblacion', 'Bulacao', 'Dumlog', 'Lawaan I', 'Tabunok', 'Pooc'],
+    'Cebu (Consolacion)': ['Poblacion', 'Cansaga', 'Lamac', 'Pitogo', 'Tayud'],
+    'Cebu (Liloan)': ['Poblacion', 'Catarman', 'Jubay', 'Tayud', 'Yati'],
+    'Bohol (Tagbilaran City - Capital)': ['Bool', 'Cogon', 'Dao', 'Mansasa', 'Poblacion II', 'Ubujan', 'Taloto'],
+    'Bohol (Panglao Island - Beaches)': ['Alona Beach (Tawala)', 'Bolod', 'Danao', 'Poblacion', 'Libaong'],
+    'Bohol (Dauis)': ['Poblacion', 'Bingag', 'Mariveles', 'Songculan', 'Totolan'],
+    'Negros Oriental (Dumaguete City - Gentle)': ['Bantayan', 'Piapi', 'Looc (Rizal Blvd)', 'Daro', 'Mangnao', 'Cadawinonan', 'Taclobo'],
+    'Negros Oriental (Sibulan - Airport)': ['Poblacion', 'Maslog', 'Ajong', 'Tubigon', 'San Antonio'],
+    'Siquijor (Siquijor Capital)': ['Poblacion', 'Pangi', 'Caipilan', 'Polangyuta', 'Dumanhog'],
+    'Siquijor (San Juan - Beachfront)': ['Poblacion', 'Tubod', 'Paliton Beach', 'Solangon', 'Maite']
+  },
+
+  // =========================================================================
+  // 10. EASTERN VISAYAS (REGION VIII) - Historic Islands & Leyte Gulf
+  // =========================================================================
+  'Eastern Visayas (Region VIII)': {
+    'Leyte (Tacloban City - Capital)': ['Downtown (Poblacion)', 'San Jose (Airport)', 'Abucay', 'Marasbaras', 'V&G Subdivision', 'Utap', 'Caibaan'],
+    'Leyte (Ormoc City)': ['Alegria', 'Cogon', 'Linao', 'Punta', 'Valencia', 'Ipil', 'Tambulilid'],
+    'Leyte (Palo - MacArthur Landing)': ['Canramos (Poblacion)', 'Baras (Landing Site)', 'Cavite East', 'Pawing', 'San Joaquin'],
+    'Leyte (Baybay City)': ['Zone 1 (Poblacion)', 'Punta', 'Gabu', 'Kambanog', 'Pangbatan'],
+    'Southern Leyte (Maasin City - Capital)': ['Tunga-tunga (Poblacion)', 'Combado', 'Asuncion', 'Mantahan', 'Abgao', 'Canturing'],
+    'Samar (Catbalogan City - Capital)': ['Poblacion 1', 'Ubanon', 'Canlapwas', 'Mercedes', 'Bunuanan', 'Guindapunan'],
+    'Samar (Calbayog City)': ['Central (Poblacion)', 'Capoocan', 'Dagum', 'Matobato', 'Obrero', 'Rawis'],
+    'Eastern Samar (Borongan City - Capital)': ['Songco (Poblacion)', 'Bato', 'Campesao', 'Lalawigan', 'Taboc', 'Bugong'],
+    'Eastern Samar (Guiuan - Calicoan Surf)': ['Poblacion 1', 'Ngolos (Calicoan)', 'Sulangan', 'Campoyong'],
+    'Northern Samar (Catarman - Capital)': ['Narra (Poblacion)', 'Dalakit', 'Cawayan', 'Baybay', 'Macagtas', 'Ipil-ipil'],
+    'Biliran (Naval - Capital)': ['P.I. Garcia (Poblacion)', 'Atipolo', 'Caraycaray', 'Larrazabal', 'Santissimo Rosario']
+  }
+};
+
+// Backwards-compatible alias for existing references
+const NORTHERN_LUZON_ADDRESS_DATA = PHILIPPINES_ADDRESS_DATA;
+
+// --- ICON COMPONENTS (Pure SVG, Zero Emojis) ---
+const IconsBase = {
+  Plus: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  ),
+  Eye: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+    </svg>
+  ),
+  Flower: (props) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V3m4.5 9a4.5 4.5 0 1 1-4.5 4.5M16.5 12H21m-9 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V21m-4.5-9H3"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  ),
+  ShoppingBag: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+  ),
+  User: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  Heart: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    </svg>
+  ),
+  Truck: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5l-4-4h-3v10Z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>
+    </svg>
+  ),
+  Sparkles: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+    </svg>
+  ),
+  Star: (props) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  ),
+  MapPin: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  ),
+  Home: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  ),
+  Calendar: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
+    </svg>
+  ),
+  Check: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  ArrowUpRight: (props) => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+    </svg>
+  ),
+  ChevronRight: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  ),
+  Clock: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
+  Search: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  ),
+  Rotate: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+    </svg>
+  ),
+  Orders: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+    </svg>
+  )
+};
+
+// Safe Proxy so no missing Icon key can ever return undefined or cause React Invariant #130
+const Icons = new Proxy(IconsBase, {
+  get: (target, prop) => {
+    if (prop in target) return target[prop];
+    return (props) => (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="8"/>
+      </svg>
+    );
+  }
+});
+
+// Storage Helpers
+const getInitial = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem('bt_' + key + '_v2');
+    return raw ? JSON.parse(raw) : fallback;
+  } catch(e) {
+    return fallback;
+  }
+};
+
+const saveItem = (key, data) => {
+  try {
+    localStorage.setItem('bt_' + key + '_v2', JSON.stringify(data));
+  } catch(e) {}
+};
+
+// --- APP COMPONENT ---
+function App() {
+  // Navigation mode: 'landing' (Default Landing Page) | 'store' | 'customer_dashboard'
+  const [viewMode, setViewMode] = useState('landing');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Guarantee that Fraunces is fully ready before finishing font gate
+  useEffect(() => {
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => setFontsLoaded(true));
+    } else {
+      setFontsLoaded(true);
+    }
+  }, []);
+
+  // 3D Flip Card state for Auth Panel on Landing Page
+  const [isAuthFlipped, setIsAuthFlipped] = useState(false);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  
+  // Smart Address Selector for Registration (Studio based in Apayao)
+  const [authRegion, setAuthRegion] = useState('Cordillera (CAR)');
+  const [authProvinceCity, setAuthProvinceCity] = useState('Apayao (Luna - Atelier Base)');
+  const [authBarangay, setAuthBarangay] = useState('San Isidro (Poblacion)');
+  const [authStreet, setAuthStreet] = useState('');
+
+  // Smart Address Selector for Checkout Modal
+  const [checkoutRegion, setCheckoutRegion] = useState('Cordillera (CAR)');
+  const [checkoutProvinceCity, setCheckoutProvinceCity] = useState('Apayao (Luna - Atelier Base)');
+  const [checkoutBarangay, setCheckoutBarangay] = useState('San Isidro (Poblacion)');
+  const [checkoutStreet, setCheckoutStreet] = useState('');
+
+  // Shopee-style Address Selector Modal State (Luzon to Visayas)
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [addressModalTarget, setAddressModalTarget] = useState('auth'); // 'auth' or 'checkout'
+  const [addressActiveTab, setAddressActiveTab] = useState('region'); // 'region' | 'city' | 'barangay'
+  const [addressSearchQuery, setAddressSearchQuery] = useState('');
+
+  // Staged selection inside the Shopee Address Modal
+  const [tempRegion, setTempRegion] = useState('Cordillera (CAR)');
+  const [tempProvinceCity, setTempProvinceCity] = useState('Apayao (Luna - Atelier Base)');
+  const [tempBarangay, setTempBarangay] = useState('San Isidro (Poblacion)');
+
+  const openAddressModal = (target = 'auth') => {
+    setAddressModalTarget(target);
+    const activeReg = target === 'auth' ? authRegion : checkoutRegion;
+    const activeCity = target === 'auth' ? authProvinceCity : checkoutProvinceCity;
+    const activeBrgy = target === 'auth' ? authBarangay : checkoutBarangay;
+
+    const validReg = (PHILIPPINES_ADDRESS_DATA[activeReg] ? activeReg : 'Cordillera (CAR)');
+    const validCity = (PHILIPPINES_ADDRESS_DATA[validReg] && PHILIPPINES_ADDRESS_DATA[validReg][activeCity]) 
+      ? activeCity 
+      : Object.keys(PHILIPPINES_ADDRESS_DATA[validReg] || {})[0] || '';
+    const validBrgy = (PHILIPPINES_ADDRESS_DATA[validReg] && PHILIPPINES_ADDRESS_DATA[validReg][validCity] && PHILIPPINES_ADDRESS_DATA[validReg][validCity].includes(activeBrgy)) 
+      ? activeBrgy 
+      : ((PHILIPPINES_ADDRESS_DATA[validReg] && PHILIPPINES_ADDRESS_DATA[validReg][validCity]) || [])[0] || '';
+
+    setTempRegion(validReg);
+    setTempProvinceCity(validCity);
+    setTempBarangay(validBrgy);
+    setAddressActiveTab('region');
+    setAddressSearchQuery('');
+    setIsAddressModalOpen(true);
+  };
+
+  const handleSelectRegion = (reg) => {
+    setTempRegion(reg);
+    const cities = Object.keys(PHILIPPINES_ADDRESS_DATA[reg] || {});
+    const firstCity = cities[0] || '';
+    setTempProvinceCity(firstCity);
+    const barangs = (PHILIPPINES_ADDRESS_DATA[reg] && PHILIPPINES_ADDRESS_DATA[reg][firstCity]) || [];
+    setTempBarangay(barangs[0] || '');
+    setAddressActiveTab('city');
+    setAddressSearchQuery('');
+  };
+
+  const handleSelectCity = (city) => {
+    setTempProvinceCity(city);
+    const barangs = (PHILIPPINES_ADDRESS_DATA[tempRegion] && PHILIPPINES_ADDRESS_DATA[tempRegion][city]) || [];
+    setTempBarangay(barangs[0] || '');
+    setAddressActiveTab('barangay');
+    setAddressSearchQuery('');
+  };
+
+  const handleSelectBarangay = (brgy) => {
+    setTempBarangay(brgy);
+    if (addressModalTarget === 'auth') {
+      setAuthRegion(tempRegion);
+      setAuthProvinceCity(tempProvinceCity);
+      setAuthBarangay(brgy);
+    } else {
+      setCheckoutRegion(tempRegion);
+      setCheckoutProvinceCity(tempProvinceCity);
+      setCheckoutBarangay(brgy);
+    }
+    setIsAddressModalOpen(false);
+  };
+
+  const handleConfirmAddress = () => {
+    if (addressModalTarget === 'auth') {
+      setAuthRegion(tempRegion);
+      setAuthProvinceCity(tempProvinceCity);
+      setAuthBarangay(tempBarangay);
+    } else {
+      setCheckoutRegion(tempRegion);
+      setCheckoutProvinceCity(tempProvinceCity);
+      setCheckoutBarangay(tempBarangay);
+    }
+    setIsAddressModalOpen(false);
+  };
+
+  const [currentUser, setCurrentUser] = useState(() => getInitial('currentUser', null));
+  const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
+  const [authNoticeMessage, setAuthNoticeMessage] = useState('');
+
+  // Requirement: require sign in or registration to start shopping
+  const requireAuthToShop = () => {
+    if (!currentUser) {
+      setAuthNoticeMessage('Sign in or register to start shopping at Blooms&Twirl by Shaira.');
+      const authEl = document.getElementById('auth-panel-section');
+      if (authEl) {
+        authEl.scrollIntoView({ behavior: 'smooth' });
+      }
+      return false;
+    }
+    return true;
+  };
+
+  // Core Bouquets Collection
+  const [arrangements] = useState(() => getInitial('arrangements', [
+    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-7', name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
+    { id: 'arr-8', name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false }
+  ]));
+
+  const [orders, setOrders] = useState(() => getInitial('orders', [
+    { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
+    { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Fuchsia Fable hand-tied + vase ×2', channel: 'Instagram', total: 4180, dueTime: '14:00', status: 'Fresh', date: '2026-10-01 08:54' },
+    { id: 'BT-2039', customerName: 'Highland Pine Cafe', customerInitials: 'HP', email: 'orders@highlandpine.ph', phone: '+63 918 333 9920', address: 'Camp 7, Baguio City', arrangementName: 'Table blooms × 6 (weekly)', channel: 'Phone', total: 12600, dueTime: '10:00', status: 'In transit', date: '2026-09-30 17:20', courier: 'Marisol' },
+    { id: 'BT-2038', customerName: 'Andrea Villanueva', customerInitials: 'AV', email: 'andrea.v@outlook.com', phone: '+63 917 554 9021', address: 'Strawberry Valley, La Trinidad, Benguet', arrangementName: 'Dusk & Dried bespoke', channel: 'Online', total: 2740, dueTime: '17:30', status: 'Delivered', date: '2026-09-30 15:41', courier: 'Nino' }
+  ]));
+
+  // Shopping Cart & Modals
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [activePromoCode, setActivePromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [catalogCategory, setCatalogCategory] = useState('All');
+
+  // Customer Dashboard Order Tracker
+  const [lookupOrderNumber, setLookupOrderNumber] = useState('BT-2041');
+  const [trackedOrder, setTrackedOrder] = useState(() => orders.find(o => o.id === 'BT-2041') || orders[0]);
+
+  useEffect(() => saveItem('orders', orders), [orders]);
+
+  // Cart operations
+  const addToCart = (product) => {
+    setCart(prev => {
+      const exists = prev.find(item => item.id === product.id);
+      if (exists) {
+        return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item);
+      }
+      return [...prev, { ...product, qty: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  const updateCartQty = (id, delta) => {
+    setCart(prev => prev.map(item => {
+      if (item.id === id) {
+        const newQty = item.qty + delta;
+        return newQty > 0 ? { ...item, qty: newQty } : null;
+      }
+      return item;
+    }).filter(Boolean));
+  };
+
+  const cartSubtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+  const deliveryFee = 150;
+  const cartTotal = Math.max(0, cartSubtotal + (cart.length > 0 ? deliveryFee : 0) - promoDiscount);
+
+  const applyPromo = (code) => {
+    const clean = code.trim().toUpperCase();
+    if (clean === 'ALLSAINTS15') {
+      const disc = Math.round(cartSubtotal * 0.15);
+      setPromoDiscount(disc);
+      setActivePromoCode('ALLSAINTS15');
+      alert('Promo applied: 15% discount (₱' + disc.toLocaleString() + ')');
+    } else if (clean === 'TWIRLFIRST') {
+      setPromoDiscount(200);
+      setActivePromoCode('TWIRLFIRST');
+      alert('Promo applied: ₱200 discount');
+    } else {
+      alert('Invalid or expired promo code. Try TWIRLFIRST or ALLSAINTS15');
+    }
+  };
+
+  // Checkout order placement
+  const handlePlaceOrder = (checkoutData) => {
+    const nextId = 'BT-' + (2040 + orders.length + 1);
+    const newOrd = {
+      id: nextId,
+      customerName: checkoutData.name,
+      customerInitials: checkoutData.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0, 2) || 'CL',
+      email: checkoutData.email,
+      phone: checkoutData.phone,
+      address: checkoutData.address,
+      arrangementName: cart.map(i => i.name + ' (×' + i.qty + ')').join(', '),
+      channel: 'Online',
+      total: cartTotal,
+      dueTime: checkoutData.dueTime || '14:00',
+      status: 'Fresh',
+      date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      cardMessage: checkoutData.cardMessage,
+      courier: 'Nino'
+    };
+
+    setOrders([newOrd, ...orders]);
+    setCart([]);
+    setIsCheckoutOpen(false);
+    setIsCartOpen(false);
+    setTrackedOrder(newOrd);
+    setLookupOrderNumber(newOrd.id);
+    setViewMode('customer_dashboard');
+    alert('Thank you! Your order ' + newOrd.id + ' has been submitted to Shaira’s atelier bench.');
+  };
+
+  // Auth Handler on Landing Page (Sign In & Register)
+  const handleAuthSubmit = (e, isRegister) => {
+    e.preventDefault();
+    if (isRegister) {
+      const fullAddress = [authStreet, authBarangay, authProvinceCity, authRegion].filter(Boolean).join(', ');
+      const newUser = { 
+        name: authName || 'Guest Client', 
+        email: authEmail, 
+        phone: authPhone, 
+        region: authRegion,
+        city: authProvinceCity,
+        barangay: authBarangay,
+        address: fullAddress,
+        role: 'client'
+      };
+      setCurrentUser(newUser);
+      try {
+        localStorage.setItem('bt_currentUser_v2', JSON.stringify(newUser));
+      } catch(err) {}
+      setCheckoutRegion(authRegion);
+      setCheckoutProvinceCity(authProvinceCity);
+      setCheckoutBarangay(authBarangay);
+      setCheckoutStreet(authStreet);
+      alert('Welcome to Blooms&Twirl by Shaira, ' + (authName || 'friend') + '! Your account is now active (' + authProvinceCity + ').');
+      setViewMode('store');
+    } else {
+      const cleaned = (authEmail || '').toLowerCase().trim();
+      const isAdmin = cleaned === 'admin' || cleaned.includes('admin') || authPassword === 'admin' || authPassword === 'admin123';
+      
+      if (isAdmin) {
+        const adminUser = { 
+          name: 'Shaira Angela Saladino', 
+          email: authEmail || 'admin@bloomtwirl.com', 
+          role: 'admin' 
+        };
+        setCurrentUser(adminUser);
+        try {
+          localStorage.setItem('bt_currentUser_v2', JSON.stringify(adminUser));
+        } catch(err) {}
+        alert('Welcome back, Admin! Redirecting to Blooms&Twirl Admin Studio Console...');
+        window.location.href = './admin/index.html';
+      } else {
+        const clientName = authEmail.includes('@') ? authEmail.split('@')[0] : (authEmail || 'Valued Client');
+        const clientUser = { 
+          name: clientName, 
+          email: authEmail, 
+          role: 'client' 
+        };
+        setCurrentUser(clientUser);
+        try {
+          localStorage.setItem('bt_currentUser_v2', JSON.stringify(clientUser));
+        } catch(err) {}
+        alert('Signed in successfully as ' + authEmail);
+        setViewMode('customer_dashboard');
+      }
+    }
+  };
+
+  // Catalogue Filtering
+  const filteredArrangements = useMemo(() => {
+    let list = arrangements;
+    if (catalogCategory !== 'All') list = list.filter(a => a.category === catalogCategory || a.tag === catalogCategory);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
+    }
+    return list;
+  }, [arrangements, catalogCategory, searchQuery]);
+
+  return (
+    <div className="app-container">
+      {/* ========================================================================= */}
+      {/* 1. BRAND LANDING PAGE (Quick Overview, Flipping Auth Card, Featured Blooms) */}
+      {/* ========================================================================= */}
+      {viewMode === 'landing' && (
+        <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
+          {/* Announcement Bar */}
+          <div style={{ background: '#2E121E', color: '#FCE2E8', textAlign: 'center', padding: '9px 16px', fontSize: '13px', fontWeight: '600' }}>
+            Studio Atelier in Apayao, Northern Luzon · Handpicked highland blooms from Baguio City (The Flower Capital of Luzon) · Use code <strong>TWIRLFIRST</strong> for ₱200 off!
+          </div>
+
+          {/* Landing Header */}
+          <header style={{ background: '#FFFFFF', borderBottom: '1px solid var(--border-light)', padding: '18px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 90 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+              <div className="brand-icon-box">
+                <Icons.Flower />
+              </div>
+              <div>
+                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                </h1>
+                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                  BY SHAIRA · FLORAL STUDIO
+                </div>
+              </div>
+            </div>
+
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
+                document.getElementById('brand-overview-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}>
+                Studio Overview
+              </button>
+              <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
+                document.getElementById('featured-products-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}>
+                Featured Blooms
+              </button>
+              {currentUser?.role === 'admin' ? (
+                <a 
+                  href="./admin/index.html" 
+                  className="btn-secondary" 
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2E121E', color: '#FFE4EE', borderColor: '#4D0025', fontWeight: '700', fontSize: '13px', padding: '8px 16px', borderRadius: '9999px' }}
+                >
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }}></span>
+                  Admin Studio
+                </a>
+              ) : currentUser ? (
+                <button className="switcher-btn" style={{ color: 'var(--primary)', fontWeight: '700' }} onClick={() => setViewMode('customer_dashboard')}>
+                  Hi, {currentUser.name ? currentUser.name.split(' ')[0] : 'Client'}
+                </button>
+              ) : (
+                <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
+                  document.getElementById('auth-panel-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}>
+                  Sign In
+                </button>
+              )}
+              <button 
+                className="btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
+                onClick={() => setIsOwnerModalOpen(true)}
+              >
+                <Icons.User /> Owner Profile
+              </button>
+              <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
+                Track Order
+              </button>
+              <button className="btn-primary" onClick={() => {
+                if (requireAuthToShop()) setViewMode('store');
+              }}>
+                <Icons.ShoppingBag /> Shop Studio
+              </button>
+            </nav>
+          </header>
+
+          <main className="page-content">
+            {/* Landing Hero Section */}
+            <section className="landing-hero">
+              <div className="landing-hero-content">
+                <span className="hero-badge-pill">
+                  <Icons.Sparkles /> Handcrafted in Apayao · Sourced from Baguio City
+                </span>
+                <h1>Blooms that speak, <br /><span>moments that linger.</span></h1>
+                <p>
+                  Handcrafted bouquets, architectural botanicals, and bespoke wedding arrangements by <strong>Shaira Angela Saladino</strong>. Designed at our studio in <strong>Apayao, Northern Luzon</strong> with highland fresh flowers sourced directly from <strong>Baguio City — the City of Flowers of Luzon</strong>.
+                </p>
+
+                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                  <button className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px' }} onClick={() => {
+                    if (requireAuthToShop()) setViewMode('store');
+                  }}>
+                    <Icons.ShoppingBag /> Explore Bouquet Collections
+                  </button>
+                  <button className="btn-secondary" style={{ padding: '14px 24px', fontSize: '15px' }} onClick={() => {
+                    document.getElementById('auth-panel-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}>
+                    Member Sign In / Register
+                  </button>
+                </div>
+
+                <div className="stats-pill-group">
+                  <div className="stat-mini-pill">
+                    <Icons.Flower /> <span><strong>100%</strong> Fresh Stem Guarantee</span>
+                  </div>
+                  <div className="stat-mini-pill">
+                    <Icons.Truck /> <span><strong>Northern Luzon</strong> Express Dispatch</span>
+                  </div>
+                  <div className="stat-mini-pill">
+                    <Icons.Star /> <span><strong>4.9</strong> Rating (1,141+ Happy Clients)</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Quick Overview Feature Cards */}
+            <section id="brand-overview-section" style={{ marginBottom: '48px' }}>
+              <div className="page-eyebrow" style={{ textAlign: 'center' }}>STUDIO OVERVIEW</div>
+              <h2 className="page-title" style={{ textAlign: 'center', marginBottom: '28px' }}>Artisanal Care from Bench to Doorstep</h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                <div className="content-card" style={{ padding: '32px 28px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '16px' }}>
+                    <Icons.Flower />
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', marginBottom: '8px' }}>Atelier in Apayao</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                    Each commission is custom conditioned, wrapped, and tied with silk ribbons right on Shaira’s atelier bench in Luna, Apayao.
+                  </p>
+                </div>
+
+                <div className="content-card" style={{ padding: '32px 28px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '16px' }}>
+                    <Icons.Sparkles />
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', marginBottom: '8px' }}>Baguio Mountain Blooms</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                    Partnered directly with highland growers in Baguio City (The Flower Capital of Luzon) for exceptional cold-weather petal freshness.
+                  </p>
+                </div>
+
+                <div className="content-card" style={{ padding: '32px 28px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '16px' }}>
+                    <Icons.Truck />
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', marginBottom: '8px' }}>Express Direct Courier</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                    Carefully boxed in climate-safe transport with dedicated couriers across Northern Luzon (Apayao, Benguet, Baguio, La Union, Pangasinan).
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 3D Flipping Auth Panel Card Section */}
+            <section id="auth-panel-section" style={{ padding: '60px 0 80px', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', marginBottom: '60px' }}>
+              <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                <span className="hero-badge-pill">
+                  <Icons.User /> Studio Portal & Sign In
+                </span>
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', color: 'var(--text-main)', marginBottom: '8px' }}>
+                  Sign In or Join Our Floral Circle
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>
+                  Access your client deliveries, manage arrangements, or enter the studio admin dashboard.
+                </p>
+
+                {authNoticeMessage && (
+                  <div style={{ maxWidth: '520px', margin: '16px auto 0', padding: '12px 20px', background: '#FFF0F5', border: '1px solid var(--primary-border)', borderRadius: '12px', color: 'var(--primary)', fontWeight: '700', fontSize: '14px' }}>
+                    {authNoticeMessage}
+                  </div>
+                )}
+              </div>
+
+              {/* 3D Flip Card Container */}
+              <div className="flip-scene">
+                <div className={'flip-card-inner ' + (isAuthFlipped ? 'flipped' : '')}>
+                  {/* FACE 1: SIGN IN */}
+                  <div className="flip-card-face">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <div>
+                        <span className="card-subtitle">WELCOME BACK</span>
+                        <h3 className="card-title font-serif" style={{ fontSize: '24px' }}>Sign In</h3>
+                      </div>
+                      <div style={{ color: 'var(--primary)' }}><Icons.Flower /></div>
+                    </div>
+
+                    <form onSubmit={(e) => handleAuthSubmit(e, false)}>
+                      <div className="form-group">
+                        <label>Email Address or Username</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          required 
+                          placeholder="client@domain.ph or admin"
+                          value={authEmail}
+                          onChange={(e) => setAuthEmail(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Password</label>
+                        <input 
+                          type="password" 
+                          className="form-control" 
+                          required 
+                          placeholder="••••••••"
+                          value={authPassword}
+                          onChange={(e) => setAuthPassword(e.target.value)}
+                        />
+                      </div>
+
+                      <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px', marginTop: '8px' }}>
+                        Sign In
+                      </button>
+                    </form>
+
+                    <div style={{ textAlign: 'center', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', fontSize: '13px', color: 'var(--text-muted)' }}>
+                      New to Blooms&Twirl?{' '}
+                      <button 
+                        type="button" 
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => setIsAuthFlipped(true)}
+                      >
+                        Create Member Account
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* FACE 2: REGISTER */}
+                  <div className="flip-card-face flip-card-back">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div>
+                        <span className="card-subtitle">JOIN THE FLORAL FAMILY</span>
+                        <h3 className="card-title font-serif" style={{ fontSize: '24px' }}>Register Account</h3>
+                      </div>
+                      <div style={{ color: 'var(--primary)' }}><Icons.Sparkles /></div>
+                    </div>
+
+                    <form onSubmit={(e) => handleAuthSubmit(e, true)}>
+                      <div className="form-group">
+                        <label>Full Name</label>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          required 
+                          placeholder="e.g. Maria Santos"
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div className="form-group">
+                          <label>Email</label>
+                          <input 
+                            type="email" 
+                            className="form-control" 
+                            required 
+                            placeholder="maria@domain.ph"
+                            value={authEmail}
+                            onChange={(e) => setAuthEmail(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Mobile No.</label>
+                          <input 
+                            type="tel" 
+                            className="form-control" 
+                            required 
+                            placeholder="0917 XXX XXXX"
+                            value={authPhone}
+                            onChange={(e) => setAuthPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Shopee-style Smart Address Selector (Luzon to Visayas) */}
+                      <div style={{ background: '#FFF5F8', padding: '12px 14px', borderRadius: '14px', border: '1px solid var(--border-light)', margin: '10px 0 14px 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                            <Icons.MapPin /> Delivery Address (Luzon to Visayas)
+                          </div>
+                          <span style={{ fontSize: '10px', background: '#FFE0EB', color: 'var(--primary)', padding: '2px 8px', borderRadius: '9999px', fontWeight: '700' }}>
+                            Shopee Address Picker
+                          </span>
+                        </div>
+
+                        {/* Interactive Shopee Trigger Card */}
+                        <div className="form-group" style={{ marginBottom: '8px' }}>
+                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Region, Province / City, Barangay</label>
+                          <div 
+                            className="shopee-addr-trigger"
+                            onClick={() => openAddressModal('auth')}
+                            role="button"
+                            tabIndex={0}
+                            title="Click to select Region, Province / City, and Barangay"
+                          >
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: 0 }}>
+                              <div style={{ color: 'var(--primary)', marginTop: '2px', flexShrink: 0 }}>
+                                <Icons.MapPin />
+                              </div>
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)', lineHeight: '1.3', wordBreak: 'break-word' }}>
+                                  {authBarangay}, {authProvinceCity}
+                                </div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                  {authRegion}
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--primary)', fontSize: '11px', fontWeight: '700', flexShrink: 0, marginLeft: '8px' }}>
+                              <span>Select</span>
+                              <Icons.ChevronRight />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Street Address / House / Landmark</label>
+                          <input 
+                            type="text" 
+                            className="form-control" 
+                            style={{ fontSize: '12px' }}
+                            placeholder="e.g. Purok 4, near Luna Municipal Hall"
+                            value={authStreet}
+                            onChange={(e) => setAuthStreet(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Password</label>
+                        <input 
+                          type="password" 
+                          className="form-control" 
+                          required 
+                          placeholder="Create secure password"
+                          value={authPassword}
+                          onChange={(e) => setAuthPassword(e.target.value)}
+                        />
+                      </div>
+
+                      <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px' }}>
+                        Register & Start Shopping
+                      </button>
+                    </form>
+
+                    <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                      Already have an account?{' '}
+                      <button 
+                        type="button" 
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => setIsAuthFlipped(false)}
+                      >
+                        Sign In
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Featured Products of Blooms&Twirl by Shaira */}
+            <section id="featured-products-section" style={{ marginBottom: '60px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <div className="page-eyebrow">FEATURED CREATIONS</div>
+                  <h2 className="page-title" style={{ margin: 0 }}>Handpicked Studio Arrangements</h2>
+                </div>
+                <button className="btn-secondary" onClick={() => {
+                  if (requireAuthToShop()) setViewMode('store');
+                }}>
+                  View All ({arrangements.length}) Collections →
+                </button>
+              </div>
+
+              <div className="arrangements-grid">
+                {arrangements.slice(0, 4).map(arr => (
+                  <div key={arr.id} className="arrangement-card">
+                    <div 
+                      className="arrangement-image-wrap" 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        if (requireAuthToShop()) setSelectedProduct(arr);
+                      }}
+                    >
+                      <img src={arr.image} alt={arr.name} />
+                      <span className="card-tag-pill">{arr.tag}</span>
+                      {(arr.isLowStock || arr.coldRoomCount <= 5) && (
+                        <span className="card-low-stock-pill">Low stock</span>
+                      )}
+                    </div>
+                    <div className="arrangement-body">
+                      <div className="arrangement-name-row">
+                        <span className="arrangement-name">{arr.name}</span>
+                        <span className="arrangement-rating">
+                          <Icons.Star /> {arr.rating}
+                        </span>
+                      </div>
+                      <p className="arrangement-stems">{arr.stems.join(' · ')}</p>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.4', flex: 1 }}>
+                        {arr.description.slice(0, 95)}...
+                      </p>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
+                        <span>Cold room: <strong>{arr.coldRoomCount} ready</strong></span>
+                        <span style={{ color: 'var(--primary)', fontWeight: '600' }}>Highland Choice</span>
+                      </div>
+
+                      <div className="arrangement-footer-row">
+                        <span className="arrangement-price">₱{arr.price.toLocaleString()}</span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button 
+                            className="btn-secondary" 
+                            style={{ padding: '7px 12px', fontSize: '12px' }}
+                            onClick={() => {
+                              if (requireAuthToShop()) setSelectedProduct(arr);
+                            }}
+                          >
+                            Quick View
+                          </button>
+                          <button 
+                            className="btn-primary" 
+                            style={{ padding: '7px 14px', fontSize: '12px' }}
+                            onClick={() => {
+                              if (requireAuthToShop()) addToCart(arr);
+                            }}
+                          >
+                            <Icons.Plus /> Add to Cart
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Wedding & Custom Event Consultations Banner */}
+            <section style={{ background: 'linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%)', borderRadius: 'var(--radius-card)', padding: '48px', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px', marginBottom: '40px' }}>
+              <div style={{ maxWidth: '580px' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', borderRadius: '9999px', background: 'rgba(255,255,255,0.2)', fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>
+                  <Icons.Calendar /> 2026/2027 BESPOKE BRIDAL BOOKINGS
+                </span>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', margin: '0 0 10px 0' }}>
+                  Custom Wedding & Grand Event Botanicals
+                </h3>
+                <p style={{ fontSize: '14px', color: '#F8DFE5', lineHeight: '1.6' }}>
+                  Planning an intimate chapel wedding or grand reception? Shaira offers dedicated private styling consultations with tailored floral mockups and venue styling walk-throughs across Northern Luzon (Apayao, Baguio, Benguet, Ilocos, and Pangasinan).
+                </p>
+              </div>
+              <button className="btn-secondary" style={{ padding: '14px 28px', fontSize: '15px' }} onClick={() => setViewMode('customer_dashboard')}>
+                Book Private Consult
+              </button>
+            </section>
+          </main>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. CUSTOMER STOREFRONT VIEW                                                */}
+      {/* ========================================================================= */}
+      {viewMode === 'store' && (
+        <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
+          <div style={{ background: '#2E121E', color: '#FCE2E8', textAlign: 'center', padding: '9px 16px', fontSize: '13px', fontWeight: '600' }}>
+            Studio Atelier in Apayao, Northern Luzon · Handpicked highland blooms from Baguio City (The Flower Capital of Luzon) · Use code <strong>TWIRLFIRST</strong> for ₱200 off!
+          </div>
+
+          <header style={{ background: '#FFFFFF', borderBottom: '1px solid var(--border-light)', padding: '18px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 90 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+              <div className="brand-icon-box">
+                <Icons.Flower />
+              </div>
+              <div>
+                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                </h1>
+                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                  BY SHAIRA · FLORAL STUDIO
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button 
+                className="btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
+                onClick={() => setIsOwnerModalOpen(true)}
+              >
+                <Icons.User /> Owner Profile
+              </button>
+              <button className="btn-secondary" onClick={() => setViewMode('landing')}>
+                Studio Overview
+              </button>
+              <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
+                Track Order
+              </button>
+              <button className="btn-primary" onClick={() => setIsCartOpen(true)}>
+                <Icons.ShoppingBag /> Cart ({cart.reduce((a,c)=>a+c.qty, 0)}) · ₱{cartSubtotal.toLocaleString()}
+              </button>
+            </div>
+          </header>
+
+          <div className="page-content">
+            <div className="store-hero">
+              <div className="store-hero-content">
+                <span className="hero-badge-pill">
+                  <Icons.Sparkles /> The Studio Collection
+                </span>
+                <h1>Hand-crafted Blooms for Northern Luzon</h1>
+                <p>
+                  Explore our curated seasonal bouquets, architectural preserved designs, and bespoke hatbox blooms conditioned to perfection.
+                </p>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button className="btn-primary" onClick={() => {
+                    const el = document.getElementById('store-catalogue-grid');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}>
+                    Browse Bouquets
+                  </button>
+                  <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
+                    Track Active Delivery
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Category Filter Pills & Search */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {['All', 'Signature', 'Statement', 'Dried', 'Houseplant', 'Box', 'Bridal', 'Cheerful'].map(cat => (
+                  <button 
+                    key={cat} 
+                    className={'switcher-btn ' + (catalogCategory === cat ? 'active' : '')}
+                    onClick={() => setCatalogCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ width: '260px' }}>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="Search bouquets or stems..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Product Cards Grid */}
+            <div id="store-catalogue-grid" className="product-grid">
+              {filteredArrangements.map(arr => (
+                <div key={arr.id} className="product-card">
+                  <span className="card-tag-pill">{arr.tag}</span>
+                  <img src={arr.image} alt={arr.name} className="product-img" />
+                  <div className="product-body">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                      <div className="product-title font-serif">{arr.name}</div>
+                      <div className="product-price">₱{arr.price.toLocaleString()}</div>
+                    </div>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.5' }}>
+                      {arr.description}
+                    </p>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Icons.Star /> <strong>{arr.rating}</strong> ({arr.sold30d} orders)
+                      </span>
+                      <span>Cold Room: <strong style={{ color: arr.coldRoomCount <= 5 ? 'var(--status-rose)' : 'var(--text-main)' }}>{arr.coldRoomCount} stems ready</strong></span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <button 
+                        className="btn-secondary" 
+                        style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
+                        onClick={() => setSelectedProduct(arr)}
+                      >
+                        Quick View
+                      </button>
+                      <button 
+                        className="btn-primary" 
+                        style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
+                        onClick={() => addToCart(arr)}
+                      >
+                        Add to Basket
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3. CUSTOMER DASHBOARD & LIVE ORDER TRACKER                                */}
+      {/* ========================================================================= */}
+      {viewMode === 'customer_dashboard' && (
+        <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
+          <header style={{ background: '#FFFFFF', borderBottom: '1px solid var(--border-light)', padding: '18px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 90 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+              <div className="brand-icon-box">
+                <Icons.Flower />
+              </div>
+              <div>
+                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                </h1>
+                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                  CUSTOMER CARE & TRACKING
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button 
+                className="btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
+                onClick={() => setIsOwnerModalOpen(true)}
+              >
+                <Icons.User /> Owner Profile
+              </button>
+              <button className="btn-secondary" onClick={() => setViewMode('landing')}>
+                Studio Overview
+              </button>
+              <button className="btn-primary" onClick={() => setViewMode('store')}>
+                <Icons.ShoppingBag /> Shop Studio
+              </button>
+            </div>
+          </header>
+
+          <div className="page-content" style={{ maxWidth: '900px' }}>
+            <div className="page-eyebrow">ORDER LOOKUP</div>
+            <h1 className="page-title" style={{ marginBottom: '8px' }}>Track Your Delivery</h1>
+            <p className="page-description" style={{ marginBottom: '24px' }}>
+              Follow your flowers in real time from Shaira’s atelier cold room to your courier's delivery run across Northern Luzon.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Enter Order Number (e.g. BT-2041)"
+                value={lookupOrderNumber}
+                onChange={(e) => setLookupOrderNumber(e.target.value)}
+              />
+              <button className="btn-primary" onClick={() => {
+                const found = orders.find(o => o.id.toUpperCase() === lookupOrderNumber.trim().toUpperCase());
+                if (found) {
+                  setTrackedOrder(found);
+                } else {
+                  alert('Order ' + lookupOrderNumber + ' not found. Try BT-2041, BT-2040, or BT-2039.');
+                }
+              }}>
+                Look Up Order
+              </button>
+            </div>
+
+            {trackedOrder && (
+              <div className="content-card" style={{ padding: '36px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-light)', paddingBottom: '20px' }}>
+                  <div>
+                    <span className="card-subtitle">ORDER DETAILS</span>
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '26px', margin: '4px 0' }}>
+                      {trackedOrder.id} · {trackedOrder.customerName}
+                    </h2>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                      Destination: <strong>{trackedOrder.address}</strong>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Total Amount</div>
+                    <div style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', color: 'var(--primary)' }}>
+                      ₱{trackedOrder.total.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4-Step Visual Progress Stepper */}
+                <div className="order-tracker-stepper">
+                  <div className={'stepper-step ' + (['Fresh', 'Arranging', 'In transit', 'Delivered'].includes(trackedOrder.status) ? 'completed' : '')}>
+                    <div className="step-circle">1</div>
+                    <span className="step-label">Order Received</span>
+                  </div>
+
+                  <div className={'stepper-step ' + (['Arranging', 'In transit', 'Delivered'].includes(trackedOrder.status) ? (trackedOrder.status === 'Arranging' ? 'active' : 'completed') : '')}>
+                    <div className="step-circle">2</div>
+                    <span className="step-label">Arranging at Bench</span>
+                  </div>
+
+                  <div className={'stepper-step ' + (['In transit', 'Delivered'].includes(trackedOrder.status) ? (trackedOrder.status === 'In transit' ? 'active' : 'completed') : '')}>
+                    <div className="step-circle">3</div>
+                    <span className="step-label">In Transit</span>
+                  </div>
+
+                  <div className={'stepper-step ' + (trackedOrder.status === 'Delivered' ? 'completed' : '')}>
+                    <div className="step-circle">4</div>
+                    <span className="step-label">Delivered</span>
+                  </div>
+                </div>
+
+                <div style={{ background: '#FFF9FA', borderRadius: '16px', padding: '18px', border: '1px solid var(--border-light)', marginTop: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase' }}>COURIER DISPATCH</div>
+                      <div style={{ fontWeight: '700', fontSize: '14px', marginTop: '2px' }}>
+                        {trackedOrder.courier ? ('Assigned to ' + trackedOrder.courier + ' (Blooms&Twirl Studio Courier)') : 'Awaiting bench completion'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Estimated Delivery Window: {trackedOrder.dueTime || 'Before 5:00 PM'}</div>
+                    </div>
+                    <span className={'status-chip ' + trackedOrder.status.toLowerCase().replace(/\s+/g, '')}>
+                      {trackedOrder.status}
+                    </span>
+                  </div>
+
+                  {trackedOrder.cardMessage && (
+                    <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-light)', fontSize: '13px' }}>
+                      <span style={{ fontWeight: '700', color: 'var(--text-muted)' }}>Card Dedication: </span>
+                      <em>"{trackedOrder.cardMessage}"</em>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 4. MODALS (CART, CHECKOUT, DETAIL, OWNER PROFILE)                         */}
+      {/* ========================================================================= */}
+
+      {/* --- CART DRAWER --- */}
+      {isCartOpen && (
+        <div className="cart-drawer-overlay" onClick={() => setIsCartOpen(false)}>
+          <div className="cart-drawer" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icons.ShoppingBag />
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '22px' }}>Your Flower Basket</h2>
+              </div>
+              <button className="modal-close-btn" onClick={() => setIsCartOpen(false)}>✕</button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 0' }}>
+              {cart.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                  <p style={{ fontSize: '15px' }}>Your basket is empty.</p>
+                  <button className="btn-secondary" style={{ marginTop: '16px', display: 'inline-flex' }} onClick={() => { setIsCartOpen(false); setViewMode('store'); }}>
+                    Browse Arrangements
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {cart.map(item => (
+                    <div key={item.id} style={{ display: 'flex', gap: '14px', paddingBottom: '14px', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <img src={item.image} alt={item.name} style={{ width: '70px', height: '70px', borderRadius: '12px', objectFit: 'cover' }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{item.name}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: '700' }}>₱{item.price.toLocaleString()}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+                          <button style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'white', cursor: 'pointer' }} onClick={() => updateCartQty(item.id, -1)}>-</button>
+                          <span style={{ fontSize: '13px', fontWeight: '700' }}>{item.qty}</span>
+                          <button style={{ width: '24px', height: '24px', borderRadius: '6px', border: '1px solid var(--border-light)', background: 'white', cursor: 'pointer' }} onClick={() => updateCartQty(item.id, 1)}>+</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {cart.length > 0 && (
+              <div style={{ paddingTop: '16px', borderTop: '1px solid var(--border-light)' }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="Promo code (TWIRLFIRST)"
+                    id="cart-promo-input"
+                    defaultValue={activePromoCode}
+                  />
+                  <button className="btn-secondary" onClick={() => {
+                    const el = document.getElementById('cart-promo-input');
+                    if (el && el.value) applyPromo(el.value);
+                  }}>Apply</button>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  <span>Subtotal</span>
+                  <span>₱{cartSubtotal.toLocaleString()}</span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  <span>Northern Luzon Express Delivery</span>
+                  <span>₱{deliveryFee}</span>
+                </div>
+
+                {promoDiscount > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--primary)', fontWeight: '700', marginBottom: '4px' }}>
+                    <span>Promo Discount</span>
+                    <span>-₱{promoDiscount.toLocaleString()}</span>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: '700', margin: '12px 0 16px 0', borderTop: '1px solid var(--border-subtle)', paddingTop: '10px' }}>
+                  <span>Total</span>
+                  <span style={{ color: 'var(--primary)' }}>₱{cartTotal.toLocaleString()}</span>
+                </div>
+
+                <button 
+                  className="btn-primary" 
+                  style={{ width: '100%', justifyContent: 'center', padding: '14px' }}
+                  onClick={() => setIsCheckoutOpen(true)}
+                >
+                  Proceed to Checkout · ₱{cartTotal.toLocaleString()}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* --- CHECKOUT MODAL --- */}
+      {isCheckoutOpen && (
+        <div className="modal-overlay" onClick={() => setIsCheckoutOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <span className="card-subtitle">NORTHERN LUZON DISPATCH</span>
+                <h2 className="modal-title font-serif" style={{ fontSize: '26px' }}>Checkout Order</h2>
+              </div>
+              <button className="modal-close-btn" onClick={() => setIsCheckoutOpen(false)}>✕</button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const fd = new FormData(e.target);
+              const assembledCheckoutAddress = [checkoutStreet, checkoutBarangay, checkoutProvinceCity, checkoutRegion].filter(Boolean).join(', ');
+              handlePlaceOrder({
+                name: fd.get('name'),
+                phone: fd.get('phone'),
+                email: fd.get('email'),
+                address: assembledCheckoutAddress,
+                dueTime: fd.get('dueTime'),
+                cardMessage: fd.get('cardMessage')
+              });
+            }}>
+              <div className="form-group">
+                <label>Recipient Full Name</label>
+                <input name="name" type="text" className="form-control" required placeholder="e.g. Sofia Romero" />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="form-group">
+                  <label>Mobile Number (+63)</label>
+                  <input name="phone" type="tel" className="form-control" required placeholder="0917 XXX XXXX" />
+                </div>
+                <div className="form-group">
+                  <label>Email Address</label>
+                  <input name="email" type="email" className="form-control" required placeholder="recipient@domain.ph" />
+                </div>
+              </div>
+
+              {/* Shopee-style Smart Address Selector for Checkout */}
+              <div style={{ background: '#FFF0F5', padding: '14px', borderRadius: '16px', margin: '14px 0', border: '1px solid var(--primary-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                    <Icons.MapPin /> Delivery Destination (Luzon to Visayas)
+                  </div>
+                  <span style={{ fontSize: '10px', background: '#FFE0EB', color: 'var(--primary)', padding: '2px 8px', borderRadius: '9999px', fontWeight: '700' }}>
+                    Shopee Address Picker
+                  </span>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '10px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Region, Province / City, Barangay</label>
+                  <div 
+                    className="shopee-addr-trigger"
+                    onClick={() => openAddressModal('checkout')}
+                    role="button"
+                    tabIndex={0}
+                    title="Click to select Region, Province / City, and Barangay"
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: 1, minWidth: 0 }}>
+                      <div style={{ color: 'var(--primary)', marginTop: '2px', flexShrink: 0 }}>
+                        <Icons.MapPin />
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)', lineHeight: '1.4', wordBreak: 'break-word' }}>
+                          {checkoutBarangay}, {checkoutProvinceCity}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          {checkoutRegion}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)', fontSize: '12px', fontWeight: '700', flexShrink: 0 }}>
+                      <span>Change</span>
+                      <Icons.ChevronRight />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)' }}>Street / House No. / Landmark (Optional)</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    placeholder="e.g. Unit 3B, Pine View St."
+                    value={checkoutStreet}
+                    onChange={(e) => setCheckoutStreet(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div className="form-group">
+                  <label>Preferred Delivery Time</label>
+                  <select name="dueTime" className="form-control">
+                    <option value="11:00">Morning (10:00 - 12:00)</option>
+                    <option value="14:00">Early Afternoon (13:00 - 15:00)</option>
+                    <option value="17:00">Late Afternoon (16:00 - 18:00)</option>
+                    <option value="Rush">Rush Courier (Within 2 Hours)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Payment Method</label>
+                  <select name="payment" className="form-control">
+                    <option value="gcash">GCash (Scan QR / Mobile)</option>
+                    <option value="maya">Maya</option>
+                    <option value="card">Credit / Debit Card</option>
+                    <option value="cod">Cash on Delivery (COD)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Handwritten Dedication Card Message (Complimentary)</label>
+                <textarea name="cardMessage" className="form-control" rows="3" placeholder="Write your heartfelt message here..."></textarea>
+              </div>
+
+              <div style={{ background: '#FFF0F4', padding: '14px', borderRadius: '14px', marginBottom: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: '600' }}>Amount to Pay:</span>
+                <span style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', fontWeight: '700', color: 'var(--primary)' }}>
+                  ₱{cartTotal.toLocaleString()}
+                </span>
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '14px' }}>
+                Confirm & Dispatch Order
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- PRODUCT QUICK VIEW MODAL --- */}
+      {selectedProduct && (
+        <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="modal-card" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="card-tag-pill" style={{ position: 'static' }}>{selectedProduct.tag}</span>
+              <button className="modal-close-btn" onClick={() => setSelectedProduct(null)}>✕</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', margin: '16px 0' }}>
+              <img src={selectedProduct.image} alt={selectedProduct.name} style={{ width: '100%', height: '260px', objectFit: 'cover', borderRadius: '16px' }} />
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', marginBottom: '6px' }}>{selectedProduct.name}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--primary)', fontWeight: '700', marginBottom: '12px' }}>
+                  <Icons.Star /> {selectedProduct.rating} Rating · {selectedProduct.sold30d} delighted recipients
+                </div>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: '26px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '14px' }}>
+                  ₱{selectedProduct.price.toLocaleString()}
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '14px' }}>
+                  {selectedProduct.description}
+                </p>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>
+                  Flower Stem Recipe:
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+                  {selectedProduct.stems.join(' · ')}
+                </div>
+
+                <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {
+                  addToCart(selectedProduct);
+                  setSelectedProduct(null);
+                }}>
+                  Add to Basket
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- OWNER PROFILE MODAL WITH OWNER_IMAGE & ZERO EMOJIS --- */}
+      {isOwnerModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsOwnerModalOpen(false)}>
+          <div className="modal-card" style={{ maxWidth: '640px', overflow: 'hidden', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+            {/* Header Banner with Owner Image from assets */}
+            <div style={{ background: 'linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%)', padding: '36px 32px 32px', color: '#FFFFFF', position: 'relative' }}>
+              <button 
+                className="modal-close-btn" 
+                style={{ position: 'absolute', top: '18px', right: '18px', color: '#FFFFFF', background: 'rgba(255,255,255,0.18)', border: 'none' }}
+                onClick={() => setIsOwnerModalOpen(false)}
+              >
+                ✕
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
+                <img 
+                  src="./assets/Owner_Image.jpg" 
+                  alt="Shaira Angela Saladino - Owner of Blooms&Twirl" 
+                  style={{ 
+                    width: '108px', 
+                    height: '108px', 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    border: '3px solid #FFFFFF', 
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                    flexShrink: 0
+                  }} 
+                />
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.18)', padding: '5px 14px', borderRadius: '9999px', fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px', color: '#FFE4EE' }}>
+                    <Icons.Flower /> Founder & Head Floral Stylist
+                  </div>
+                  <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', margin: '0 0 4px 0', color: '#FFFFFF', letterSpacing: '-0.3px', lineHeight: 1.15 }}>
+                    Shaira Angela Saladino
+                  </h2>
+                  <div style={{ fontSize: '13px', color: '#FCE2E8', fontWeight: '600' }}>
+                    Owner & Creative Director · Blooms&Twirl by Shaira
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '28px 32px' }}>
+              {/* Studio & Sourcing Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '22px' }}>
+                <div style={{ background: '#FFF0F6', border: '1px solid var(--primary-border)', padding: '16px', borderRadius: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>
+                    <Icons.Home /> Floral Atelier Base
+                  </div>
+                  <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-main)', marginBottom: '2px' }}>
+                    Apayao, Northern Luzon
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    Handcrafted floral bench & design workshop in Luna, Apayao
+                  </div>
+                </div>
+
+                <div style={{ background: '#FFF9E6', border: '1px solid #FFE58F', padding: '16px', borderRadius: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: '#D48806', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>
+                    <Icons.Sparkles /> Fresh Flower Supplier
+                  </div>
+                  <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-main)', marginBottom: '2px' }}>
+                    Baguio City
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    The City of Flowers of Luzon — fresh highland mountain blooms
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio & Craftsmanship */}
+              <div style={{ marginBottom: '24px', fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.7' }}>
+                <p style={{ margin: '0 0 10px' }}>
+                  Every arrangement at <strong>Blooms&Twirl</strong> is individually designed and conditioned by <strong>Shaira Angela Saladino</strong>. Operating from her atelier in <strong>Apayao, Northern Luzon</strong>, Shaira brings boutique botanical artistry to weddings, heartfelt celebrations, and signature everyday gifts.
+                </p>
+                <p style={{ margin: 0 }}>
+                  To guarantee exceptional stem longevity, all premium roses, hydrangeas, eucalyptus, and seasonal botanicals are directly supplied and hand-selected from growers in <strong>Baguio City</strong> — acclaimed as the <em>City of Flowers of Luzon</em>.
+                </p>
+              </div>
+
+              {/* Contact Information & Instagram */}
+              <div style={{ background: 'var(--bg-main)', border: '1px solid var(--border-light)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                    Direct Contact / Instagram
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-main)', marginTop: '2px' }}>
+                    <a href="https://instagram.com/s.shyiee" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                      @s.shyiee
+                    </a>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Shaira Angela Saladino</div>
+                </div>
+
+                <a 
+                  href="https://instagram.com/s.shyiee" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="btn-primary" 
+                  style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <span>Connect on Instagram</span>
+                  <Icons.ArrowUpRight />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- SHOPEE-STYLE SMART ADDRESS SELECTION MODAL (LUZON TO VISAYAS) --- */}
+      {isAddressModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsAddressModalOpen(false)}>
+          <div 
+            className="modal-card" 
+            style={{ maxWidth: '540px', width: '92%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #F0E8EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: 'var(--primary)' }}><Icons.MapPin /></span>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', margin: 0, color: 'var(--text-main)' }}>
+                    Select Delivery Address
+                  </h3>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '3px' }}>
+                  Luzon to Visayas Coverage · Atelier in Apayao, Fresh from Baguio City
+                </div>
+              </div>
+              <button 
+                className="modal-close-btn"
+                style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#F5ECEF', border: 'none', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}
+                onClick={() => setIsAddressModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Shopee Stepper Tabs */}
+            <div style={{ display: 'flex', background: '#FAFAFA', borderBottom: '1px solid #F0E8EB', padding: '0 8px' }}>
+              <button
+                type="button"
+                className={`shopee-tab-btn ${addressActiveTab === 'region' ? 'active' : ''}`}
+                onClick={() => { setAddressActiveTab('region'); setAddressSearchQuery(''); }}
+              >
+                <span className="shopee-tab-step">1</span>
+                <span className="shopee-tab-title">{tempRegion ? tempRegion.split('(')[0].trim() : 'Region'}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`shopee-tab-btn ${addressActiveTab === 'city' ? 'active' : ''}`}
+                onClick={() => { if (tempRegion) { setAddressActiveTab('city'); setAddressSearchQuery(''); } }}
+                disabled={!tempRegion}
+              >
+                <span className="shopee-tab-step">2</span>
+                <span className="shopee-tab-title">{tempProvinceCity ? tempProvinceCity.split('(')[0].trim() : 'Province / City'}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`shopee-tab-btn ${addressActiveTab === 'barangay' ? 'active' : ''}`}
+                onClick={() => { if (tempProvinceCity) { setAddressActiveTab('barangay'); setAddressSearchQuery(''); } }}
+                disabled={!tempProvinceCity}
+              >
+                <span className="shopee-tab-step">3</span>
+                <span className="shopee-tab-title">{tempBarangay ? tempBarangay.split('(')[0].trim() : 'Barangay'}</span>
+              </button>
+            </div>
+
+            {/* Real-time Search Box */}
+            <div style={{ padding: '12px 20px', background: '#FFFFFF', borderBottom: '1px solid #F6EDF0' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                  <Icons.Search />
+                </div>
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ paddingLeft: '36px', height: '38px', fontSize: '13px', borderRadius: '10px' }}
+                  placeholder={`Search ${addressActiveTab === 'region' ? 'Region (e.g. Cordillera, Ilocos, Cebu, Iloilo...)' : addressActiveTab === 'city' ? 'Province or City (e.g. Apayao, Baguio, Cebu...)' : 'Barangay...'}`}
+                  value={addressSearchQuery}
+                  onChange={(e) => setAddressSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* List Body with Real-time Filtering */}
+            <div style={{ padding: '10px 14px', overflowY: 'auto', flex: 1, maxHeight: '340px' }}>
+              {addressActiveTab === 'region' && (() => {
+                const query = addressSearchQuery.toLowerCase().trim();
+                const regions = Object.keys(PHILIPPINES_ADDRESS_DATA).filter(r => !query || r.toLowerCase().includes(query));
+                if (regions.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      No matching region found for "{addressSearchQuery}".
+                    </div>
+                  );
+                }
+                return regions.map(reg => {
+                  const isSelected = tempRegion === reg;
+                  return (
+                    <div 
+                      key={reg} 
+                      className={`shopee-item-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleSelectRegion(reg)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{reg}</span>
+                      </div>
+                      {isSelected && (
+                        <span style={{ color: 'var(--primary)', fontWeight: '700' }}><Icons.Check /></span>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+
+              {addressActiveTab === 'city' && (() => {
+                const query = addressSearchQuery.toLowerCase().trim();
+                const cities = Object.keys(PHILIPPINES_ADDRESS_DATA[tempRegion] || {}).filter(c => !query || c.toLowerCase().includes(query));
+                if (cities.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      No matching province/city found in {tempRegion}.
+                    </div>
+                  );
+                }
+                return cities.map(city => {
+                  const isSelected = tempProvinceCity === city;
+                  return (
+                    <div 
+                      key={city} 
+                      className={`shopee-item-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleSelectCity(city)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{city}</span>
+                      </div>
+                      {isSelected && (
+                        <span style={{ color: 'var(--primary)', fontWeight: '700' }}><Icons.Check /></span>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+
+              {addressActiveTab === 'barangay' && (() => {
+                const query = addressSearchQuery.toLowerCase().trim();
+                const barangs = ((PHILIPPINES_ADDRESS_DATA[tempRegion] && PHILIPPINES_ADDRESS_DATA[tempRegion][tempProvinceCity]) || []).filter(b => !query || b.toLowerCase().includes(query));
+                if (barangs.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '30px 16px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                      No matching barangay found in {tempProvinceCity}.
+                    </div>
+                  );
+                }
+                return barangs.map(brgy => {
+                  const isSelected = tempBarangay === brgy;
+                  return (
+                    <div 
+                      key={brgy} 
+                      className={`shopee-item-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleSelectBarangay(brgy)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{brgy}</span>
+                      </div>
+                      {isSelected && (
+                        <span style={{ color: 'var(--primary)', fontWeight: '700' }}><Icons.Check /></span>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Footer Location Trail & Action */}
+            <div style={{ padding: '14px 20px', borderTop: '1px solid #F0E8EB', background: '#FFF9FB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', maxWidth: '65%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>Selected:</span>
+                <span>{tempRegion.split('(')[0].trim()} / {tempProvinceCity.split('(')[0].trim()} / {tempBarangay || '...'}</span>
+              </div>
+              <button
+                type="button"
+                className="btn-primary"
+                style={{ padding: '8px 20px', fontSize: '13px', borderRadius: '9999px' }}
+                onClick={handleConfirmAddress}
+                disabled={!tempRegion || !tempProvinceCity || !tempBarangay}
+              >
+                Confirm Address
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Error Boundary to prevent blank screens
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '40px', fontFamily: 'sans-serif', textAlign: 'center', background: '#FFF5F8', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#F70077' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V3m4.5 9a4.5 4.5 0 1 1-4.5 4.5M16.5 12H21m-9 4.5a4.5 4.5 0 1 1-4.5-4.5M12 16.5V21m-4.5-9H3"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+          <h2 style={{ color: '#F70077', marginBottom: '8px' }}>Blooms&Twirl Studio Portal Notice</h2>
+          <p style={{ color: '#666', maxWidth: '500px', marginBottom: '20px', lineHeight: '1.6' }}>
+            {this.state.error?.message || 'A temporary display issue occurred.'}
+          </p>
+          <button 
+            onClick={() => { localStorage.clear(); window.location.reload(); }} 
+            style={{ background: '#F70077', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer' }}
+          >
+            Reset & Reload Studio
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Mount React Root
+const rootElement = document.getElementById('root');
+try {
+  if (ReactDOM.createRoot) {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
+  } else {
+    ReactDOM.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>,
+      rootElement
+    );
+  }
+} catch(err) {
+  console.error("Mount error:", err);
+  rootElement.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif;color:#F70077;"><h2>Studio Launch Error</h2><p>' + err.message + '</p><button onclick="location.reload()" style="padding:10px 20px;background:#F70077;color:#fff;border:none;border-radius:20px;cursor:pointer;">Reload</button></div>';
+}
+  </script>
+</body>
+</html>
