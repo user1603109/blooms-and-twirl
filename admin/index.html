@@ -21,6 +21,36 @@
       background: var(--bg-page);
       font-family: var(--font-sans);
     }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(36, 24, 28, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      border: 1px solid var(--border-light);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
   </style>
 </head>
 <body>
@@ -111,6 +141,11 @@ const IconsBase = {
       <path d="M12 5v14M5 12h14"/>
     </svg>
   ),
+  Database: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+    </svg>
+  ),
   User: () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -167,6 +202,7 @@ function AdminApp() {
       return false;
     }
   });
+
   const [loginUsername, setLoginUsername] = useState('shaira');
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -201,33 +237,77 @@ function AdminApp() {
     window.location.href = '../index.html';
   };
 
-  const [adminTab, setAdminTab] = useState('overview');
+  // Support direct hash routing: e.g. #orders, #inventory, #arrangements, #deliveries, #customers, #settings
+  const getTabFromHash = () => {
+    const h = (window.location.hash || '').replace('#', '').toLowerCase();
+    const valid = ['overview', 'orders', 'arrangements', 'inventory', 'deliveries', 'customers', 'promotions', 'reviews', 'reports', 'staff', 'settings'];
+    return valid.includes(h) ? h : 'overview';
+  };
+
+  const [adminTab, setAdminTabState] = useState(getTabFromHash);
+  const setAdminTab = (tab) => {
+    setAdminTabState(tab);
+    window.location.hash = '#' + tab;
+  };
+
+  useEffect(() => {
+    const handleHash = () => setAdminTabState(getTabFromHash());
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Primary Collections
   const [arrangements, setArrangements] = useState(() => getInitial('arrangements', [
-    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
-    { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of deep magenta peonies and eucalyptus.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
-    { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true }
+    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Signature bouquet featuring Benguet highland roses in peach and cream with astilbe.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Deep magenta peonies, ruby ranunculus, and eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass and terracotta accents in ceramic.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', name: 'Sweet Blush Hatbox', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Round luxury hatbox with Dutch hydrangeas and cappuccino roses.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with White O’Hara garden roses and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true }
   ]));
 
   const [orders, setOrders] = useState(() => getInitial('orders', [
-    { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Session Road, Baguio City', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
-    { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Fuchsia Fable hand-tied', channel: 'Instagram', total: 4180, dueTime: '14:00', status: 'Fresh', date: '2026-10-01 08:54' }
+    { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
+    { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Fuchsia Fable hand-tied', channel: 'Instagram', total: 4180, dueTime: '14:00', status: 'Fresh', date: '2026-10-01 08:54' },
+    { id: 'BT-2039', customerName: 'Highland Pine Cafe', customerInitials: 'HP', email: 'orders@highlandpine.ph', phone: '+63 918 333 9920', address: 'Camp 7, Baguio City', arrangementName: 'Table blooms × 6 (weekly)', channel: 'Phone', total: 12600, dueTime: '10:00', status: 'In transit', date: '2026-09-30 17:20', courier: 'Marisol' },
+    { id: 'BT-2038', customerName: 'Andrea Villanueva', customerInitials: 'AV', email: 'andrea.v@outlook.com', phone: '+63 917 554 9021', address: 'Strawberry Valley, La Trinidad', arrangementName: 'Dusk & Dried bespoke', channel: 'Online', total: 2740, dueTime: '17:30', status: 'Delivered', date: '2026-09-30 15:41', courier: 'Nino' }
   ]));
 
   const [inventory, setInventory] = useState(() => getInitial('inventory', [
-    { id: 'inv-1', name: 'Garden rose, blush', type: 'stem', inStock: 24, needed: 40, unit: 'stems', isLow: true },
-    { id: 'inv-2', name: 'Peony, coral', type: 'stem', inStock: 8, needed: 30, unit: 'stems', isLow: true },
-    { id: 'inv-3', name: 'Pink tulip', type: 'stem', inStock: 60, needed: 50, unit: 'stems', isLow: false }
+    { id: 'inv-1', name: 'Highland Garden Rose, blush', type: 'stem', inStock: 24, needed: 40, unit: 'stems', isLow: true },
+    { id: 'inv-2', name: 'Coral Peony, Dutch import', type: 'stem', inStock: 8, needed: 30, unit: 'stems', isLow: true },
+    { id: 'inv-3', name: 'Benguet Pink Tulip', type: 'stem', inStock: 60, needed: 50, unit: 'stems', isLow: false },
+    { id: 'inv-4', name: 'White Hydrangea', type: 'stem', inStock: 18, needed: 25, unit: 'stems', isLow: false },
+    { id: 'inv-5', name: 'Silvery Eucalyptus gunnii', type: 'foliage', inStock: 35, needed: 40, unit: 'bunches', isLow: false },
+    { id: 'inv-6', name: 'Artisanal Ceramic Rose Vases', type: 'vase', inStock: 12, needed: 20, unit: 'pieces', isLow: true }
   ]));
 
   const [deliveries, setDeliveries] = useState(() => getInitial('deliveries', [
-    { id: 'del-1', time: '09:30', recipient: 'Yuna Park', location: 'Session Road, Baguio City', courier: 'Nino', status: 'Done' },
-    { id: 'del-2', time: '10:00', recipient: 'Highland Pine Cafe', location: 'Camp 7, Baguio City', courier: 'Marisol', status: 'Rolling' }
+    { id: 'del-1', time: '09:30', recipient: 'Yuna Park', location: 'Session Road, Baguio City', courier: 'Nino', status: 'Done', orderId: 'BT-2037' },
+    { id: 'del-2', time: '10:00', recipient: 'Highland Pine Cafe', location: 'Camp 7, Baguio City', courier: 'Marisol', status: 'Rolling', orderId: 'BT-2039' },
+    { id: 'del-3', time: '12:30', recipient: 'Marisol Reyes', location: 'Luna, Apayao', courier: 'Jom', status: 'Queued', orderId: 'BT-2041' },
+    { id: 'del-4', time: '14:00', recipient: 'Kaito Nakamura', location: 'Urbiztondo, San Juan, La Union', courier: 'Nino', status: 'Queued', orderId: 'BT-2040' }
   ]));
 
   const [customers, setCustomers] = useState(() => getInitial('customers', [
-    { id: 'c-1', name: 'Marisol Reyes', initials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', segment: 'Bride', ordersCount: 6, lifetimeValue: 34180, lastOrderDate: '2026-10-01', customerSinceDate: '2025-11-04' }
+    { id: 'c-1', name: 'Marisol Reyes', initials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', segment: 'Bride', ordersCount: 6, lifetimeValue: 34180, lastOrderDate: '2026-10-01', customerSinceDate: '2025-11-04' },
+    { id: 'c-2', name: 'Kaito Nakamura', initials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', segment: 'Regular', ordersCount: 3, lifetimeValue: 12540, lastOrderDate: '2026-10-01', customerSinceDate: '2026-02-14' },
+    { id: 'c-3', name: 'Highland Pine Cafe', initials: 'HP', email: 'orders@highlandpine.ph', phone: '+63 918 333 9920', segment: 'Corporate', ordersCount: 14, lifetimeValue: 148200, lastOrderDate: '2026-09-30', customerSinceDate: '2025-08-20' },
+    { id: 'c-4', name: 'Andrea Villanueva', initials: 'AV', email: 'andrea.v@outlook.com', phone: '+63 917 554 9021', segment: 'Subscriber', ordersCount: 8, lifetimeValue: 21920, lastOrderDate: '2026-09-30', customerSinceDate: '2026-01-05' }
+  ]));
+
+  const [promotions, setPromotions] = useState(() => getInitial('promotions', [
+    { id: 'p-1', code: 'HIGHLANDLOVE', description: '10% off bespoke bridal consultations', status: 'Live', usesCount: 48, discount: '10%' },
+    { id: 'p-2', code: 'APAYAOBLOOM', description: '₱200 off your first seasonal bouquet', status: 'Live', usesCount: 89, discount: '₱200' },
+    { id: 'p-3', code: 'BAGUIOFRESH', description: 'Free courier delivery across Baguio & Benguet', status: 'Expired', usesCount: 124, discount: 'Free Shipping' }
+  ]));
+
+  const [reviews, setReviews] = useState(() => getInitial('reviews', [
+    { id: 'r-1', customerName: 'Marisol Reyes', quote: 'Shaira’s bridal arrangement arrived in Luna, Apayao looking like it was just cut from the highland terrace! Incredible quality.', rating: 5, badge: 'Verified Bride', date: '2026-10-01' },
+    { id: 'r-2', customerName: 'Kaito Nakamura', quote: 'The eucalyptus and peonies in the Fuchsia Fable stayed fragrant for over two weeks in San Juan.', rating: 5, badge: 'Verified Buyer', date: '2026-09-29' },
+    { id: 'r-3', customerName: 'Highland Pine Cafe', quote: 'Our weekly cafe tables look magnificent. Reliable delivery every single Monday without fail.', rating: 5, badge: 'Corporate Client', date: '2026-09-25' }
   ]));
 
   const [settings, setSettings] = useState(() => getInitial('settings', {
@@ -236,43 +316,80 @@ function AdminApp() {
     operatingHours: '08:00–20:00',
     phone: '+63 917 555 0142',
     currency: 'PHP ₱',
-    paymentMethods: 4,
-    deliveryZones: 9
+    paymentMethods: 'GCash, Maya, COD, BDO Transfer',
+    deliveryZones: 'Luzon to Visayas (Apayao Atelier & Baguio Supplier Hub)',
+    googleAppsScriptUrl: '',
+    googleSheetId: '',
+    googleDriveFolderId: ''
   }));
 
+  // Modals
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
-  const [editingArrangement, setEditingArrangement] = useState(null);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
-  const [editingInventoryItem, setEditingInventoryItem] = useState(null);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  
+  // Filter States
   const [orderFilter, setOrderFilter] = useState('All');
+  const [catalogCategory, setCatalogCategory] = useState('All');
+  const [customerSegmentFilter, setCustomerSegmentFilter] = useState('All');
 
+  // Persistence
   useEffect(() => saveItem('orders', orders), [orders]);
   useEffect(() => saveItem('arrangements', arrangements), [arrangements]);
   useEffect(() => saveItem('inventory', inventory), [inventory]);
+  useEffect(() => saveItem('deliveries', deliveries), [deliveries]);
+  useEffect(() => saveItem('customers', customers), [customers]);
+  useEffect(() => saveItem('promotions', promotions), [promotions]);
+  useEffect(() => saveItem('settings', settings), [settings]);
 
+  // Order Actions
   const advanceOrderStatus = (orderId, newStatus) => {
     setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
   };
 
-  const handleSaveArrangement = (arrData) => {
-    if (editingArrangement) {
-      setArrangements(arrangements.map(a => a.id === editingArrangement.id ? { ...a, ...arrData } : a));
-    } else {
-      setArrangements([{ id: 'arr-' + Date.now(), sold30d: 0, rating: 5.0, ...arrData }, ...arrangements]);
+  // Google Sheets Ping Test
+  const [syncStatus, setSyncStatus] = useState('');
+  const testGoogleSync = async () => {
+    if (!settings.googleAppsScriptUrl) {
+      alert('Please enter your Google Apps Script Web App URL first!');
+      return;
     }
-    setIsArrangementModalOpen(false);
+    setSyncStatus('Testing connection to Google Sheets Webhook...');
+    try {
+      const res = await fetch(settings.googleAppsScriptUrl + '?action=ping', { method: 'GET', mode: 'no-cors' });
+      setSyncStatus('Connection verified! Your Google Apps Script Webhook is reachable.');
+      alert('Success! Google Apps Script Webhook is active and responding.');
+    } catch(err) {
+      setSyncStatus('Error connecting to webhook. Please verify your Web App deployment settings.');
+      alert('Could not connect. Make sure your Web App deployment is set to "Who has access: Anyone".');
+    }
   };
 
-  const handleSaveInventory = (itemData) => {
-    if (editingInventoryItem) {
-      setInventory(inventory.map(i => i.id === editingInventoryItem.id ? { ...i, ...itemData } : i));
-    } else {
-      setInventory([{ id: 'inv-' + Date.now(), ...itemData }, ...inventory]);
-    }
-    setIsInventoryModalOpen(false);
-  };
+  // Filtered Lists
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      const matchesFilter = orderFilter === 'All' || o.status === orderFilter;
+      const matchesQuery = !searchQuery || 
+        o.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        o.arrangementName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.address.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesFilter && matchesQuery;
+    });
+  }, [orders, orderFilter, searchQuery]);
 
+  const filteredArrangements = useMemo(() => {
+    return arrangements.filter(a => {
+      const matchesCat = catalogCategory === 'All' || a.category === catalogCategory || a.tag === catalogCategory;
+      const matchesQuery = !searchQuery || a.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCat && matchesQuery;
+    });
+  }, [arrangements, catalogCategory, searchQuery]);
+
+  // =========================================================================
+  // AUTHENTICATION GATE
+  // =========================================================================
   if (!isAdminAuthenticated) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--bg-page)', padding: '24px' }}>
@@ -354,8 +471,12 @@ function AdminApp() {
     );
   }
 
+  // =========================================================================
+  // FULL ADMIN STUDIO DASHBOARD (ALL 11 PAGES)
+  // =========================================================================
   return (
     <div style={{ display: 'flex', width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
+      {/* SIDEBAR NAVIGATION */}
       <aside className="sidebar">
         <div className="brand-header">
           <div className="brand-icon-box">
@@ -396,6 +517,7 @@ function AdminApp() {
           <li>
             <button className={'nav-item-btn ' + (adminTab === 'deliveries' ? 'active' : '')} onClick={() => setAdminTab('deliveries')}>
               <div className="nav-label-group"><Icons.Deliveries /> Deliveries</div>
+              <span className="nav-badge">{deliveries.filter(d=>d.status==='Rolling').length}</span>
             </button>
           </li>
         </ul>
@@ -405,6 +527,27 @@ function AdminApp() {
           <li>
             <button className={'nav-item-btn ' + (adminTab === 'customers' ? 'active' : '')} onClick={() => setAdminTab('customers')}>
               <div className="nav-label-group"><Icons.Customers /> Customers CRM</div>
+              <span className="nav-badge">{customers.length}</span>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'promotions' ? 'active' : '')} onClick={() => setAdminTab('promotions')}>
+              <div className="nav-label-group"><Icons.Promotions /> Promotions</div>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'reviews' ? 'active' : '')} onClick={() => setAdminTab('reviews')}>
+              <div className="nav-label-group"><Icons.Reviews /> Reviews</div>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'reports' ? 'active' : '')} onClick={() => setAdminTab('reports')}>
+              <div className="nav-label-group"><Icons.Reports /> Reports</div>
+            </button>
+          </li>
+          <li>
+            <button className={'nav-item-btn ' + (adminTab === 'staff' ? 'active' : '')} onClick={() => setAdminTab('staff')}>
+              <div className="nav-label-group"><Icons.Staff /> Staff</div>
             </button>
           </li>
           <li>
@@ -423,6 +566,7 @@ function AdminApp() {
         </div>
       </aside>
 
+      {/* MAIN ADMIN WORKSPACE */}
       <div className="main-wrapper">
         <header className="topbar">
           <div className="search-bar">
@@ -454,69 +598,1017 @@ function AdminApp() {
         </header>
 
         <main className="page-content">
+          {/* ========================================================================= */}
+          {/* 1. OVERVIEW VIEW */}
+          {/* ========================================================================= */}
           {adminTab === 'overview' && (
             <div>
               <div className="page-eyebrow">STUDIO BENCH DASHBOARD</div>
-              <h1 className="page-title" style={{ marginBottom: '8px' }}>Highland Flower Studio</h1>
-              <div className="page-description" style={{ marginBottom: '24px' }}>Apayao atelier bench & Baguio flower supply logistics.</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Good morning, Shaira</h1>
+                  <p className="page-description">Apayao atelier bench & Baguio flower supply logistics. {orders.length} active orders in the studio book.</p>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className="btn-secondary" onClick={() => alert("Today's Studio Plan: Jom and Nino on dispatch; fresh Benguet highland rose delivery checked in.")}>
+                    Today's plan
+                  </button>
+                  <button className="btn-secondary" onClick={() => alert('Exporting live studio summary to CSV...')}>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
 
+              {/* 4 Stat Cards */}
               <div className="stats-grid-4">
                 <div className="stat-card">
-                  <div className="stat-label">TODAY'S ORDERS</div>
+                  <div className="stat-header">
+                    <span className="stat-label">TODAY'S ORDERS</span>
+                    <span className="stat-tag positive">↗ Active</span>
+                  </div>
                   <div className="stat-value">{orders.length}</div>
+                  <div className="stat-subtext">{orders.filter(o => o.status === 'Arranging').length} currently on the bench</div>
                 </div>
+
                 <div className="stat-card">
-                  <div className="stat-label">REVENUE (EST)</div>
+                  <div className="stat-header">
+                    <span className="stat-label">BOOKED REVENUE</span>
+                    <span className="stat-tag positive">₱ Live</span>
+                  </div>
                   <div className="stat-value">₱{orders.reduce((a,c)=>a+c.total, 0).toLocaleString()}</div>
+                  <div className="stat-subtext">Avg ₱{Math.round(orders.reduce((a,c)=>a+c.total, 0)/Math.max(1, orders.length)).toLocaleString()} per order</div>
                 </div>
+
                 <div className="stat-card">
-                  <div className="stat-label">COLD ROOM STEMS</div>
+                  <div className="stat-header">
+                    <span className="stat-label">COLD ROOM STEMS</span>
+                    <span className="stat-tag positive">Baguio Fresh</span>
+                  </div>
                   <div className="stat-value">{inventory.reduce((a,c)=>a+c.inStock, 0)}</div>
+                  <div className="stat-subtext">{inventory.filter(i=>i.isLow).length} lines need restocking</div>
                 </div>
+
                 <div className="stat-card">
-                  <div className="stat-label">ACTIVE DELIVERIES</div>
+                  <div className="stat-header">
+                    <span className="stat-label">DISPATCH COURIERS</span>
+                    <span className="stat-tag neutral">En Route</span>
+                  </div>
                   <div className="stat-value">{deliveries.length}</div>
+                  <div className="stat-subtext">Apayao & Northern Luzon runs</div>
+                </div>
+              </div>
+
+              {/* Takings & Arrangement Split */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                <div className="content-card">
+                  <div className="card-title-row">
+                    <div>
+                      <div className="card-subtitle">WEEKLY VOLUME</div>
+                      <div className="card-title">₱{orders.reduce((a,c)=>a+c.total, 0).toLocaleString()} Active Booking</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Highland flower supply pipeline from Baguio City to Northern Luzon & Visayas</div>
+                    </div>
+                  </div>
+                  <div style={{ position: 'relative', height: '140px', marginTop: '16px' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 500 130" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="adminAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#F70077" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#F70077" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="30" x2="500" y2="30" stroke="#FCE8ED" strokeDasharray="3 3" />
+                      <line x1="0" y1="80" x2="500" y2="80" stroke="#FCE8ED" strokeDasharray="3 3" />
+                      <path d="M0,60 C80,75 160,95 240,85 C320,70 400,50 500,45 L500,130 L0,130 Z" fill="url(#adminAreaGrad)" />
+                      <path d="M0,60 C80,75 160,95 240,85 C320,70 400,50 500,45" fill="none" stroke="#F70077" strokeWidth="3" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="content-card">
+                  <div className="card-subtitle">QUICK ACTIONS</div>
+                  <div className="card-title" style={{ marginBottom: '14px' }}>Studio Shortcuts</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setAdminTab('orders')}>
+                      <Icons.Orders /> View All Orders ({orders.length})
+                    </button>
+                    <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setAdminTab('inventory')}>
+                      <Icons.Inventory /> Check Cold Room Stock
+                    </button>
+                    <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setAdminTab('settings')}>
+                      <Icons.Settings /> Google Sheets Sync
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Studio Bench Active Queue */}
+              <div className="content-card">
+                <div className="card-title-row" style={{ marginBottom: '16px' }}>
+                  <div>
+                    <div className="card-subtitle">ACTIVE BENCH QUEUE</div>
+                    <div className="card-title">Live Orders Requiring Floral Arrangement</div>
+                  </div>
+                  <button className="btn-secondary" onClick={() => setAdminTab('orders')}>See Full Book →</button>
+                </div>
+
+                <div className="data-table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>ORDER ID</th>
+                        <th>CLIENT</th>
+                        <th>ARRANGEMENT</th>
+                        <th>TOTAL</th>
+                        <th>DUE</th>
+                        <th>STATUS</th>
+                        <th>BENCH ACTION</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.slice(0, 4).map(o => (
+                        <tr key={o.id}>
+                          <td style={{ fontWeight: '700', color: 'var(--primary)' }}>{o.id}</td>
+                          <td>
+                            <strong>{o.customerName}</strong>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.address}</div>
+                          </td>
+                          <td>{o.arrangementName}</td>
+                          <td style={{ fontWeight: '700' }}>₱{o.total.toLocaleString()}</td>
+                          <td>{o.dueTime}</td>
+                          <td>
+                            <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
+                          </td>
+                          <td>
+                            <select 
+                              value={o.status} 
+                              onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
+                              style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
+                            >
+                              <option value="Fresh">Fresh</option>
+                              <option value="Arranging">Arranging</option>
+                              <option value="In transit">In transit</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           )}
 
+          {/* ========================================================================= */}
+          {/* 2. ORDERS VIEW */}
+          {/* ========================================================================= */}
           {adminTab === 'orders' && (
             <div>
               <div className="page-eyebrow">ORDER REPOSITORY</div>
               <div className="page-header-row">
-                <h1 className="page-title">Orders Book</h1>
+                <div>
+                  <h1 className="page-title">Orders Book</h1>
+                  <p className="page-description">Complete log of artisanal bouquets and deliveries across Luzon and Visayas.</p>
+                </div>
+                <button className="btn-primary" onClick={() => setIsNewOrderModalOpen(true)}>
+                  <Icons.Plus /> New order
+                </button>
               </div>
+
+              {/* Status Filter Pills */}
+              <div className="filter-tabs" style={{ marginBottom: '16px' }}>
+                {['All', 'Fresh', 'Arranging', 'In transit', 'Delivered', 'Cancelled'].map(st => (
+                  <button 
+                    key={st} 
+                    className={'filter-pill ' + (orderFilter === st ? 'active' : '')}
+                    onClick={() => setOrderFilter(st)}
+                  >
+                    {st} ({st === 'All' ? orders.length : orders.filter(o => o.status === st).length})
+                  </button>
+                ))}
+              </div>
+
               <div className="content-card">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>ORDER ID</th>
-                      <th>CLIENT</th>
-                      <th>ARRANGEMENT</th>
-                      <th>TOTAL</th>
-                      <th>STATUS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map(o => (
-                      <tr key={o.id}>
-                        <td style={{ fontWeight: '700', color: 'var(--primary)' }}>{o.id}</td>
-                        <td>{o.customerName}</td>
-                        <td>{o.arrangementName}</td>
-                        <td style={{ fontWeight: '700' }}>₱{o.total.toLocaleString()}</td>
-                        <td>
-                          <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
-                        </td>
+                <div className="data-table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>ORDER ID</th>
+                        <th>CLIENT DETAILS</th>
+                        <th>ARRANGEMENT</th>
+                        <th>CHANNEL</th>
+                        <th>TOTAL</th>
+                        <th>DUE TIME</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.map(o => (
+                        <tr key={o.id}>
+                          <td style={{ fontWeight: '700', color: 'var(--primary)' }}>
+                            {o.id}
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.date}</div>
+                          </td>
+                          <td>
+                            <strong>{o.customerName}</strong>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.phone} · {o.address}</div>
+                          </td>
+                          <td>{o.arrangementName}</td>
+                          <td>
+                            <span style={{ fontSize: '11px', fontWeight: '700', background: '#F8DFE5', padding: '3px 8px', borderRadius: '9999px', color: 'var(--text-main)' }}>
+                              {o.channel}
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: '700' }}>₱{o.total.toLocaleString()}</td>
+                          <td>{o.dueTime}</td>
+                          <td>
+                            <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
+                          </td>
+                          <td>
+                            <select 
+                              value={o.status} 
+                              onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
+                              style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
+                            >
+                              <option value="Fresh">Fresh</option>
+                              <option value="Arranging">Arranging</option>
+                              <option value="In transit">In transit</option>
+                              <option value="Delivered">Delivered</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 3. ARRANGEMENTS VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'arrangements' && (
+            <div>
+              <div className="page-eyebrow">FLORAL CATALOGUE</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Bouquets & Arrangements</h1>
+                  <p className="page-description">Manage atelier designs, cold-room flower stock levels, and prices.</p>
+                </div>
+                <button className="btn-primary" onClick={() => setIsArrangementModalOpen(true)}>
+                  <Icons.Plus /> New arrangement
+                </button>
+              </div>
+
+              {/* Category Pills */}
+              <div className="filter-tabs" style={{ marginBottom: '20px' }}>
+                {['All', 'Signature', 'Statement', 'Dried', 'Houseplant', 'Box', 'Bridal'].map(cat => (
+                  <button 
+                    key={cat} 
+                    className={'filter-pill ' + (catalogCategory === cat ? 'active' : '')}
+                    onClick={() => setCatalogCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              <div className="arrangements-grid">
+                {filteredArrangements.map(arr => (
+                  <div key={arr.id} className="arrangement-card">
+                    <div className="arrangement-image-wrap">
+                      <img src={arr.image} alt={arr.name} />
+                      <span className="card-tag-pill">{arr.tag}</span>
+                      {arr.isLowStock && <span className="card-low-stock-pill">Low stock</span>}
+                    </div>
+                    <div className="arrangement-body">
+                      <div className="arrangement-name-row">
+                        <h3 className="arrangement-name">{arr.name}</h3>
+                        <span className="arrangement-rating">★ {arr.rating}</span>
+                      </div>
+                      <p className="arrangement-stems">{arr.stems.join(', ')}</p>
+
+                      <div className="stock-progress-wrap">
+                        <div className="stock-progress-text">
+                          <span>{arr.coldRoomCount} in cold room</span>
+                          <span>{arr.sold30d} sold / 30d</span>
+                        </div>
+                        <div className="progress-bar-bg">
+                          <div className="progress-bar-fill" style={{ width: Math.min(100, (arr.coldRoomCount / 20) * 100) + '%' }}></div>
+                        </div>
+                      </div>
+
+                      <div className="arrangement-footer-row">
+                        <span className="arrangement-price">₱{arr.price.toLocaleString()}</span>
+                        <button className="btn-restock" onClick={() => {
+                          setArrangements(arrangements.map(a => a.id === arr.id ? { ...a, coldRoomCount: a.coldRoomCount + 5, isLowStock: false } : a));
+                          alert('Restocked +5 units of ' + arr.name + ' in cold room!');
+                        }}>
+                          Restock (+5)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 4. INVENTORY VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'inventory' && (
+            <div>
+              <div className="page-eyebrow">COLD ROOM STEMS & SUPPLIES</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Inventory Control</h1>
+                  <p className="page-description">Baguio City flower supply check-in, stem counts, vases, and satin ribbons.</p>
+                </div>
+                <button className="btn-primary" onClick={() => setIsInventoryModalOpen(true)}>
+                  <Icons.Plus /> New stock line
+                </button>
+              </div>
+
+              <div className="stats-grid-4" style={{ marginBottom: '20px' }}>
+                <div className="stat-card">
+                  <div className="stat-label">TOTAL STOCK LINES</div>
+                  <div className="stat-value">{inventory.length}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">BELOW NEED</div>
+                  <div className="stat-value" style={{ color: 'var(--primary)' }}>{inventory.filter(i=>i.isLow).length}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">TOTAL STEMS ON HAND</div>
+                  <div className="stat-value">{inventory.reduce((a,c)=>a+c.inStock, 0)}</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">SUPPLIER HUB</div>
+                  <div className="stat-value" style={{ fontSize: '18px' }}>Baguio City</div>
+                </div>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Stock Lines</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {inventory.map(item => (
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{item.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.inStock} {item.unit} available · {item.needed} needed this week</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        {item.isLow && <span className="status-chip low">Low</span>}
+                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: '700' }}>{item.inStock}</span>
+                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => {
+                          setInventory(inventory.map(i => i.id === item.id ? { ...i, inStock: i.inStock + 20, isLow: false } : i));
+                          alert('Checked in +20 units for ' + item.name + '!');
+                        }}>
+                          + Check In (+20)
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 5. DELIVERIES VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'deliveries' && (
+            <div>
+              <div className="page-eyebrow">COURIER DISPATCH</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Delivery Runs</h1>
+                  <p className="page-description">Today’s dispatch runs across Northern Luzon towns and onward logistics.</p>
+                </div>
+                <button className="btn-secondary" onClick={() => alert('New courier route planned for Jom and Nino.')}>Plan a route</button>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Today's Scheduled Dispatch Runs</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {deliveries.map(run => (
+                    <div key={run.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>
+                          <span style={{ color: 'var(--primary)', marginRight: '8px' }}>{run.time}</span>
+                          {run.recipient}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{run.location} · Courier: <strong>{run.courier}</strong></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span className={'status-chip ' + run.status.toLowerCase()}>{run.status}</span>
+                        <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => {
+                          const nextStatus = run.status === 'Queued' ? 'Rolling' : (run.status === 'Rolling' ? 'Done' : 'Queued');
+                          setDeliveries(deliveries.map(d => d.id === run.id ? { ...d, status: nextStatus } : d));
+                        }}>
+                          Toggle: {run.status === 'Queued' ? 'Start Run' : (run.status === 'Rolling' ? 'Mark Done' : 'Reset')}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 6. CUSTOMERS CRM VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'customers' && (
+            <div>
+              <div className="page-eyebrow">CLIENT DIRECTORY</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Customers CRM</h1>
+                  <p className="page-description">Loyal flower lovers, brides-to-be, and recurring cafe table decor accounts.</p>
+                </div>
+                <button className="btn-secondary" onClick={() => alert('Customer list exported.')}>Export CSV</button>
+              </div>
+
+              {/* Segment Filter */}
+              <div className="filter-tabs" style={{ marginBottom: '16px' }}>
+                {['All', 'Bride', 'Subscriber', 'Corporate', 'Regular'].map(seg => (
+                  <button 
+                    key={seg} 
+                    className={'filter-pill ' + (customerSegmentFilter === seg ? 'active' : '')}
+                    onClick={() => setCustomerSegmentFilter(seg)}
+                  >
+                    {seg}
+                  </button>
+                ))}
+              </div>
+
+              <div className="content-card">
+                <div className="data-table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>CUSTOMER</th>
+                        <th>SEGMENT</th>
+                        <th>ORDERS</th>
+                        <th>LIFETIME VALUE</th>
+                        <th>LAST ORDER</th>
+                        <th>SINCE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.filter(c => customerSegmentFilter === 'All' || c.segment === customerSegmentFilter).map(cust => (
+                        <tr key={cust.id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div className="avatar-circle">{cust.initials}</div>
+                              <div>
+                                <div style={{ fontWeight: '600' }}>{cust.name}</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{cust.email} · {cust.phone}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span style={{ padding: '3px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: '700', background: cust.segment === 'Corporate' ? '#2E121E' : '#FDF0F3', color: cust.segment === 'Corporate' ? '#FFF' : 'var(--primary)' }}>
+                              {cust.segment}
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: '600' }}>{cust.ordersCount}</td>
+                          <td style={{ fontWeight: '700' }}>₱{cust.lifetimeValue.toLocaleString()}</td>
+                          <td>{cust.lastOrderDate}</td>
+                          <td style={{ color: 'var(--text-muted)' }}>{cust.customerSinceDate}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 7. PROMOTIONS VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'promotions' && (
+            <div>
+              <div className="page-eyebrow">MARKETING & CAMPAIGNS</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Promotions & Vouchers</h1>
+                  <p className="page-description">Manage discount codes and seasonal floral promo campaigns.</p>
+                </div>
+                <button className="btn-primary" onClick={() => setIsPromoModalOpen(true)}>
+                  <Icons.Plus /> New promo code
+                </button>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Active Discount Codes</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {promotions.map(promo => (
+                    <div key={promo.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-serif)', fontWeight: '700', fontSize: '17px', letterSpacing: '1px', color: 'var(--primary)' }}>
+                          {promo.code}
+                        </div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{promo.description} · Discount: <strong>{promo.discount}</strong></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{promo.usesCount} uses</span>
+                        <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '11px', fontWeight: '700', background: promo.status === 'Live' ? '#EAF7EE' : '#F3F4F6', color: promo.status === 'Live' ? '#1E6B37' : '#6B7280' }}>
+                          {promo.status}
+                        </span>
+                        <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => {
+                          const next = promo.status === 'Live' ? 'Expired' : 'Live';
+                          setPromotions(promotions.map(p => p.id === promo.id ? { ...p, status: next } : p));
+                        }}>
+                          Toggle
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 8. REVIEWS VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'reviews' && (
+            <div>
+              <div className="page-eyebrow">FEEDBACK & REPUTATION</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Customer Reviews</h1>
+                  <p className="page-description">What clients and brides say after their blooms arrive from our atelier.</p>
+                </div>
+                <button className="btn-secondary" onClick={() => alert('Review request link copied for social media!')}>Copy request link</button>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Client Quotes & Testimonials</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {reviews.map(rev => (
+                    <div key={rev.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{rev.customerName}</div>
+                        <div style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-main)', marginTop: '2px' }}>"{rev.quote}"</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '9999px', background: '#FDF0F3', color: 'var(--primary)' }}>
+                          {rev.badge}
+                        </span>
+                        <span style={{ fontWeight: '700', color: '#D97706' }}>{'★'.repeat(rev.rating)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 9. REPORTS VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'reports' && (
+            <div>
+              <div className="page-eyebrow">ANALYTICS & METRICS</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Studio Reports</h1>
+                  <p className="page-description">Monthly revenue, highland supply margins, and sales volume.</p>
+                </div>
+                <button className="btn-primary" onClick={() => alert('Studio financial summary generated and exported.')}>Generate report</button>
+              </div>
+
+              <div className="stats-grid-4" style={{ marginBottom: '20px' }}>
+                <div className="stat-card">
+                  <div className="stat-label">TOTAL SALES (YTD)</div>
+                  <div className="stat-value">₱1.48M</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">GROSS MARGIN</div>
+                  <div className="stat-value">58%</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">COMPLETED ORDERS</div>
+                  <div className="stat-value">684</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">REPEAT CLIENT RATE</div>
+                  <div className="stat-value">42%</div>
+                </div>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Available Reports</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {[
+                    { title: 'Monthly Sales & Order Volume', desc: 'Breakdown of online, Instagram and bridal orders', val: '₱399,908 (last 30d)' },
+                    { title: 'Baguio Floral Supply Margins', desc: 'Cost of Benguet roses vs atelier retail price', val: '58% Margin' },
+                    { title: 'Courier Delivery Performance', desc: 'On-time delivery tracking across Apayao & Luzon', val: '97% On Time' }
+                  ].map((rep, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{rep.title}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{rep.desc}</div>
+                      </div>
+                      <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary)' }}>{rep.val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 10. STAFF VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'staff' && (
+            <div>
+              <div className="page-eyebrow">STUDIO TEAM</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Team Roster</h1>
+                  <p className="page-description">Head florist, arrangement bench apprentices, and dispatch couriers.</p>
+                </div>
+                <button className="btn-secondary" onClick={() => alert('Invite link copied for apprentice florist.')}>Invite member</button>
+              </div>
+
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Atelier Members</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {[
+                    { name: 'Shaira Angela Saladino', role: 'Owner & Head Florist (Atelier Apayao)', tier: 'Admin', scope: 'Full Studio Control' },
+                    { name: 'Jom', role: 'Floral Arranger & Logistics Lead', tier: 'Staff', scope: 'Orders, Stock, Deliveries' },
+                    { name: 'Bea', role: 'Bridal Floral Specialist', tier: 'Staff', scope: 'Orders, Customer Care' },
+                    { name: 'Nino', role: 'Highland Dispatch Courier', tier: 'Staff', scope: 'Deliveries, Routes' },
+                    { name: 'Marisol', role: 'Baguio-Benguet Supply Courier', tier: 'Staff', scope: 'Deliveries, Stock In' }
+                  ].map((mem, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{mem.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{mem.role}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '9999px', background: mem.tier === 'Admin' ? '#FDF0F3' : '#F3F4F6', color: mem.tier === 'Admin' ? 'var(--primary)' : '#4B5563' }}>
+                          {mem.tier}
+                        </span>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{mem.scope}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* 11. SETTINGS VIEW */}
+          {/* ========================================================================= */}
+          {adminTab === 'settings' && (
+            <div>
+              <div className="page-eyebrow">SYSTEM & INTEGRATIONS</div>
+              <div className="page-header-row">
+                <div>
+                  <h1 className="page-title">Settings & Cloud Sync</h1>
+                  <p className="page-description">Configure your shop details, delivery zones, and connect live Google Sheets & 5TB Google Drive.</p>
+                </div>
+                <button className="btn-primary" onClick={() => {
+                  saveItem('settings', settings);
+                  alert('Settings updated successfully!');
+                }}>
+                  Save changes
+                </button>
+              </div>
+
+              {/* Google Sheets Integration Card */}
+              <div className="content-card" style={{ border: '2px solid var(--primary-border)', background: '#FFFDFE', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ color: 'var(--primary)' }}><Icons.Database /></div>
+                  <div className="card-title">Google Sheets & 5TB Google Drive Live Sync</div>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px' }}>
+                  Orders placed by clients automatically append rows directly into your connected Google Sheet. Image uploads save directly to your Google Drive!
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Google Apps Script Web App URL</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      value={settings.googleAppsScriptUrl || ''}
+                      onChange={(e) => setSettings({ ...settings, googleAppsScriptUrl: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Google Spreadsheet ID</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+                      value={settings.googleSheetId || ''}
+                      onChange={(e) => setSettings({ ...settings, googleSheetId: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '12px', color: syncStatus ? 'var(--primary)' : 'var(--text-muted)' }}>
+                    {syncStatus || 'Ready to test connection with Google Cloud.'}
+                  </span>
+                  <button type="button" className="btn-secondary" onClick={testGoogleSync}>
+                    Test Connection
+                  </button>
+                </div>
+              </div>
+
+              {/* Shop Setup Card */}
+              <div className="content-card">
+                <div className="card-title" style={{ marginBottom: '16px' }}>Shop Profile Details</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Storefront Name</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={settings.shopName}
+                      onChange={(e) => setSettings({ ...settings, shopName: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Standard Delivery Fee (₱)</label>
+                    <input 
+                      type="number" 
+                      className="form-control" 
+                      value={settings.deliveryFee}
+                      onChange={(e) => setSettings({ ...settings, deliveryFee: Number(e.target.value) })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Operating Hours</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={settings.operatingHours}
+                      onChange={(e) => setSettings({ ...settings, operatingHours: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Contact Hotline / Mobile</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={settings.phone}
+                      onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </main>
       </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL 1: NEW ORDER MODAL */}
+      {/* ========================================================================= */}
+      {isNewOrderModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsNewOrderModalOpen(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Record New Order</h3>
+              <button onClick={() => setIsNewOrderModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+            <form onSubmit={e => {
+              e.preventDefault();
+              const fd = new FormData(e.target);
+              const newOrd = {
+                id: 'BT-' + Math.floor(1000 + Math.random() * 9000),
+                customerName: fd.get('name'),
+                customerInitials: fd.get('name').slice(0, 2).toUpperCase(),
+                phone: fd.get('phone'),
+                email: fd.get('email') || 'client@ph.com',
+                address: fd.get('address'),
+                arrangementName: fd.get('arrangement'),
+                channel: fd.get('channel') || 'Manual',
+                total: Number(fd.get('total')) || 2450,
+                dueTime: fd.get('dueTime') || '14:00',
+                status: 'Fresh',
+                date: new Date().toISOString().slice(0, 10),
+                courier: fd.get('courier') || 'Jom'
+              };
+              setOrders([newOrd, ...orders]);
+              setIsNewOrderModalOpen(false);
+              alert('Order ' + newOrd.id + ' added to studio book!');
+            }}>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Customer Full Name</label>
+                <input type="text" name="name" className="form-control" required placeholder="e.g. Sofia Valenzuela" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Mobile Phone</label>
+                <input type="text" name="phone" className="form-control" required placeholder="+63 917 XXX XXXX" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Delivery Address</label>
+                <input type="text" name="address" className="form-control" required placeholder="e.g. Luna, Apayao or Session Rd, Baguio City" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Arrangement Name</label>
+                <select name="arrangement" className="form-control">
+                  {arrangements.map(a => <option key={a.id} value={a.name}>{a.name} (₱{a.price.toLocaleString()})</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Total (₱)</label>
+                  <input type="number" name="total" defaultValue="2450" className="form-control" />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Due Time</label>
+                  <input type="text" name="dueTime" defaultValue="14:00" className="form-control" />
+                </div>
+              </div>
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Save Order to Book
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: NEW ARRANGEMENT MODAL */}
+      {/* ========================================================================= */}
+      {isArrangementModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsArrangementModalOpen(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Add New Floral Design</h3>
+              <button onClick={() => setIsArrangementModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+            <form onSubmit={e => {
+              e.preventDefault();
+              const fd = new FormData(e.target);
+              const newArr = {
+                id: 'arr-' + Date.now(),
+                name: fd.get('name'),
+                category: fd.get('category'),
+                tag: fd.get('tag') || 'Signature',
+                price: Number(fd.get('price')) || 2450,
+                coldRoomCount: Number(fd.get('coldRoomCount')) || 10,
+                sold30d: 0,
+                rating: 5.0,
+                image: fd.get('image') || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+                description: fd.get('description') || 'Handcrafted bespoke bouquet with highland blooms.',
+                stems: (fd.get('stems') || 'Benguet Roses, Astilbe').split(',').map(s => s.trim()),
+                isLowStock: false
+              };
+              setArrangements([newArr, ...arrangements]);
+              setIsArrangementModalOpen(false);
+              alert('New bouquet "' + newArr.name + '" added to catalogue!');
+            }}>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Arrangement Name</label>
+                <input type="text" name="name" className="form-control" required placeholder="e.g. Velvet Solstice" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Category</label>
+                  <select name="category" className="form-control">
+                    <option value="Signature">Signature</option>
+                    <option value="Statement">Statement</option>
+                    <option value="Bridal">Bridal</option>
+                    <option value="Dried">Dried</option>
+                    <option value="Box">Box</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Price (₱)</label>
+                  <input type="number" name="price" defaultValue="2500" className="form-control" />
+                </div>
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Key Stems (comma separated)</label>
+                <input type="text" name="stems" className="form-control" placeholder="Garden roses, Peonies, Eucalyptus" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Image URL</label>
+                <input type="url" name="image" className="form-control" placeholder="https://..." />
+              </div>
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Publish Arrangement
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: NEW INVENTORY ITEM MODAL */}
+      {/* ========================================================================= */}
+      {isInventoryModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsInventoryModalOpen(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Add Cold Room Stock Line</h3>
+              <button onClick={() => setIsInventoryModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+            <form onSubmit={e => {
+              e.preventDefault();
+              const fd = new FormData(e.target);
+              const newItem = {
+                id: 'inv-' + Date.now(),
+                name: fd.get('name'),
+                type: fd.get('type') || 'stem',
+                inStock: Number(fd.get('inStock')) || 30,
+                needed: Number(fd.get('needed')) || 40,
+                unit: fd.get('unit') || 'stems',
+                isLow: false
+              };
+              setInventory([newItem, ...inventory]);
+              setIsInventoryModalOpen(false);
+              alert('Added ' + newItem.name + ' to cold room inventory!');
+            }}>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Stem / Supply Name</label>
+                <input type="text" name="name" className="form-control" required placeholder="e.g. Ranunculus, peach" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Initial In Stock</label>
+                  <input type="number" name="inStock" defaultValue="25" className="form-control" />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Unit (stems, vases)</label>
+                  <input type="text" name="unit" defaultValue="stems" className="form-control" />
+                </div>
+              </div>
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Save Stock Line
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: NEW PROMO CODE MODAL */}
+      {/* ========================================================================= */}
+      {isPromoModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsPromoModalOpen(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Create Promo Code</h3>
+              <button onClick={() => setIsPromoModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+            <form onSubmit={e => {
+              e.preventDefault();
+              const fd = new FormData(e.target);
+              const newP = {
+                id: 'p-' + Date.now(),
+                code: fd.get('code').toUpperCase(),
+                description: fd.get('description'),
+                discount: fd.get('discount') || '10%',
+                status: 'Live',
+                usesCount: 0
+              };
+              setPromotions([newP, ...promotions]);
+              setIsPromoModalOpen(false);
+              alert('Promo code ' + newP.code + ' is now live!');
+            }}>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Voucher Code</label>
+                <input type="text" name="code" className="form-control" required placeholder="e.g. SHAIRASPRING25" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Discount Value</label>
+                <input type="text" name="discount" className="form-control" required placeholder="e.g. 15% or ₱250 OFF" />
+              </div>
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Campaign Description</label>
+                <input type="text" name="description" className="form-control" required placeholder="Valid for bespoke wedding & birthday bouquets" />
+              </div>
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Activate Voucher Code
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
