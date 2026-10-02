@@ -141,6 +141,16 @@ const IconsBase = {
       <path d="M12 5v14M5 12h14"/>
     </svg>
   ),
+  Edit: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+  ),
+  Trash: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+    </svg>
+  ),
   Database: () => (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
@@ -328,8 +338,12 @@ function AdminApp() {
   const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  
+  // CRUD Editing States
+  const [editingArrangement, setEditingArrangement] = useState(null);
+  const [editingInventory, setEditingInventory] = useState(null);
 
-  // Image Upload State for Add Floral Design
+  // Image Upload State for Add/Edit Floral Design
   const [newArrangementImage, setNewArrangementImage] = useState('');
   const [imageFileName, setImageFileName] = useState('');
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -343,6 +357,58 @@ function AdminApp() {
       setNewArrangementImage(event.target.result);
     };
     reader.readAsDataURL(file);
+  };
+
+  // Arrangement CRUD Actions
+  const handleOpenNewArrangement = () => {
+    setEditingArrangement(null);
+    setNewArrangementImage('');
+    setImageFileName('');
+    setIsArrangementModalOpen(true);
+  };
+
+  const handleEditArrangement = (arr) => {
+    setEditingArrangement(arr);
+    setNewArrangementImage(arr.image || '');
+    setImageFileName('');
+    setIsArrangementModalOpen(true);
+  };
+
+  const handleDeleteArrangement = (arrId, arrName) => {
+    if (window.confirm('Are you sure you want to delete arrangement "' + arrName + '" from the floral catalogue?')) {
+      setArrangements(arrangements.filter(a => a.id !== arrId));
+    }
+  };
+
+  // Inventory CRUD Actions
+  const handleOpenNewInventory = () => {
+    setEditingInventory(null);
+    setIsInventoryModalOpen(true);
+  };
+
+  const handleEditInventory = (item) => {
+    setEditingInventory(item);
+    setIsInventoryModalOpen(true);
+  };
+
+  const handleDeleteInventory = (itemId, itemName) => {
+    if (window.confirm('Are you sure you want to delete stock line "' + itemName + '" from cold room inventory?')) {
+      setInventory(inventory.filter(i => i.id !== itemId));
+    }
+  };
+
+  // Order Delete Action
+  const handleDeleteOrder = (orderId) => {
+    if (window.confirm('Are you sure you want to remove order ' + orderId + ' from the studio book?')) {
+      setOrders(orders.filter(o => o.id !== orderId));
+    }
+  };
+
+  // Promo Delete Action
+  const handleDeletePromo = (promoId, promoCode) => {
+    if (window.confirm('Delete promotion code "' + promoCode + '"?')) {
+      setPromotions(promotions.filter(p => p.id !== promoId));
+    }
   };
   
   // Filter States
@@ -843,17 +909,28 @@ function AdminApp() {
                             <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
                           </td>
                           <td>
-                            <select 
-                              value={o.status} 
-                              onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
-                              style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
-                            >
-                              <option value="Fresh">Fresh</option>
-                              <option value="Arranging">Arranging</option>
-                              <option value="In transit">In transit</option>
-                              <option value="Delivered">Delivered</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <select 
+                                value={o.status} 
+                                onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
+                                style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
+                              >
+                                <option value="Fresh">Fresh</option>
+                                <option value="Arranging">Arranging</option>
+                                <option value="In transit">In transit</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                style={{ padding: '5px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                                title="Remove order from studio book"
+                                onClick={() => handleDeleteOrder(o.id)}
+                              >
+                                <Icons.Trash />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -875,7 +952,7 @@ function AdminApp() {
                   <h1 className="page-title">Bouquets & Arrangements</h1>
                   <p className="page-description">Manage atelier designs, cold-room flower stock levels, and prices.</p>
                 </div>
-                <button className="btn-primary" onClick={() => { setNewArrangementImage(''); setImageFileName(''); setIsArrangementModalOpen(true); }}>
+                <button className="btn-primary" onClick={handleOpenNewArrangement}>
                   <Icons.Plus /> New arrangement
                 </button>
               </div>
@@ -906,7 +983,7 @@ function AdminApp() {
                         <h3 className="arrangement-name">{arr.name}</h3>
                         <span className="arrangement-rating">★ {arr.rating}</span>
                       </div>
-                      <p className="arrangement-stems">{arr.stems.join(', ')}</p>
+                      <p className="arrangement-stems">{arr.stems ? arr.stems.join(', ') : 'Highland blooms'}</p>
 
                       <div className="stock-progress-wrap">
                         <div className="stock-progress-text">
@@ -918,14 +995,38 @@ function AdminApp() {
                         </div>
                       </div>
 
-                      <div className="arrangement-footer-row">
+                      <div className="arrangement-footer-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', flexWrap: 'wrap', gap: '8px' }}>
                         <span className="arrangement-price">₱{arr.price.toLocaleString()}</span>
-                        <button className="btn-restock" onClick={() => {
-                          setArrangements(arrangements.map(a => a.id === arr.id ? { ...a, coldRoomCount: a.coldRoomCount + 5, isLowStock: false } : a));
-                          alert('Restocked +5 units of ' + arr.name + ' in cold room!');
-                        }}>
-                          Restock (+5)
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button 
+                            className="btn-restock" 
+                            title="Quick add +5 to cold room"
+                            onClick={() => {
+                              setArrangements(arrangements.map(a => a.id === arr.id ? { ...a, coldRoomCount: a.coldRoomCount + 5, isLowStock: false } : a));
+                              alert('Restocked +5 units of ' + arr.name + ' in cold room!');
+                            }}
+                          >
+                            +5
+                          </button>
+                          <button 
+                            type="button"
+                            className="btn-secondary" 
+                            style={{ padding: '6px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            title="Edit arrangement details"
+                            onClick={() => handleEditArrangement(arr)}
+                          >
+                            <Icons.Edit /> Edit
+                          </button>
+                          <button 
+                            type="button"
+                            className="btn-secondary" 
+                            style={{ padding: '6px 8px', fontSize: '12px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                            title="Delete arrangement from catalogue"
+                            onClick={() => handleDeleteArrangement(arr.id, arr.name)}
+                          >
+                            <Icons.Trash />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -945,7 +1046,7 @@ function AdminApp() {
                   <h1 className="page-title">Inventory Control</h1>
                   <p className="page-description">Baguio City flower supply check-in, stem counts, vases, and satin ribbons.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setIsInventoryModalOpen(true)}>
+                <button className="btn-primary" onClick={handleOpenNewInventory}>
                   <Icons.Plus /> New stock line
                 </button>
               </div>
@@ -973,19 +1074,38 @@ function AdminApp() {
                 <div className="card-title" style={{ marginBottom: '16px' }}>Stock Lines</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {inventory.map(item => (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
                         <div style={{ fontWeight: '700', fontSize: '14px' }}>{item.name}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.inStock} {item.unit} available · {item.needed} needed this week</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.inStock} {item.unit} available · {item.needed} needed this week · Type: <span style={{ textTransform: 'capitalize' }}>{item.type || 'stem'}</span></div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        {item.isLow && <span className="status-chip low">Low</span>}
-                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: '700' }}>{item.inStock}</span>
-                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => {
-                          setInventory(inventory.map(i => i.id === item.id ? { ...i, inStock: i.inStock + 20, isLow: false } : i));
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {item.isLow && <span className="status-chip low">Low stock</span>}
+                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: '700', minWidth: '40px', textAlign: 'right' }}>{item.inStock}</span>
+                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }} title="Quick check-in +20 units" onClick={() => {
+                          const newCount = item.inStock + 20;
+                          setInventory(inventory.map(i => i.id === item.id ? { ...i, inStock: newCount, isLow: newCount < i.needed } : i));
                           alert('Checked in +20 units for ' + item.name + '!');
                         }}>
                           + Check In (+20)
+                        </button>
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{ padding: '6px 10px', fontSize: '12px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          title="Edit stock line"
+                          onClick={() => handleEditInventory(item)}
+                        >
+                          <Icons.Edit /> Edit
+                        </button>
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{ padding: '6px 8px', fontSize: '12px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                          title="Delete stock line from cold room"
+                          onClick={() => handleDeleteInventory(item.id, item.name)}
+                        >
+                          <Icons.Trash />
                         </button>
                       </div>
                     </div>
@@ -1144,6 +1264,15 @@ function AdminApp() {
                           setPromotions(promotions.map(p => p.id === promo.id ? { ...p, status: next } : p));
                         }}>
                           Toggle
+                        </button>
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{ padding: '4px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                          title="Delete promotion"
+                          onClick={() => handleDeletePromo(promo.id, promo.code)}
+                        >
+                          <Icons.Trash />
                         </button>
                       </div>
                     </div>
@@ -1467,22 +1596,24 @@ function AdminApp() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: NEW ARRANGEMENT MODAL */}
+      {/* MODAL 2: ADD / EDIT ARRANGEMENT MODAL */}
       {/* ========================================================================= */}
       {isArrangementModalOpen && (
-        <div className="modal-backdrop" onClick={() => { setIsArrangementModalOpen(false); setNewArrangementImage(''); setImageFileName(''); }}>
+        <div className="modal-backdrop" onClick={() => { setIsArrangementModalOpen(false); setEditingArrangement(null); setNewArrangementImage(''); setImageFileName(''); }}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Add New Floral Design</h3>
-              <button onClick={() => { setIsArrangementModalOpen(false); setNewArrangementImage(''); setImageFileName(''); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>
+                {editingArrangement ? ('Edit Floral Design: ' + editingArrangement.name) : 'Add New Floral Design'}
+              </h3>
+              <button onClick={() => { setIsArrangementModalOpen(false); setEditingArrangement(null); setNewArrangementImage(''); setImageFileName(''); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
             </div>
-            <form onSubmit={async (e) => {
+            <form key={editingArrangement ? editingArrangement.id : 'new-arrangement'} onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.target);
-              const bouquetName = fd.get('name') || 'Artisanal Bouquet';
-              let finalImageUrl = newArrangementImage || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80';
+              const bouquetName = fd.get('name') || (editingArrangement ? editingArrangement.name : 'Artisanal Bouquet');
+              let finalImageUrl = newArrangementImage || (editingArrangement ? editingArrangement.image : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80');
               
-              // Upload to Google Drive (Product-Images folder in Blooms&Twirl by Shaira)
+              // Upload to Google Drive (Product-Images folder in Blooms&Twirl by Shaira) if user picked a new file
               if (newArrangementImage && newArrangementImage.startsWith('data:image') && settings.googleAppsScriptUrl) {
                 try {
                   const uploadPayload = {
@@ -1501,49 +1632,90 @@ function AdminApp() {
                 } catch(err) {}
               }
 
-              const newArr = {
-                id: 'arr-' + Date.now(),
-                name: bouquetName,
-                category: fd.get('category'),
-                tag: fd.get('tag') || 'Signature',
-                price: Number(fd.get('price')) || 2450,
-                coldRoomCount: Number(fd.get('coldRoomCount')) || 10,
-                sold30d: 0,
-                rating: 5.0,
-                image: finalImageUrl,
-                description: fd.get('description') || 'Handcrafted bespoke bouquet with highland blooms.',
-                stems: (fd.get('stems') || 'Benguet Roses, Astilbe').split(',').map(s => s.trim()),
-                isLowStock: false
-              };
-              setArrangements([newArr, ...arrangements]);
-              setIsArrangementModalOpen(false);
-              setNewArrangementImage('');
-              setImageFileName('');
-              alert('New bouquet "' + newArr.name + '" published to catalogue! Image saved to Google Drive Product-Images folder.');
+              const stockCount = Number(fd.get('coldRoomCount')) || (editingArrangement ? editingArrangement.coldRoomCount : 10);
+              const stemsList = (fd.get('stems') || '').split(',').map(s => s.trim()).filter(Boolean);
+
+              if (editingArrangement) {
+                setArrangements(arrangements.map(a => a.id === editingArrangement.id ? {
+                  ...a,
+                  name: bouquetName,
+                  category: fd.get('category') || a.category,
+                  tag: fd.get('tag') || a.tag || 'Signature',
+                  price: Number(fd.get('price')) || a.price,
+                  coldRoomCount: stockCount,
+                  image: finalImageUrl,
+                  description: fd.get('description') || a.description,
+                  stems: stemsList.length > 0 ? stemsList : a.stems,
+                  isLowStock: stockCount <= 5
+                } : a));
+                setIsArrangementModalOpen(false);
+                setEditingArrangement(null);
+                setNewArrangementImage('');
+                setImageFileName('');
+                alert('Bouquet "' + bouquetName + '" updated successfully in catalogue!');
+              } else {
+                const newArr = {
+                  id: 'arr-' + Date.now(),
+                  name: bouquetName,
+                  category: fd.get('category'),
+                  tag: fd.get('tag') || 'Signature',
+                  price: Number(fd.get('price')) || 2450,
+                  coldRoomCount: stockCount,
+                  sold30d: 0,
+                  rating: 5.0,
+                  image: finalImageUrl,
+                  description: fd.get('description') || 'Handcrafted bespoke bouquet with highland blooms.',
+                  stems: stemsList.length > 0 ? stemsList : ['Benguet Roses', 'Astilbe'],
+                  isLowStock: stockCount <= 5
+                };
+                setArrangements([newArr, ...arrangements]);
+                setIsArrangementModalOpen(false);
+                setEditingArrangement(null);
+                setNewArrangementImage('');
+                setImageFileName('');
+                alert('New bouquet "' + newArr.name + '" published to catalogue! Image saved to Google Drive Product-Images folder.');
+              }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600' }}>Arrangement Name</label>
-                <input type="text" name="name" className="form-control" required placeholder="e.g. Velvet Solstice" />
+                <input type="text" name="name" className="form-control" required defaultValue={editingArrangement ? editingArrangement.name : ''} placeholder="e.g. Velvet Solstice" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div className="form-group">
                   <label style={{ fontSize: '12px', fontWeight: '600' }}>Category</label>
-                  <select name="category" className="form-control">
+                  <select name="category" defaultValue={editingArrangement ? editingArrangement.category : 'Signature'} className="form-control">
                     <option value="Signature">Signature</option>
                     <option value="Statement">Statement</option>
                     <option value="Bridal">Bridal</option>
                     <option value="Dried">Dried</option>
                     <option value="Box">Box</option>
+                    <option value="Houseplant">Houseplant</option>
                   </select>
                 </div>
                 <div className="form-group">
                   <label style={{ fontSize: '12px', fontWeight: '600' }}>Price (₱)</label>
-                  <input type="number" name="price" defaultValue="2500" className="form-control" />
+                  <input type="number" name="price" defaultValue={editingArrangement ? editingArrangement.price : 2500} className="form-control" />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Cold Room Stock</label>
+                  <input type="number" name="coldRoomCount" defaultValue={editingArrangement ? editingArrangement.coldRoomCount : 10} className="form-control" />
                 </div>
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Key Stems (comma separated)</label>
+                  <input type="text" name="stems" defaultValue={editingArrangement ? (editingArrangement.stems ? editingArrangement.stems.join(', ') : '') : ''} className="form-control" placeholder="Garden roses, Peonies, Eucalyptus" />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Display Tag / Badge</label>
+                  <input type="text" name="tag" defaultValue={editingArrangement ? (editingArrangement.tag || 'Signature') : 'Signature'} className="form-control" placeholder="e.g. Signature, Best Seller" />
+                </div>
+              </div>
+
               <div className="form-group" style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Key Stems (comma separated)</label>
-                <input type="text" name="stems" className="form-control" placeholder="Garden roses, Peonies, Eucalyptus" />
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Description</label>
+                <textarea name="description" rows="2" defaultValue={editingArrangement ? (editingArrangement.description || '') : ''} className="form-control" placeholder="Handcrafted bespoke bouquet with highland blooms..." />
               </div>
 
               {/* Upload Image & Live Preview (Product-Images in GDrive) */}
@@ -1566,7 +1738,7 @@ function AdminApp() {
                   style={{
                     border: '2px dashed var(--primary-border)',
                     borderRadius: '14px',
-                    padding: '18px 14px',
+                    padding: '16px 14px',
                     textAlign: 'center',
                     cursor: 'pointer',
                     background: '#FFF8FA',
@@ -1578,14 +1750,14 @@ function AdminApp() {
                     <Icons.Flower />
                   </div>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
-                    {imageFileName ? imageFileName : 'Click to Browse & Upload Photo'}
+                    {imageFileName ? imageFileName : (newArrangementImage ? 'Click to Change Uploaded Photo' : 'Click to Browse & Upload Photo')}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Select flower photo from your phone or computer
                   </div>
                 </div>
 
-                {/* Live Preview of the Product While Being Created */}
+                {/* Live Preview of the Product While Being Created / Edited */}
                 {newArrangementImage && (
                   <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--border-light)', position: 'relative', marginTop: '10px', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(247,0,119,0.08)' }}>
                     <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(36,24,28,0.85)', color: '#fff', fontSize: '10px', fontWeight: '800', letterSpacing: '0.6px', padding: '3px 8px', borderRadius: '6px', backdropFilter: 'blur(4px)' }}>
@@ -1598,7 +1770,7 @@ function AdminApp() {
                     />
                     <div style={{ padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFF9FB', borderTop: '1px solid var(--border-subtle)' }}>
                       <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-main)' }}>
-                        Previewing uploaded bouquet image
+                        Previewing bouquet image
                       </span>
                       <button 
                         type="button" 
@@ -1613,7 +1785,7 @@ function AdminApp() {
               </div>
 
               <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px' }}>
-                Publish Arrangement
+                {editingArrangement ? 'Save Arrangement Changes' : 'Publish Arrangement'}
               </button>
             </form>
           </div>
@@ -1621,47 +1793,91 @@ function AdminApp() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 3: NEW INVENTORY ITEM MODAL */}
+      {/* MODAL 3: ADD / EDIT INVENTORY ITEM MODAL */}
       {/* ========================================================================= */}
       {isInventoryModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsInventoryModalOpen(false)}>
+        <div className="modal-backdrop" onClick={() => { setIsInventoryModalOpen(false); setEditingInventory(null); }}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Add Cold Room Stock Line</h3>
-              <button onClick={() => setIsInventoryModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>
+                {editingInventory ? ('Edit Cold Room Stock Line: ' + editingInventory.name) : 'Add Cold Room Stock Line'}
+              </h3>
+              <button onClick={() => { setIsInventoryModalOpen(false); setEditingInventory(null); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
             </div>
-            <form onSubmit={e => {
+            <form key={editingInventory ? editingInventory.id : 'new-inventory'} onSubmit={e => {
               e.preventDefault();
               const fd = new FormData(e.target);
-              const newItem = {
-                id: 'inv-' + Date.now(),
-                name: fd.get('name'),
-                type: fd.get('type') || 'stem',
-                inStock: Number(fd.get('inStock')) || 30,
-                needed: Number(fd.get('needed')) || 40,
-                unit: fd.get('unit') || 'stems',
-                isLow: false
-              };
-              setInventory([newItem, ...inventory]);
-              setIsInventoryModalOpen(false);
-              alert('Added ' + newItem.name + ' to cold room inventory!');
+              const inStockVal = Number(fd.get('inStock')) || 0;
+              const neededVal = Number(fd.get('needed')) || 0;
+              const nameVal = fd.get('name') || (editingInventory ? editingInventory.name : 'Stock item');
+              const typeVal = fd.get('type') || (editingInventory ? editingInventory.type : 'stem');
+              const unitVal = fd.get('unit') || (editingInventory ? editingInventory.unit : 'stems');
+              const isLowVal = inStockVal < neededVal;
+
+              if (editingInventory) {
+                setInventory(inventory.map(i => i.id === editingInventory.id ? {
+                  ...i,
+                  name: nameVal,
+                  type: typeVal,
+                  inStock: inStockVal,
+                  needed: neededVal,
+                  unit: unitVal,
+                  isLow: isLowVal
+                } : i));
+                setIsInventoryModalOpen(false);
+                setEditingInventory(null);
+                alert('Stock line "' + nameVal + '" updated successfully in inventory!');
+              } else {
+                const newItem = {
+                  id: 'inv-' + Date.now(),
+                  name: nameVal,
+                  type: typeVal,
+                  inStock: inStockVal,
+                  needed: neededVal,
+                  unit: unitVal,
+                  isLow: isLowVal
+                };
+                setInventory([newItem, ...inventory]);
+                setIsInventoryModalOpen(false);
+                alert('Added "' + newItem.name + '" to cold room inventory!');
+              }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600' }}>Stem / Supply Name</label>
-                <input type="text" name="name" className="form-control" required placeholder="e.g. Ranunculus, peach" />
+                <input type="text" name="name" className="form-control" required defaultValue={editingInventory ? editingInventory.name : ''} placeholder="e.g. Benguet Peach Ranunculus" />
               </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Item Type</label>
+                  <select name="type" className="form-control" defaultValue={editingInventory ? editingInventory.type : 'stem'}>
+                    <option value="stem">Fresh Flower Stem</option>
+                    <option value="foliage">Foliage / Greenery</option>
+                    <option value="vase">Artisanal Ceramic / Vase</option>
+                    <option value="ribbon">Silk / Satin Ribbon</option>
+                    <option value="packaging">Wrapping & Hatbox</option>
+                    <option value="supply">Floral Foam & Preservative</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Unit (stems, bunches, pcs)</label>
+                  <input type="text" name="unit" defaultValue={editingInventory ? editingInventory.unit : 'stems'} className="form-control" placeholder="e.g. stems, bunches" />
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
                 <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Initial In Stock</label>
-                  <input type="number" name="inStock" defaultValue="25" className="form-control" />
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Current In Stock</label>
+                  <input type="number" name="inStock" defaultValue={editingInventory ? editingInventory.inStock : 30} className="form-control" required />
                 </div>
                 <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Unit (stems, vases)</label>
-                  <input type="text" name="unit" defaultValue="stems" className="form-control" />
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Weekly Target / Needed</label>
+                  <input type="number" name="needed" defaultValue={editingInventory ? editingInventory.needed : 40} className="form-control" required />
                 </div>
               </div>
+
               <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Save Stock Line
+                {editingInventory ? 'Save Changes' : 'Save Stock Line'}
               </button>
             </form>
           </div>
