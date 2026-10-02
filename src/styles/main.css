@@ -704,31 +704,80 @@ body {
   font-weight: 600;
 }
 
-.status-chip.fresh {
-  background: #FDF0F3;
-  color: var(--primary);
+.status-chip.fresh,
+.status-chip.pending,
+.status-chip.pendingnew {
+  background: #FFF1F5;
+  color: #BE123C;
+  border: 1px solid #FECDD3;
 }
 
-.status-chip.arranging {
-  background: #FEF3C7;
+.status-chip.unfulfilled {
+  background: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.status-chip.arranging,
+.status-chip.topickpack,
+.status-chip.preparing {
+  background: #FFFBEB;
   color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.status-chip.readytoship,
+.status-chip.rts,
+.status-chip.readytoshiprts {
+  background: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+}
+
+.status-chip.handedtocourier {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
 }
 
 .status-chip.intransit,
 .status-chip.rolling {
-  background: #FDF0F3;
-  color: var(--primary);
+  background: #F0F9FF;
+  color: #0369A1;
+  border: 1px solid #BAE6FD;
+}
+
+.status-chip.outfordelivery {
+  background: #FEFCE8;
+  color: #854D0E;
+  border: 1px solid #FEF08A;
 }
 
 .status-chip.delivered,
-.status-chip.done {
-  background: #EAF7EE;
-  color: #1E6B37;
+.status-chip.done,
+.status-chip.deliveredcompleted {
+  background: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.status-chip.deliveryfailed {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.status-chip.returned,
+.status-chip.returnedrts {
+  background: #FAF5FF;
+  color: #7E22CE;
+  border: 1px solid #E9D5FF;
 }
 
 .status-chip.cancelled {
   background: #F3F4F6;
-  color: #6B7280;
+  color: #4B5563;
+  border: 1px solid #E5E7EB;
 }
 
 .status-chip.queued {
@@ -802,13 +851,15 @@ body {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(8px);
+  background: #A00048; /* Dark pink */
+  color: #FFFFFF; /* High contrast white label */
   font-size: 11px;
   font-weight: 700;
-  color: var(--primary);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(160, 0, 72, 0.35);
+  letter-spacing: 0.3px;
+  z-index: 2;
 }
 
 .card-low-stock-pill {

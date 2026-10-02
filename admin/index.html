@@ -298,21 +298,59 @@ function AdminApp() {
     return loaded;
   });
 
-  const [orders, setOrders] = useState(() => getInitial('orders', [
-    { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
-    { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Fuchsia Fable hand-tied', channel: 'Instagram', total: 4180, dueTime: '14:00', status: 'Fresh', date: '2026-10-01 08:54' },
-    { id: 'BT-2039', customerName: 'Highland Pine Cafe', customerInitials: 'HP', email: 'orders@highlandpine.ph', phone: '+63 918 333 9920', address: 'Camp 7, Baguio City', arrangementName: 'Table blooms × 6 (weekly)', channel: 'Phone', total: 12600, dueTime: '10:00', status: 'In transit', date: '2026-09-30 17:20', courier: 'Marisol' },
-    { id: 'BT-2038', customerName: 'Andrea Villanueva', customerInitials: 'AV', email: 'andrea.v@outlook.com', phone: '+63 917 554 9021', address: 'Strawberry Valley, La Trinidad', arrangementName: 'Dusk & Dried bespoke', channel: 'Online', total: 2740, dueTime: '17:30', status: 'Delivered', date: '2026-09-30 15:41', courier: 'Nino' }
-  ]));
+  const DELIVERY_STAGES = [
+    'Pending / New',
+    'Unfulfilled',
+    'To Pick & Pack',
+    'Ready to Ship (RTS)',
+    'Handed to Courier',
+    'In Transit',
+    'Out for Delivery',
+    'Delivered / Completed',
+    'Delivery Failed',
+    'Returned / RTS',
+    'Cancelled'
+  ];
+
+  const [orders, setOrders] = useState(() => {
+    const raw = getInitial('orders', [
+      { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet (×1)', itemType: 'arranged', channel: 'Online', total: 8450, payment: 'GCash', dueTime: '12:30', status: 'Ready to Ship (RTS)', date: '2026-10-01 09:12', courier: 'Jom' },
+      { id: 'BT-2040', customerName: 'Kaito Nakamura', customerInitials: 'KN', email: 'kaito@nakamura.design', phone: '+63 920 445 1190', address: 'Urbiztondo, San Juan, La Union', arrangementName: 'Benguet Highland Red Roses (24 stems)', itemType: 'flowers_only', channel: 'Instagram', total: 2040, payment: 'Maya', dueTime: '14:00', status: 'To Pick & Pack', date: '2026-10-01 08:54', courier: 'Nino' },
+      { id: 'BT-2039', customerName: 'Highland Pine Cafe', customerInitials: 'HP', email: 'orders@highlandpine.ph', phone: '+63 918 333 9920', address: 'Camp 7, Baguio City', arrangementName: 'White Hydrangea Giant Head (×10)', itemType: 'flowers_only', channel: 'Phone', total: 2200, payment: 'Bank Transfer', dueTime: '10:00', status: 'In Transit', date: '2026-09-30 17:20', courier: 'Marisol' },
+      { id: 'BT-2038', customerName: 'Andrea Villanueva', customerInitials: 'AV', email: 'andrea.v@outlook.com', phone: '+63 917 554 9021', address: 'Strawberry Valley, La Trinidad', arrangementName: 'Dusk & Dried bespoke vase', itemType: 'arranged', channel: 'Online', total: 2740, payment: 'COD', dueTime: '17:30', status: 'Delivered / Completed', date: '2026-09-30 15:41', courier: 'Nino' },
+      { id: 'BT-2042', customerName: 'Clarisse Mendoza', customerInitials: 'CM', email: 'clarisse.m@gmail.com', phone: '+63 919 223 8810', address: 'Tuguegarao City, Cagayan', arrangementName: 'Peach Ranunculus Bunch (10 Stems)', itemType: 'flowers_only', channel: 'Online', total: 1300, payment: 'GCash', dueTime: '16:00', status: 'Pending / New', date: '2026-10-02 08:30', courier: 'Jom' }
+    ]);
+    return raw.map(o => {
+      let st = o.status;
+      if (st === 'Fresh') st = 'Pending / New';
+      if (st === 'Arranging') st = 'To Pick & Pack';
+      if (st === 'In transit') st = 'In Transit';
+      if (st === 'Delivered') st = 'Delivered / Completed';
+      return { ...o, status: st, payment: o.payment || 'GCash', itemType: o.itemType || (o.arrangementName.includes('stem') || o.arrangementName.includes('Bunch') ? 'flowers_only' : 'arranged') };
+    });
+  });
 
   const [inventory, setInventory] = useState(() => getInitial('inventory', [
-    { id: 'inv-1', name: 'Highland Garden Rose, blush', type: 'stem', inStock: 24, needed: 40, unit: 'stems', isLow: true },
-    { id: 'inv-2', name: 'Coral Peony, Dutch import', type: 'stem', inStock: 8, needed: 30, unit: 'stems', isLow: true },
-    { id: 'inv-3', name: 'Benguet Pink Tulip', type: 'stem', inStock: 60, needed: 50, unit: 'stems', isLow: false },
-    { id: 'inv-4', name: 'White Hydrangea', type: 'stem', inStock: 18, needed: 25, unit: 'stems', isLow: false },
-    { id: 'inv-5', name: 'Silvery Eucalyptus gunnii', type: 'foliage', inStock: 35, needed: 40, unit: 'bunches', isLow: false },
-    { id: 'inv-6', name: 'Artisanal Ceramic Rose Vases', type: 'vase', inStock: 12, needed: 20, unit: 'pieces', isLow: true }
+    { id: 'inv-1', name: 'Benguet Red Rose Stems', type: 'stem', inStock: 120, needed: 40, unit: 'stems', isLow: false, linkedFlowerId: 'flw-1', usedIn: 'Petal Parade, Crimson Romance' },
+    { id: 'inv-2', name: 'Coral Peony, Dutch import', type: 'stem', inStock: 35, needed: 30, unit: 'stems', isLow: false, linkedFlowerId: 'flw-2', usedIn: 'Fuchsia Fable' },
+    { id: 'inv-3', name: 'Peach Ranunculus Stems', type: 'stem', inStock: 22, needed: 20, unit: 'bunches', isLow: false, linkedFlowerId: 'flw-3', usedIn: 'Peach Ranunculus Bunch' },
+    { id: 'inv-4', name: 'Dutch White Hydrangea Giant Head', type: 'stem', inStock: 18, needed: 25, unit: 'stems', isLow: true, linkedFlowerId: 'flw-4', usedIn: 'Sweet Blush Hatbox' },
+    { id: 'inv-5', name: 'Sun-Drenched Golden Sunflowers', type: 'stem', inStock: 45, needed: 30, unit: 'stems', isLow: false, linkedFlowerId: 'flw-5', usedIn: 'Highland Sunflowers' },
+    { id: 'inv-6', name: 'Silvery Seeded Eucalyptus gunnii', type: 'foliage', inStock: 30, needed: 25, unit: 'bunches', isLow: false, linkedFlowerId: 'flw-6', usedIn: 'Petal Parade, Fuchsia Fable' },
+    { id: 'inv-7', name: 'Artisanal Ceramic & Glass Vases', type: 'vase', inStock: 12, needed: 20, unit: 'pieces', isLow: true, usedIn: 'Dusk & Dried, Twirl Orchid' },
+    { id: 'inv-8', name: 'Luxury Matte Wrap & Satin Ribbons', type: 'wrap', inStock: 85, needed: 50, unit: 'rolls', isLow: false, usedIn: 'All Hand-tied Bouquets' }
   ]));
+
+  // Flower Families State (Full CRUD: Add, Edit, Delete)
+  const [flowerFamilies, setFlowerFamilies] = useState(() => {
+    return getInitial('flower_families', ['Roses', 'Peonies', 'Ranunculus', 'Hydrangeas', 'Sunflowers', 'Tulips', 'Orchids', 'Foliage']);
+  });
+  useEffect(() => saveItem('flower_families', flowerFamilies), [flowerFamilies]);
+
+  const [isFamilyManagerOpen, setIsFamilyManagerOpen] = useState(false);
+  const [newFamilyInput, setNewFamilyInput] = useState('');
+  const [editingFamily, setEditingFamily] = useState(null);
+  const [editingFamilyNewName, setEditingFamilyNewName] = useState('');
 
   const [deliveries, setDeliveries] = useState(() => getInitial('deliveries', [
     { id: 'del-1', time: '09:30', recipient: 'Yuna Park', location: 'Session Road, Baguio City', courier: 'Nino', status: 'Done', orderId: 'BT-2037' },
@@ -450,6 +488,80 @@ function AdminApp() {
   useEffect(() => saveItem('customers', customers), [customers]);
   useEffect(() => saveItem('promotions', promotions), [promotions]);
   useEffect(() => saveItem('settings', settings), [settings]);
+
+  // Flower Family Management Actions
+  const handleAddFamily = (name) => {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    if (flowerFamilies.some(f => f.toLowerCase() === trimmed.toLowerCase())) {
+      alert('Flower family "' + trimmed + '" already exists!');
+      return;
+    }
+    setFlowerFamilies([...flowerFamilies, trimmed]);
+    setNewFamilyInput('');
+  };
+
+  const handleSaveEditFamily = (oldName) => {
+    const newName = (editingFamilyNewName || '').trim();
+    if (!newName || newName === oldName) {
+      setEditingFamily(null);
+      return;
+    }
+    setFlowerFamilies(flowerFamilies.map(f => f === oldName ? newName : f));
+    setArrangements(prev => prev.map(a => a.category === oldName ? { ...a, category: newName } : a));
+    setEditingFamily(null);
+    setEditingFamilyNewName('');
+  };
+
+  const handleDeleteFamily = (familyName) => {
+    if (flowerFamilies.length <= 1) {
+      alert('You must have at least one flower family.');
+      return;
+    }
+    const affectedCount = arrangements.filter(a => a.category === familyName).length;
+    if (window.confirm('Delete flower family "' + familyName + '"? ' + (affectedCount > 0 ? (affectedCount + ' product(s) will be moved to General.') : ''))) {
+      const next = flowerFamilies.filter(f => f !== familyName);
+      setFlowerFamilies(next);
+      const fallbackFamily = next[0] || 'General';
+      setArrangements(prev => prev.map(a => a.category === familyName ? { ...a, category: fallbackFamily } : a));
+    }
+  };
+
+  // Connected Restock: Arrangements <-> Inventory Sync
+  const handleQuickRestockArrangement = (arrId, delta) => {
+    setArrangements(prev => prev.map(a => {
+      if (a.id === arrId) {
+        const nextStock = (a.coldRoomCount || 0) + delta;
+        setInventory(invList => invList.map(inv => {
+          if (inv.linkedFlowerId === arrId || (inv.name && a.name && inv.name.toLowerCase().includes(a.name.toLowerCase().split(' ')[0]))) {
+            const updatedInv = inv.inStock + delta;
+            return { ...inv, inStock: updatedInv, isLow: updatedInv < inv.needed };
+          }
+          return inv;
+        }));
+        return { ...a, coldRoomCount: nextStock, isLowStock: nextStock <= 5 };
+      }
+      return a;
+    }));
+  };
+
+  const handleCheckInInventory = (item, delta) => {
+    const newCount = item.inStock + delta;
+    setInventory(inventory.map(i => i.id === item.id ? { ...i, inStock: newCount, isLow: newCount < i.needed } : i));
+    if (item.linkedFlowerId) {
+      setArrangements(prev => prev.map(a => a.id === item.linkedFlowerId ? { ...a, coldRoomCount: a.coldRoomCount + delta } : a));
+    }
+    alert('Checked in +' + delta + ' units for ' + item.name + '. Connected catalogue stock synchronized!');
+  };
+
+  // Delivery Stage Advance Action
+  const getNextDeliveryStage = (current) => {
+    const idx = DELIVERY_STAGES.indexOf(current);
+    if (idx >= 0 && idx < 7) {
+      return DELIVERY_STAGES[idx + 1];
+    }
+    return current;
+  };
 
   // Order Actions
   const advanceOrderStatus = (orderId, newStatus) => {
@@ -639,7 +751,7 @@ function AdminApp() {
         <ul className="nav-list">
           <li>
             <button className={'nav-item-btn ' + (adminTab === 'customers' ? 'active' : '')} onClick={() => setAdminTab('customers')}>
-              <div className="nav-label-group"><Icons.Customers /> Customers CRM</div>
+              <div className="nav-label-group"><Icons.Customers /> Customers</div>
               <span className="nav-badge">{customers.length}</span>
             </button>
           </li>
@@ -693,8 +805,8 @@ function AdminApp() {
           </div>
 
           <div className="topbar-actions">
-            <a href="../index.html" className="btn-secondary" style={{ textDecoration: 'none' }}>
-              ← Visit Store
+            <a href="../index.html?view=customer_dashboard" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              ← Customer Dashboard Preview
             </a>
             <button 
               type="button" 
@@ -874,99 +986,251 @@ function AdminApp() {
           )}
 
           {/* ========================================================================= */}
-          {/* 2. ORDERS VIEW */}
+          {/* 2. UNIFIED ORDERS & DELIVERY MONITORING HUB                                */}
           {/* ========================================================================= */}
-          {adminTab === 'orders' && (
+          {(adminTab === 'orders' || adminTab === 'deliveries') && (
             <div>
-              <div className="page-eyebrow">ORDER REPOSITORY</div>
+              <div className="page-eyebrow">ORDER FULFILLMENT & COURIER DISPATCH HUB</div>
               <div className="page-header-row">
                 <div>
-                  <h1 className="page-title">Orders Book</h1>
-                  <p className="page-description">Complete log of artisanal bouquets and deliveries across Luzon and Visayas.</p>
+                  <h1 className="page-title">Orders & Delivery Monitoring</h1>
+                  <p className="page-description">Complete real-time monitoring across all 11 stages from order placement to door-to-door delivery in Northern Luzon.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setIsNewOrderModalOpen(true)}>
-                  <Icons.Plus /> New order
-                </button>
-              </div>
-
-              {/* Status Filter Pills */}
-              <div className="filter-tabs" style={{ marginBottom: '16px' }}>
-                {['All', 'Fresh', 'Arranging', 'In transit', 'Delivered', 'Cancelled'].map(st => (
-                  <button 
-                    key={st} 
-                    className={'filter-pill ' + (orderFilter === st ? 'active' : '')}
-                    onClick={() => setOrderFilter(st)}
-                  >
-                    {st} ({st === 'All' ? orders.length : orders.filter(o => o.status === st).length})
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button className="btn-secondary" onClick={() => alert('Courier route sync updated with Jom and Nino.')}>
+                    <Icons.Deliveries /> Route Sync
                   </button>
-                ))}
+                  <button className="btn-primary" onClick={() => setIsNewOrderModalOpen(true)}>
+                    <Icons.Plus /> New order
+                  </button>
+                </div>
               </div>
 
+              {/* Top 4 KPI Cards */}
+              <div className="stats-grid-4" style={{ marginBottom: '20px' }}>
+                <div className="stat-card">
+                  <div className="stat-label">TOTAL ACTIVE ORDERS</div>
+                  <div className="stat-value">{orders.length}</div>
+                  <div className="stat-subtext">Across Northern Luzon</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">TO PICK & PACK / RTS</div>
+                  <div className="stat-value" style={{ color: '#D97706' }}>
+                    {orders.filter(o => ['Pending / New', 'Unfulfilled', 'To Pick & Pack', 'Ready to Ship (RTS)'].includes(o.status)).length}
+                  </div>
+                  <div className="stat-subtext">Bench preparation</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">IN TRANSIT / DISPATCHED</div>
+                  <div className="stat-value" style={{ color: 'var(--primary)' }}>
+                    {orders.filter(o => ['Handed to Courier', 'In Transit', 'Out for Delivery'].includes(o.status)).length}
+                  </div>
+                  <div className="stat-subtext">Couriers on the road</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">COMPLETED DELIVERIES</div>
+                  <div className="stat-value" style={{ color: '#16A34A' }}>
+                    {orders.filter(o => o.status === 'Delivered / Completed').length}
+                  </div>
+                  <div className="stat-subtext">Delivered to recipients</div>
+                </div>
+              </div>
+
+              {/* 11-Stage Pipeline Filter Tabs */}
+              <div style={{ background: '#FFFFFF', padding: '14px', borderRadius: '16px', border: '1px solid var(--border-light)', marginBottom: '18px' }}>
+                <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '0.8px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '10px' }}>
+                  Filter by Fulfillment & Delivery Stage (11 Stages)
+                </div>
+                <div className="filter-tabs" style={{ gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+                  {['All', ...DELIVERY_STAGES].map(st => {
+                    const count = st === 'All' ? orders.length : orders.filter(o => o.status === st).length;
+                    return (
+                      <button 
+                        key={st} 
+                        className={'filter-pill ' + (orderFilter === st ? 'active' : '')}
+                        onClick={() => setOrderFilter(st)}
+                        style={{ whiteSpace: 'nowrap', fontSize: '12px', padding: '6px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      >
+                        {st}
+                        <span style={{
+                          fontSize: '10px',
+                          fontWeight: '800',
+                          padding: '1px 6px',
+                          borderRadius: '999px',
+                          background: orderFilter === st ? 'rgba(255,255,255,0.3)' : '#F3F4F6',
+                          color: orderFilter === st ? '#FFFFFF' : 'var(--text-muted)'
+                        }}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Orders Data Table */}
               <div className="content-card">
                 <div className="data-table-container">
                   <table className="data-table">
                     <thead>
                       <tr>
                         <th>ORDER ID</th>
-                        <th>CLIENT DETAILS</th>
-                        <th>ARRANGEMENT</th>
-                        <th>CHANNEL</th>
-                        <th>TOTAL</th>
-                        <th>DUE TIME</th>
-                        <th>STATUS</th>
+                        <th>CLIENT & DESTINATION</th>
+                        <th>ORDERED ITEM(S)</th>
+                        <th>TOTAL & PAYMENT</th>
+                        <th>COURIER</th>
+                        <th>DELIVERY STAGE</th>
                         <th>ACTION</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredOrders.map(o => (
-                        <tr key={o.id}>
-                          <td style={{ fontWeight: '700', color: 'var(--primary)' }}>
-                            {o.id}
-                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.date}</div>
-                          </td>
-                          <td>
-                            <strong>{o.customerName}</strong>
-                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.phone} · {o.address}</div>
-                          </td>
-                          <td>{o.arrangementName}</td>
-                          <td>
-                            <span style={{ fontSize: '11px', fontWeight: '700', background: '#F8DFE5', padding: '3px 8px', borderRadius: '9999px', color: 'var(--text-main)' }}>
-                              {o.channel}
-                            </span>
-                          </td>
-                          <td style={{ fontWeight: '700' }}>₱{o.total.toLocaleString()}</td>
-                          <td>{o.dueTime}</td>
-                          <td>
-                            <span className={'status-chip ' + o.status.toLowerCase().replace(/\s+/g, '')}>{o.status}</span>
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <select 
-                                value={o.status} 
-                                onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
-                                style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
-                              >
-                                <option value="Fresh">Fresh</option>
-                                <option value="Arranging">Arranging</option>
-                                <option value="In transit">In transit</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
-                              </select>
-                              <button
-                                type="button"
-                                className="btn-secondary"
-                                style={{ padding: '5px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
-                                title="Remove order from studio book"
-                                onClick={() => handleDeleteOrder(o.id)}
-                              >
-                                <Icons.Trash />
-                              </button>
-                            </div>
+                      {filteredOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan="7" style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                            No orders found in stage "{orderFilter}".
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredOrders.map(o => {
+                          const isFlowerItem = o.itemType === 'flowers_only' || o.arrangementName.toLowerCase().includes('stem') || o.arrangementName.toLowerCase().includes('bunch');
+                          const nextStage = getNextDeliveryStage(o.status);
+                          return (
+                            <tr key={o.id}>
+                              <td style={{ fontWeight: '700', color: 'var(--primary)' }}>
+                                {o.id}
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '400' }}>{o.date}</div>
+                                <span style={{ fontSize: '10px', fontWeight: '700', background: '#F8DFE5', padding: '2px 6px', borderRadius: '4px', color: 'var(--text-main)' }}>
+                                  {o.channel}
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{o.customerName}</strong>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{o.phone}</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', maxWidth: '180px', wordBreak: 'break-word' }}>{o.address}</div>
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                  <span style={{
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    background: isFlowerItem ? '#990045' : '#4D0025',
+                                    color: '#FFFFFF'
+                                  }}>
+                                    {isFlowerItem ? 'Flowers Only' : 'Arrangement'}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-main)' }}>
+                                  {o.arrangementName}
+                                </div>
+                                {o.cardMessage && (
+                                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '2px' }}>
+                                    Card: "{o.cardMessage.slice(0, 30)}..."
+                                  </div>
+                                )}
+                              </td>
+                              <td>
+                                <div style={{ fontWeight: '700', fontSize: '14px' }}>₱{o.total.toLocaleString()}</div>
+                                <span style={{ fontSize: '11px', background: '#E0F2FE', color: '#0369A1', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                                  {o.payment || 'GCash'}
+                                </span>
+                              </td>
+                              <td>
+                                <select 
+                                  value={o.courier || 'Jom'} 
+                                  onChange={(e) => setOrders(orders.map(ord => ord.id === o.id ? { ...ord, courier: e.target.value } : ord))}
+                                  style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
+                                >
+                                  <option value="Jom">Jom (Apayao Van)</option>
+                                  <option value="Nino">Nino (Motorcycle Express)</option>
+                                  <option value="Marisol">Marisol (Baguio Logistics)</option>
+                                  <option value="LBC">LBC Express</option>
+                                  <option value="Unassigned">Unassigned</option>
+                                </select>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Due: {o.dueTime || '14:00'}</div>
+                              </td>
+                              <td>
+                                <select 
+                                  value={o.status} 
+                                  onChange={(e) => advanceOrderStatus(o.id, e.target.value)}
+                                  className={'status-chip ' + o.status.toLowerCase().replace(/[^a-z]/g, '')}
+                                  style={{ padding: '6px 10px', fontSize: '12px', cursor: 'pointer', border: 'none', outline: 'none' }}
+                                >
+                                  {DELIVERY_STAGES.map(stage => (
+                                    <option key={stage} value={stage} style={{ background: '#FFFFFF', color: 'var(--text-main)' }}>
+                                      {stage}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  {nextStage !== o.status && (
+                                    <button 
+                                      type="button" 
+                                      className="btn-primary" 
+                                      style={{ padding: '4px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
+                                      title={'Advance to next stage: ' + nextStage}
+                                      onClick={() => advanceOrderStatus(o.id, nextStage)}
+                                    >
+                                      Advance ➔
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    className="btn-secondary"
+                                    style={{ padding: '5px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                                    title="Remove order from studio book"
+                                    onClick={() => handleDeleteOrder(o.id)}
+                                  >
+                                    <Icons.Trash />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+
+              {/* Scheduled Courier Run Dispatch Section */}
+              <div className="content-card" style={{ marginTop: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <div>
+                    <div className="card-title">Scheduled Dispatch Runs (Courier Fleet)</div>
+                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>Daily transport routes connecting Apayao studio and Baguio City growers with Northern Luzon towns.</p>
+                  </div>
+                  <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 14px' }} onClick={() => alert('New courier route queued for dispatch.')}>
+                    + Add Dispatch Run
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {deliveries.map(run => (
+                    <div key={run.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '10px' }}>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>
+                          <span style={{ color: 'var(--primary)', marginRight: '8px' }}>{run.time}</span>
+                          {run.recipient}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {run.location} · Courier: <strong>{run.courier}</strong> · Order: <strong style={{ color: 'var(--primary)' }}>{run.orderId}</strong>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span className={'status-chip ' + run.status.toLowerCase()}>{run.status}</span>
+                        <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => {
+                          const nextStatus = run.status === 'Queued' ? 'Rolling' : (run.status === 'Rolling' ? 'Done' : 'Queued');
+                          setDeliveries(deliveries.map(d => d.id === run.id ? { ...d, status: nextStatus } : d));
+                        }}>
+                          Toggle: {run.status === 'Queued' ? 'Start Run' : (run.status === 'Rolling' ? 'Mark Done' : 'Reset')}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1073,16 +1337,28 @@ function AdminApp() {
                       : 'Manage loose fresh-cut stems, wholesale bunches, and Baguio highland flower supply sold per stem or bunch.'}
                   </p>
                 </div>
-                <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
-                  <Icons.Plus /> {arrangementTypeTab === 'arranged' ? 'New arranged product' : 'New flower variety'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {arrangementTypeTab === 'flowers_only' && (
+                    <button 
+                      type="button"
+                      className="btn-secondary" 
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: '700' }}
+                      onClick={() => setIsFamilyManagerOpen(true)}
+                    >
+                      <Icons.Settings /> Manage Flower Families ({flowerFamilies.length})
+                    </button>
+                  )}
+                  <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
+                    <Icons.Plus /> {arrangementTypeTab === 'arranged' ? 'New arranged product' : 'New flower variety'}
+                  </button>
+                </div>
               </div>
 
               {/* Dynamic Category Filter Pills */}
               <div className="filter-tabs" style={{ marginBottom: '20px' }}>
                 {(arrangementTypeTab === 'arranged'
                   ? ['All', 'Signature', 'Statement', 'Bridal', 'Dried', 'Box', 'Houseplant']
-                  : ['All', 'Roses', 'Peonies', 'Ranunculus', 'Hydrangeas', 'Sunflowers', 'Foliage']
+                  : ['All', ...flowerFamilies]
                 ).map(cat => (
                   <button 
                     key={cat} 
@@ -1102,7 +1378,7 @@ function AdminApp() {
                     <div key={arr.id} className="arrangement-card">
                       <div className="arrangement-image-wrap">
                         <img src={arr.image} alt={arr.name} />
-                        <span className="card-tag-pill" style={{ background: isFlowersOnly ? '#0D9488' : 'rgba(36,24,28,0.8)' }}>
+                        <span className="card-tag-pill" style={{ background: '#A00048', color: '#FFFFFF', fontWeight: '700' }}>
                           {arr.tag || (isFlowersOnly ? 'Flowers Only' : 'Arranged')}
                         </span>
                         {arr.isLowStock && <span className="card-low-stock-pill">Low stock</span>}
@@ -1142,11 +1418,11 @@ function AdminApp() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <button 
                               className="btn-restock" 
-                              title={isFlowersOnly ? "Quick add +20 stems to cold room" : "Quick add +5 to cold room"}
+                              title={isFlowersOnly ? "Quick add +20 stems to cold bucket (auto-syncs inventory)" : "Quick add +5 to cold room"}
                               onClick={() => {
                                 const addCount = isFlowersOnly ? 20 : 5;
-                                setArrangements(arrangements.map(a => a.id === arr.id ? { ...a, coldRoomCount: a.coldRoomCount + addCount, isLowStock: false } : a));
-                                alert('Restocked +' + addCount + ' units of ' + arr.name + ' in cold room!');
+                                handleQuickRestockArrangement(arr.id, addCount);
+                                alert('Restocked +' + addCount + ' units of ' + arr.name + ' (Inventory synchronized)!');
                               }}
                             >
                               +{isFlowersOnly ? '20' : '5'}
@@ -1235,17 +1511,32 @@ function AdminApp() {
                   {inventory.map(item => (
                     <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '10px' }}>
                       <div>
-                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{item.name}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.inStock} {item.unit} available · {item.needed} needed this week · Type: <span style={{ textTransform: 'capitalize' }}>{item.type || 'stem'}</span></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                          <span style={{ fontWeight: '700', fontSize: '14px' }}>{item.name}</span>
+                          {item.linkedFlowerId && (
+                            <span style={{ fontSize: '10px', background: '#FCE7F3', color: '#9D174D', padding: '2px 8px', borderRadius: '999px', fontWeight: '800' }}>
+                              Connected Flower Variety
+                            </span>
+                          )}
+                          {item.usedIn && (
+                            <span style={{ fontSize: '10px', background: '#EFF6FF', color: '#1E40AF', padding: '2px 8px', borderRadius: '999px', fontWeight: '700' }}>
+                              Recipe in: {item.usedIn}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {item.inStock} {item.unit} available · {item.needed} needed this week · Type: <span style={{ textTransform: 'capitalize' }}>{item.type || 'stem'}</span>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {item.isLow && <span className="status-chip low">Low stock</span>}
                         <span style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: '700', minWidth: '40px', textAlign: 'right' }}>{item.inStock}</span>
-                        <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }} title="Quick check-in +20 units" onClick={() => {
-                          const newCount = item.inStock + 20;
-                          setInventory(inventory.map(i => i.id === item.id ? { ...i, inStock: newCount, isLow: newCount < i.needed } : i));
-                          alert('Checked in +20 units for ' + item.name + '!');
-                        }}>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '12px' }} 
+                          title="Quick check-in +20 units (auto-syncs connected catalogue)" 
+                          onClick={() => handleCheckInInventory(item, 20)}
+                        >
                           + Check In (+20)
                         </button>
                         <button 
@@ -1275,56 +1566,14 @@ function AdminApp() {
           )}
 
           {/* ========================================================================= */}
-          {/* 5. DELIVERIES VIEW */}
-          {/* ========================================================================= */}
-          {adminTab === 'deliveries' && (
-            <div>
-              <div className="page-eyebrow">COURIER DISPATCH</div>
-              <div className="page-header-row">
-                <div>
-                  <h1 className="page-title">Delivery Runs</h1>
-                  <p className="page-description">Today’s dispatch runs across Northern Luzon towns and onward logistics.</p>
-                </div>
-                <button className="btn-secondary" onClick={() => alert('New courier route planned for Jom and Nino.')}>Plan a route</button>
-              </div>
-
-              <div className="content-card">
-                <div className="card-title" style={{ marginBottom: '16px' }}>Today's Scheduled Dispatch Runs</div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {deliveries.map(run => (
-                    <div key={run.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                      <div>
-                        <div style={{ fontWeight: '700', fontSize: '14px' }}>
-                          <span style={{ color: 'var(--primary)', marginRight: '8px' }}>{run.time}</span>
-                          {run.recipient}
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{run.location} · Courier: <strong>{run.courier}</strong></div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span className={'status-chip ' + run.status.toLowerCase()}>{run.status}</span>
-                        <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => {
-                          const nextStatus = run.status === 'Queued' ? 'Rolling' : (run.status === 'Rolling' ? 'Done' : 'Queued');
-                          setDeliveries(deliveries.map(d => d.id === run.id ? { ...d, status: nextStatus } : d));
-                        }}>
-                          Toggle: {run.status === 'Queued' ? 'Start Run' : (run.status === 'Rolling' ? 'Mark Done' : 'Reset')}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* 6. CUSTOMERS CRM VIEW */}
+          {/* 5. CUSTOMERS VIEW */}
           {/* ========================================================================= */}
           {adminTab === 'customers' && (
             <div>
               <div className="page-eyebrow">CLIENT DIRECTORY</div>
               <div className="page-header-row">
                 <div>
-                  <h1 className="page-title">Customers CRM</h1>
+                  <h1 className="page-title">Customers</h1>
                   <p className="page-description">Loyal flower lovers, brides-to-be, and recurring cafe table decor accounts.</p>
                 </div>
                 <button className="btn-secondary" onClick={() => alert('Customer list exported.')}>Export CSV</button>
@@ -1687,11 +1936,11 @@ function AdminApp() {
       </div>
 
       {/* ========================================================================= */}
-      {/* MODAL 1: NEW ORDER MODAL */}
+      {/* MODAL 1: RECORD NEW ORDER (ARRANGEMENTS & LOOSE FLOWERS)                   */}
       {/* ========================================================================= */}
       {isNewOrderModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsNewOrderModalOpen(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+          <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Record New Order</h3>
               <button onClick={() => setIsNewOrderModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
@@ -1699,57 +1948,266 @@ function AdminApp() {
             <form onSubmit={e => {
               e.preventDefault();
               const fd = new FormData(e.target);
+              const selectedItemId = fd.get('selectedItemId');
+              const selectedItem = arrangements.find(a => a.id === selectedItemId) || arrangements[0];
+              const qty = Math.max(1, Number(fd.get('qty')) || 1);
+              const isFlower = selectedItem.productType === 'flowers_only';
+              const unitText = selectedItem.unit ? (' / ' + selectedItem.unit) : '';
+              const computedTotal = (selectedItem.price || 0) * qty;
+
               const newOrd = {
                 id: 'BT-' + Math.floor(1000 + Math.random() * 9000),
                 customerName: fd.get('name'),
-                customerInitials: fd.get('name').slice(0, 2).toUpperCase(),
+                customerInitials: (fd.get('name') || 'CL').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0, 2),
                 phone: fd.get('phone'),
                 email: fd.get('email') || 'client@ph.com',
                 address: fd.get('address'),
-                arrangementName: fd.get('arrangement'),
+                arrangementName: `${selectedItem.name} (×${qty}${unitText})`,
+                itemType: selectedItem.productType || 'arranged',
                 channel: fd.get('channel') || 'Manual',
-                total: Number(fd.get('total')) || 2450,
+                total: computedTotal,
+                payment: fd.get('payment') || 'GCash',
                 dueTime: fd.get('dueTime') || '14:00',
-                status: 'Fresh',
-                date: new Date().toISOString().slice(0, 10),
-                courier: fd.get('courier') || 'Jom'
+                status: fd.get('status') || 'Pending / New',
+                date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+                courier: fd.get('courier') || 'Jom',
+                cardMessage: fd.get('cardMessage') || ''
               };
+
+              // Deduct coldRoomCount in arrangements
+              setArrangements(prev => prev.map(a => {
+                if (a.id === selectedItem.id) {
+                  const rem = Math.max(0, (a.coldRoomCount || 0) - qty);
+                  return { ...a, coldRoomCount: rem, isLowStock: rem <= (isFlower ? 20 : 5) };
+                }
+                return a;
+              }));
+
+              // Deduct inventory raw materials
+              setInventory(prevInv => prevInv.map(inv => {
+                if (inv.linkedFlowerId === selectedItem.id || (inv.name && selectedItem.name && inv.name.toLowerCase().includes(selectedItem.name.toLowerCase().split(' ')[0]))) {
+                  const remInv = Math.max(0, (inv.inStock || 0) - qty);
+                  return { ...inv, inStock: remInv, isLow: remInv < inv.needed };
+                }
+                return inv;
+              }));
+
               setOrders([newOrd, ...orders]);
               setIsNewOrderModalOpen(false);
-              alert('Order ' + newOrd.id + ' added to studio book!');
+              alert(`Order ${newOrd.id} created! Stock automatically deducted from both arrangements and cold room inventory.`);
             }}>
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Customer Full Name</label>
-                <input type="text" name="name" className="form-control" required placeholder="e.g. Sofia Valenzuela" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Customer Full Name</label>
+                  <input type="text" name="name" className="form-control" required placeholder="e.g. Sofia Valenzuela" />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Mobile Phone</label>
+                  <input type="text" name="phone" className="form-control" required placeholder="+63 917 XXX XXXX" />
+                </div>
               </div>
+
               <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Mobile Phone</label>
-                <input type="text" name="phone" className="form-control" required placeholder="+63 917 XXX XXXX" />
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Delivery Destination (Luzon to Visayas)</label>
+                <input type="text" name="address" className="form-control" required placeholder="e.g. Barangay San Pedro, Luna, Apayao" />
               </div>
+
+              {/* Product Selection: Arranged Bouquets vs Loose Flowers */}
               <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Delivery Address</label>
-                <input type="text" name="address" className="form-control" required placeholder="e.g. Luna, Apayao or Session Rd, Baguio City" />
-              </div>
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Arrangement Name</label>
-                <select name="arrangement" className="form-control">
-                  {arrangements.map(a => <option key={a.id} value={a.name}>{a.name} (₱{a.price.toLocaleString()})</option>)}
+                <label style={{ fontSize: '12px', fontWeight: '600', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Select Item (Arranged Bouquets or Fresh Cut Loose Flowers)</span>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>Auto-deducts stock</span>
+                </label>
+                <select name="selectedItemId" className="form-control" required>
+                  <optgroup label="Arranged Products (Bouquets, Vases & Hatboxes)">
+                    {arrangements.filter(a => (a.productType || 'arranged') === 'arranged').map(a => (
+                      <option key={a.id} value={a.id}>
+                        [Bouquet] {a.name} — ₱{a.price.toLocaleString()} ({a.coldRoomCount} ready in cold room)
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Fresh Flowers Only (Unarranged Cut Stems & Bunches)">
+                    {arrangements.filter(a => a.productType === 'flowers_only').map(a => (
+                      <option key={a.id} value={a.id}>
+                        [Stems] {a.name} — ₱{a.price.toLocaleString()} {a.unit ? ('/ ' + a.unit) : '/ stem'} ({a.coldRoomCount} stems in bucket)
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Total (₱)</label>
-                  <input type="number" name="total" defaultValue="2450" className="form-control" />
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Quantity / Stems</label>
+                  <input type="number" name="qty" defaultValue="1" min="1" className="form-control" required />
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Payment Method</label>
+                  <select name="payment" className="form-control">
+                    <option value="GCash">GCash</option>
+                    <option value="Maya">Maya</option>
+                    <option value="COD">Cash on Delivery (COD)</option>
+                    <option value="Card">Credit / Debit Card</option>
+                    <option value="Bank">BDO / BPI Bank</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Sales Channel</label>
+                  <select name="channel" className="form-control">
+                    <option value="Online">Online Store</option>
+                    <option value="Instagram">Instagram DM</option>
+                    <option value="Phone">Phone Call</option>
+                    <option value="Walk-in">Walk-in Atelier</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Initial Delivery Stage</label>
+                  <select name="status" className="form-control">
+                    {DELIVERY_STAGES.map(stage => (
+                      <option key={stage} value={stage}>{stage}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Assigned Courier</label>
+                  <select name="courier" className="form-control">
+                    <option value="Jom">Jom (Apayao Van)</option>
+                    <option value="Nino">Nino (Motorcycle Express)</option>
+                    <option value="Marisol">Marisol (Baguio Logistics)</option>
+                    <option value="LBC">LBC Express</option>
+                    <option value="Unassigned">Unassigned</option>
+                  </select>
                 </div>
                 <div className="form-group">
                   <label style={{ fontSize: '12px', fontWeight: '600' }}>Due Time</label>
                   <input type="text" name="dueTime" defaultValue="14:00" className="form-control" />
                 </div>
               </div>
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Save Order to Book
+
+              <div className="form-group" style={{ marginBottom: '16px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600' }}>Dedication Card Message (Optional)</label>
+                <input type="text" name="cardMessage" className="form-control" placeholder="Complimentary handwritten note message..." />
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px' }}>
+                Confirm & Record Order (11-Stage Pipeline)
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: MANAGE FLOWER FAMILIES (ADD, EDIT, DELETE)                          */}
+      {/* ========================================================================= */}
+      {isFamilyManagerOpen && (
+        <div className="modal-backdrop" onClick={() => { setIsFamilyManagerOpen(false); setEditingFamily(null); }}>
+          <div className="modal-card" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Manage Flower Families</h3>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Add, edit, or delete botanical families for loose stem classification.</div>
+              </div>
+              <button onClick={() => { setIsFamilyManagerOpen(false); setEditingFamily(null); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+
+            {/* Add New Family Input Form */}
+            <form onSubmit={(e) => { e.preventDefault(); handleAddFamily(newFamilyInput); }} style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="e.g. Carnations, Baby's Breath, Tulips..."
+                value={newFamilyInput}
+                onChange={e => setNewFamilyInput(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button type="submit" className="btn-primary" style={{ whiteSpace: 'nowrap' }}>
+                <Icons.Plus /> Add Family
+              </button>
+            </form>
+
+            {/* Family List with Edit & Delete */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '360px', overflowY: 'auto' }}>
+              {flowerFamilies.map(fam => {
+                const count = arrangements.filter(a => a.category === fam && a.productType === 'flowers_only').length;
+                const isEditingThis = editingFamily === fam;
+
+                return (
+                  <div key={fam} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
+                    background: '#FDF7F9',
+                    border: '1px solid var(--border-light)'
+                  }}>
+                    {isEditingThis ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, marginRight: '8px' }}>
+                        <input 
+                          type="text" 
+                          className="form-control" 
+                          value={editingFamilyNewName} 
+                          onChange={e => setEditingFamilyNewName(e.target.value)} 
+                          autoFocus
+                          style={{ padding: '4px 8px', fontSize: '13px' }}
+                        />
+                        <button 
+                          type="button" 
+                          className="btn-primary" 
+                          style={{ padding: '4px 10px', fontSize: '12px' }}
+                          onClick={() => handleSaveEditFamily(fam)}
+                        >
+                          Save
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn-secondary" 
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          onClick={() => setEditingFamily(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--text-main)' }}>{fam}</span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '8px' }}>
+                            ({count} {count === 1 ? 'variety' : 'varieties'})
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button 
+                            type="button" 
+                            className="btn-secondary" 
+                            style={{ padding: '4px 8px', fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => {
+                              setEditingFamily(fam);
+                              setEditingFamilyNewName(fam);
+                            }}
+                          >
+                            <Icons.Edit /> Edit
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn-secondary" 
+                            style={{ padding: '4px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                            title="Delete this family"
+                            onClick={() => handleDeleteFamily(fam)}
+                          >
+                            <Icons.Trash />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
