@@ -806,14 +806,21 @@ function AdminApp() {
   // Order Delete Action
   const handleDeleteOrder = (orderId) => {
     if (window.confirm('Are you sure you want to remove order ' + orderId + ' from the studio book?')) {
-      setOrders(orders.filter(o => o.id !== orderId));
+      const updated = orders.filter(o => o.id !== orderId);
+      setOrders(updated);
+      saveItem('orders', updated);
+      const updatedDeliveries = deliveries.filter(d => d.orderId !== orderId);
+      setDeliveries(updatedDeliveries);
+      saveItem('deliveries', updatedDeliveries);
     }
   };
 
   // Promo Delete Action
   const handleDeletePromo = (promoId, promoCode) => {
     if (window.confirm('Delete promotion code "' + promoCode + '"?')) {
-      setPromotions(promotions.filter(p => p.id !== promoId));
+      const updated = promotions.filter(p => p.id !== promoId);
+      setPromotions(updated);
+      saveItem('promotions', updated);
     }
   };
   
@@ -821,6 +828,7 @@ function AdminApp() {
   const [orderFilter, setOrderFilter] = useState('All');
   const [catalogCategory, setCatalogCategory] = useState('All');
   const [customerSegmentFilter, setCustomerSegmentFilter] = useState('All');
+  const [reportTimeframe, setReportTimeframe] = useState('30d');
 
   // Persistence
   useEffect(() => saveItem('orders', orders), [orders]);
@@ -951,6 +959,51 @@ function AdminApp() {
     saveItem('custom_orders', updated);
     setSubstitutionModalOrder(null);
     alert('Substitution proposal sent to customer live monitor! The customer can now accept or cancel.');
+  };
+
+  const handleDeleteCustomOrder = (customOrderId, customerName) => {
+    if (window.confirm(`Are you sure you want to delete custom order ${customOrderId} (${customerName || 'Bespoke Order'})? This will permanently remove the record.`)) {
+      const updated = customOrders.filter(co => co.id !== customOrderId);
+      setCustomOrders(updated);
+      saveItem('custom_orders', updated);
+      if (selectedCustomOrder && selectedCustomOrder.id === customOrderId) {
+        setSelectedCustomOrder(null);
+      }
+    }
+  };
+
+  const handleDeleteDispatchRun = (runId, recipient) => {
+    if (window.confirm(`Delete scheduled courier dispatch run for ${recipient}?`)) {
+      const updated = deliveries.filter(d => d.id !== runId);
+      setDeliveries(updated);
+      saveItem('deliveries', updated);
+    }
+  };
+
+  const handleExportOrdersCSV = () => {
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Address', 'Item / Arrangement', 'Type', 'Channel', 'Total (PHP)', 'Payment', 'Courier', 'Delivery Sub-Status'];
+    const rows = orders.map(o => [
+      o.id,
+      `"${o.date || ''}"`,
+      `"${(o.customerName || '').replace(/"/g, '""')}"`,
+      `"${o.phone || ''}"`,
+      `"${(o.address || '').replace(/"/g, '""')}"`,
+      `"${(o.arrangementName || '').replace(/"/g, '""')}"`,
+      o.itemType || 'arranged',
+      o.channel || 'Online',
+      o.total || 0,
+      o.payment || 'GCash',
+      o.courier || 'Jom',
+      `"${normalizeSubStatus(o.status)}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Blooms_Twirl_Studio_Ledger_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Filtered Lists
@@ -1685,13 +1738,24 @@ function AdminApp() {
                           {run.location} · Courier: <strong>{run.courier}</strong> · Order: <strong style={{ color: 'var(--primary)' }}>{run.orderId}</strong>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span className={'status-chip ' + run.status.toLowerCase()}>{run.status}</span>
                         <button className="btn-secondary" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => {
                           const nextStatus = run.status === 'Queued' ? 'Rolling' : (run.status === 'Rolling' ? 'Done' : 'Queued');
-                          setDeliveries(deliveries.map(d => d.id === run.id ? { ...d, status: nextStatus } : d));
+                          const updated = deliveries.map(d => d.id === run.id ? { ...d, status: nextStatus } : d);
+                          setDeliveries(updated);
+                          saveItem('deliveries', updated);
                         }}>
                           Toggle: {run.status === 'Queued' ? 'Start Run' : (run.status === 'Rolling' ? 'Mark Done' : 'Reset')}
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn-secondary" 
+                          style={{ padding: '4px 8px', fontSize: '11px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }}
+                          title="Delete dispatch run"
+                          onClick={() => handleDeleteDispatchRun(run.id, run.recipient)}
+                        >
+                          <Icons.Trash />
                         </button>
                       </div>
                     </div>
@@ -2043,6 +2107,24 @@ function AdminApp() {
                                     title="Open full florist workshop design sheet"
                                   >
                                     Design Ticket 📋
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="btn-secondary"
+                                    style={{ 
+                                      padding: '4px 8px', 
+                                      fontSize: '11px', 
+                                      whiteSpace: 'nowrap',
+                                      color: '#E11D48',
+                                      borderColor: '#FECDD3',
+                                      background: '#FFF1F2',
+                                      fontWeight: '600'
+                                    }}
+                                    onClick={() => handleDeleteCustomOrder(co.id, co.customerName)}
+                                    title="Delete custom order"
+                                  >
+                                    Delete 🗑️
                                   </button>
                                 </div>
                               </td>
@@ -2550,56 +2632,320 @@ function AdminApp() {
           {/* ========================================================================= */}
           {/* 9. REPORTS VIEW */}
           {/* ========================================================================= */}
-          {adminTab === 'reports' && (
-            <div>
-              <div className="page-eyebrow">ANALYTICS & METRICS</div>
-              <div className="page-header-row">
-                <div>
-                  <h1 className="page-title">Studio Reports</h1>
-                  <p className="page-description">Monthly revenue, highland supply margins, and sales volume.</p>
-                </div>
-                <button className="btn-primary" onClick={() => alert('Studio financial summary generated and exported.')}>Generate report</button>
-              </div>
+          {adminTab === 'reports' && (() => {
+            const totalStandardSales = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+            const totalCustomSales = customOrders.reduce((sum, co) => sum + (Number(co.estimatedPrice || co.total) || 0), 0);
+            const grossRevenue = totalStandardSales + totalCustomSales;
+            const totalOrdersCount = orders.length + customOrders.length;
+            const aov = totalOrdersCount > 0 ? Math.round(grossRevenue / totalOrdersCount) : 0;
+            
+            const completedOrdersCount = orders.filter(o => ['Delivered', 'Received by Customer'].includes(normalizeSubStatus(o.status))).length;
+            const inWarehouseCount = orders.filter(o => ['To Pick', 'Packing', 'Ready to Ship'].includes(normalizeSubStatus(o.status))).length;
+            const inTransitCount = orders.filter(o => ['Handed to Courier', 'In Hub Transit', 'Out for Delivery'].includes(normalizeSubStatus(o.status))).length;
+            const exceptionsCount = orders.filter(o => ['Delivery Failed', 'Cancelled', 'Returned'].includes(normalizeSubStatus(o.status))).length;
+            const completionRate = orders.length > 0 ? Math.round((completedOrdersCount / orders.length) * 100) : 100;
 
-              <div className="stats-grid-4" style={{ marginBottom: '20px' }}>
-                <div className="stat-card">
-                  <div className="stat-label">TOTAL SALES (YTD)</div>
-                  <div className="stat-value">₱1.48M</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">GROSS MARGIN</div>
-                  <div className="stat-value">58%</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">COMPLETED ORDERS</div>
-                  <div className="stat-value">684</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">REPEAT CLIENT RATE</div>
-                  <div className="stat-value">42%</div>
-                </div>
-              </div>
+            const channelData = [
+              { name: 'Online Storefront', icon: '🌐', count: orders.filter(o => (o.channel || '').toLowerCase().includes('online')).length, revenue: orders.filter(o => (o.channel || '').toLowerCase().includes('online')).reduce((s, o) => s + (o.total || 0), 0), color: 'var(--primary)' },
+              { name: 'Instagram Direct', icon: '📸', count: orders.filter(o => (o.channel || '').toLowerCase().includes('instagram')).length, revenue: orders.filter(o => (o.channel || '').toLowerCase().includes('instagram')).reduce((s, o) => s + (o.total || 0), 0), color: '#BE185D' },
+              { name: 'Phone & Concierge', icon: '📞', count: orders.filter(o => (o.channel || '').toLowerCase().includes('phone')).length, revenue: orders.filter(o => (o.channel || '').toLowerCase().includes('phone')).reduce((s, o) => s + (o.total || 0), 0), color: '#D97706' },
+              { name: 'Walk-in & Atelier', icon: '🏬', count: orders.filter(o => (o.channel || '').toLowerCase().includes('manual') || (o.channel || '').toLowerCase().includes('walk')).length, revenue: orders.filter(o => (o.channel || '').toLowerCase().includes('manual') || (o.channel || '').toLowerCase().includes('walk')).reduce((s, o) => s + (o.total || 0), 0), color: '#059669' }
+            ];
 
-              <div className="content-card">
-                <div className="card-title" style={{ marginBottom: '16px' }}>Available Reports</div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {[
-                    { title: 'Monthly Sales & Order Volume', desc: 'Breakdown of online, Instagram and bridal orders', val: '₱399,908 (last 30d)' },
-                    { title: 'Baguio Floral Supply Margins', desc: 'Cost of Benguet roses vs atelier retail price', val: '58% Margin' },
-                    { title: 'Courier Delivery Performance', desc: 'On-time delivery tracking across Apayao & Luzon', val: '97% On Time' }
-                  ].map((rep, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                      <div>
-                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{rep.title}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{rep.desc}</div>
-                      </div>
-                      <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary)' }}>{rep.val}</span>
+            const topProducts = [...arrangements].sort((a, b) => (b.sold30d || 0) - (a.sold30d || 0)).slice(0, 6);
+
+            return (
+              <div>
+                <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                  <div>
+                    <div className="page-eyebrow">STUDIO INTELLIGENCE & PERFORMANCE ANALYTICS</div>
+                    <h1 className="page-title">Studio Financial & Operations Reports</h1>
+                    <p className="page-description">
+                      Real-time revenue metrics, highland flower inventory margins, sales channel conversions, and regional logistics fulfillment logs.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button" 
+                      className="btn-secondary" 
+                      onClick={() => window.print()}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      🖨️ Print Summary
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn-primary" 
+                      onClick={handleExportOrdersCSV}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      📥 Export CSV Ledger
+                    </button>
+                  </div>
+                </div>
+
+                {/* Timeframe Switcher Tabs */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', background: '#FFFFFF', padding: '4px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
+                    {[
+                      { id: 'today', label: 'Today' },
+                      { id: '7d', label: 'Last 7 Days' },
+                      { id: '30d', label: 'Last 30 Days' },
+                      { id: 'ytd', label: 'Year to Date' },
+                      { id: 'all', label: 'All Time' }
+                    ].map(tf => (
+                      <button
+                        key={tf.id}
+                        type="button"
+                        onClick={() => setReportTimeframe(tf.id)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          background: reportTimeframe === tf.id ? 'var(--primary)' : 'transparent',
+                          color: reportTimeframe === tf.id ? '#FFFFFF' : 'var(--text-muted)',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {tf.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>
+                    Reporting Period: <strong style={{ color: 'var(--text-main)' }}>{reportTimeframe === 'today' ? 'Today' : (reportTimeframe === '7d' ? 'Last 7 Days' : (reportTimeframe === '30d' ? 'Last 30 Days' : 'Fiscal Year 2026'))}</strong>
+                  </div>
+                </div>
+
+                {/* 4 Financial KPI Cards */}
+                <div className="stats-grid-4" style={{ marginBottom: '22px' }}>
+                  <div className="stat-card" style={{ borderLeft: '4px solid var(--primary)' }}>
+                    <div className="stat-label">GROSS STUDIO SALES</div>
+                    <div className="stat-value" style={{ color: 'var(--primary)' }}>₱{grossRevenue.toLocaleString()}</div>
+                    <div className="stat-subtext">₱{totalStandardSales.toLocaleString()} Standard · ₱{totalCustomSales.toLocaleString()} Custom</div>
+                  </div>
+
+                  <div className="stat-card" style={{ borderLeft: '4px solid #059669' }}>
+                    <div className="stat-label">TOTAL ORDERS PROCESSED</div>
+                    <div className="stat-value" style={{ color: '#059669' }}>{totalOrdersCount}</div>
+                    <div className="stat-subtext">{orders.length} Deliveries & Pickup · {customOrders.length} Custom</div>
+                  </div>
+
+                  <div className="stat-card" style={{ borderLeft: '4px solid #D97706' }}>
+                    <div className="stat-label">AVERAGE ORDER VALUE (AOV)</div>
+                    <div className="stat-value" style={{ color: '#D97706' }}>₱{aov.toLocaleString()}</div>
+                    <div className="stat-subtext">Gross revenue per transaction</div>
+                  </div>
+
+                  <div className="stat-card" style={{ borderLeft: '4px solid #6366F1' }}>
+                    <div className="stat-label">FULFILLMENT RATE</div>
+                    <div className="stat-value" style={{ color: '#6366F1' }}>{completionRate}%</div>
+                    <div className="stat-subtext">{completedOrdersCount} of {orders.length} orders delivered</div>
+                  </div>
+                </div>
+
+                {/* Row 2: Sales Channels Breakdown & Fulfillment Pipeline */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px', marginBottom: '22px' }}>
+                  {/* Channels Card */}
+                  <div className="content-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div className="card-title">Revenue by Sales Channel</div>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Multi-touch attribution</span>
                     </div>
-                  ))}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {channelData.map(ch => {
+                        const pct = grossRevenue > 0 ? Math.round((ch.revenue / grossRevenue) * 100) : 0;
+                        return (
+                          <div key={ch.name}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '600', marginBottom: '4px' }}>
+                              <span>{ch.icon} {ch.name} ({ch.count} orders)</span>
+                              <span>₱{ch.revenue.toLocaleString()} ({pct}%)</span>
+                            </div>
+                            <div style={{ height: '8px', background: '#F1F5F9', borderRadius: '9999px', overflow: 'hidden' }}>
+                              <div style={{ width: `${Math.max(5, pct)}%`, height: '100%', background: ch.color, borderRadius: '9999px', transition: 'width 0.4s ease' }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Logistics Status Distribution Card */}
+                  <div className="content-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div className="card-title">Fulfillment & Logistics Funnel</div>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Active dispatch pipeline</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '14px', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', color: '#B45309' }}>IN WAREHOUSE</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#92400E', marginTop: '4px' }}>{inWarehouseCount}</div>
+                        <div style={{ fontSize: '11px', color: '#B45309', marginTop: '2px' }}>To Pick · Packing · Ready to Ship</div>
+                      </div>
+
+                      <div style={{ background: '#FDF2F8', border: '1px solid #FBCFE8', padding: '14px', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', color: '#BE185D' }}>IN TRANSIT</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#9D174D', marginTop: '4px' }}>{inTransitCount}</div>
+                        <div style={{ fontSize: '11px', color: '#BE185D', marginTop: '2px' }}>Courier · In Hub · Out for Delivery</div>
+                      </div>
+
+                      <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '14px', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', color: '#15803D' }}>COMPLETED</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#166534', marginTop: '4px' }}>{completedOrdersCount}</div>
+                        <div style={{ fontSize: '11px', color: '#15803D', marginTop: '2px' }}>Delivered · Received by Client</div>
+                      </div>
+
+                      <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', padding: '14px', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', color: '#BE123C' }}>EXCEPTIONS</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#9F1239', marginTop: '4px' }}>{exceptionsCount}</div>
+                        <div style={{ fontSize: '11px', color: '#BE123C', marginTop: '2px' }}>Failed · Cancelled · Returned</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Best-Selling Products Matrix */}
+                <div className="content-card" style={{ marginBottom: '22px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div>
+                      <div className="card-title">Top Selling Floral Designs & Stems</div>
+                      <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>Highest volume products across bouquets, vases, and loose fresh cut stems.</p>
+                    </div>
+                    <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }} onClick={() => setAdminTab('arrangements')}>
+                      View Full Catalogue ➔
+                    </button>
+                  </div>
+
+                  <div className="table-responsive">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Product</th>
+                          <th>Type</th>
+                          <th>Price</th>
+                          <th>Cold Room Stock</th>
+                          <th>Units Sold (30d)</th>
+                          <th>Estimated Revenue</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {topProducts.map((p, idx) => {
+                          const estRev = (p.sold30d || 0) * (p.price || 0);
+                          const isFlower = p.productType === 'flowers_only';
+                          return (
+                            <tr key={p.id}>
+                              <td style={{ fontWeight: '800', color: idx === 0 ? 'var(--primary)' : 'var(--text-muted)' }}>
+                                #{idx + 1}
+                              </td>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  {p.image ? (
+                                    <img 
+                                      src={p.image} 
+                                      alt={p.name} 
+                                      style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} 
+                                    />
+                                  ) : null}
+                                  <div>
+                                    <div style={{ fontWeight: '700', fontSize: '13px' }}>{p.name}</div>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{p.category}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <span style={{
+                                  fontSize: '10px',
+                                  fontWeight: '700',
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: isFlower ? '#990045' : '#4D0025',
+                                  color: '#FFFFFF'
+                                }}>
+                                  {isFlower ? 'Flowers Only' : 'Arrangement'}
+                                </span>
+                              </td>
+                              <td style={{ fontWeight: '600' }}>
+                                ₱{p.price.toLocaleString()} {p.unit ? (`/ ${p.unit}`) : ''}
+                              </td>
+                              <td>
+                                <span style={{ 
+                                  fontWeight: '700', 
+                                  color: p.coldRoomCount <= 5 ? '#E11D48' : 'var(--text-main)' 
+                                }}>
+                                  {p.coldRoomCount} {isFlower ? 'stems' : 'ready'}
+                                </span>
+                              </td>
+                              <td style={{ fontWeight: '700', color: 'var(--primary)' }}>
+                                {p.sold30d || 0} units
+                              </td>
+                              <td style={{ fontWeight: '800', color: '#166534' }}>
+                                ₱{estRev.toLocaleString()}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Supply Margins & Settlement Methods */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+                  <div className="content-card">
+                    <div className="card-title" style={{ marginBottom: '12px' }}>Highland Supply & Gross Margin Breakdown</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '13px' }}>Benguet Red Rose Stems</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Wholesale Cost: ₱35/stem · Retail: ₱85/stem</div>
+                        </div>
+                        <span style={{ fontWeight: '800', color: '#166534', fontSize: '13px' }}>58.8% Margin</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '13px' }}>Signature Bridal Bouquets</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Blooms + Silk Wrap: ₱1,850 · Retail: ₱4,800</div>
+                        </div>
+                        <span style={{ fontWeight: '800', color: '#166534', fontSize: '13px' }}>61.4% Margin</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0' }}>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '13px' }}>Bespoke Custom Commissions</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Material & Labor: ₱1,200 · Average: ₱3,250</div>
+                        </div>
+                        <span style={{ fontWeight: '800', color: '#166534', fontSize: '13px' }}>63.0% Margin</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="content-card">
+                    <div className="card-title" style={{ marginBottom: '12px' }}>Payment Settlements & Channels</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {[
+                        { method: 'GCash e-Wallet', share: '56%', badge: 'Primary Method' },
+                        { method: 'Maya e-Wallet & QR Ph', share: '24%', badge: 'Instant QR' },
+                        { method: 'Cash on Delivery (COD)', share: '12%', badge: 'Doorstep Remit' },
+                        { method: 'BDO / BPI Bank Transfer', share: '8%', badge: 'Direct Deposit' }
+                      ].map((pm, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < 3 ? '1px solid var(--border-subtle)' : 'none' }}>
+                          <div>
+                            <div style={{ fontWeight: '700', fontSize: '13px' }}>{pm.method}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{pm.badge}</div>
+                          </div>
+                          <span style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '13px' }}>{pm.share}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ========================================================================= */}
           {/* 10. STAFF VIEW */}
@@ -2776,6 +3122,7 @@ function AdminApp() {
               const unitText = selectedItem.unit ? (' / ' + selectedItem.unit) : '';
               const computedTotal = (selectedItem.price || 0) * qty;
 
+              const rawStage = fd.get('status') || 'To Pick';
               const newOrd = {
                 id: 'BT-' + Math.floor(1000 + Math.random() * 9000),
                 customerName: fd.get('name'),
@@ -2789,31 +3136,41 @@ function AdminApp() {
                 total: computedTotal,
                 payment: fd.get('payment') || 'GCash',
                 dueTime: fd.get('dueTime') || '14:00',
-                status: fd.get('status') || 'Pending / New',
+                status: normalizeSubStatus(rawStage),
                 date: new Date().toISOString().replace('T', ' ').slice(0, 16),
                 courier: fd.get('courier') || 'Jom',
                 cardMessage: fd.get('cardMessage') || ''
               };
 
               // Deduct coldRoomCount in arrangements
-              setArrangements(prev => prev.map(a => {
-                if (a.id === selectedItem.id) {
-                  const rem = Math.max(0, (a.coldRoomCount || 0) - qty);
-                  return { ...a, coldRoomCount: rem, isLowStock: rem <= (isFlower ? 20 : 5) };
-                }
-                return a;
-              }));
+              setArrangements(prev => {
+                const updatedArr = prev.map(a => {
+                  if (a.id === selectedItem.id) {
+                    const rem = Math.max(0, (a.coldRoomCount || 0) - qty);
+                    return { ...a, coldRoomCount: rem, isLowStock: rem <= (isFlower ? 20 : 5) };
+                  }
+                  return a;
+                });
+                saveItem('arrangements', updatedArr);
+                return updatedArr;
+              });
 
               // Deduct inventory raw materials
-              setInventory(prevInv => prevInv.map(inv => {
-                if (inv.linkedFlowerId === selectedItem.id || (inv.name && selectedItem.name && inv.name.toLowerCase().includes(selectedItem.name.toLowerCase().split(' ')[0]))) {
-                  const remInv = Math.max(0, (inv.inStock || 0) - qty);
-                  return { ...inv, inStock: remInv, isLow: remInv < inv.needed };
-                }
-                return inv;
-              }));
+              setInventory(prevInv => {
+                const updatedInv = prevInv.map(inv => {
+                  if (inv.linkedFlowerId === selectedItem.id || (inv.name && selectedItem.name && inv.name.toLowerCase().includes(selectedItem.name.toLowerCase().split(' ')[0]))) {
+                    const remInv = Math.max(0, (inv.inStock || 0) - qty);
+                    return { ...inv, inStock: remInv, isLow: remInv < inv.needed };
+                  }
+                  return inv;
+                });
+                saveItem('inventory', updatedInv);
+                return updatedInv;
+              });
 
-              setOrders([newOrd, ...orders]);
+              const updatedOrders = [newOrd, ...orders];
+              setOrders(updatedOrders);
+              saveItem('orders', updatedOrders);
               setIsNewOrderModalOpen(false);
               alert(`Order ${newOrd.id} created! Stock automatically deducted from both arrangements and cold room inventory.`);
             }}>
@@ -2887,7 +3244,7 @@ function AdminApp() {
                 <div className="form-group">
                   <label style={{ fontSize: '12px', fontWeight: '600' }}>Initial Delivery Stage</label>
                   <select name="status" className="form-control">
-                    {DELIVERY_STAGES.map(stage => (
+                    {ALL_SUB_STATUSES.map(stage => (
                       <option key={stage} value={stage}>{stage}</option>
                     ))}
                   </select>
@@ -3281,11 +3638,11 @@ function AdminApp() {
                 />
               </div>
 
-              {/* Upload Image & Live Preview (Product-Images in GDrive & 50MB Vault) */}
+              {/* Upload Image & Live Preview (Product-Images in GDrive) */}
               <div className="form-group" style={{ marginBottom: '18px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span>Upload High-Resolution Product Image</span>
-                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>📸 Up to 50MB • HD Studio Quality</span>
+                  <span>Upload Product Image</span>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>📁 GDrive: Product-Images</span>
                 </label>
 
                 <input 
@@ -3301,7 +3658,7 @@ function AdminApp() {
                   style={{
                     border: '2px dashed var(--primary-border)',
                     borderRadius: '14px',
-                    padding: '18px 14px',
+                    padding: '16px 14px',
                     textAlign: 'center',
                     cursor: 'pointer',
                     background: '#FFF8FA',
@@ -3314,11 +3671,11 @@ function AdminApp() {
                   </div>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: isUploadingImage ? 'var(--primary)' : 'var(--text-main)' }}>
                     {isUploadingImage 
-                      ? 'Processing & optimizing high-res photo...' 
-                      : (imageFileName ? imageFileName : (newArrangementImage ? 'Click to Change Uploaded Photo' : 'Click to Browse & Upload High-Res Photo'))}
+                      ? 'Processing photo...' 
+                      : (imageFileName ? imageFileName : (newArrangementImage ? 'Click to Change Uploaded Photo' : 'Click to Browse & Upload Photo'))}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {isUploadingImage ? 'Preparing ultra-sharp studio imagery...' : 'Supports high-resolution images up to 50MB (JPEG, PNG, WebP)'}
+                    {isUploadingImage ? 'Optimizing photo for display...' : 'Select flower photo from your phone or computer'}
                   </div>
                 </div>
 
@@ -3777,6 +4134,14 @@ function AdminApp() {
                   }}
                 >
                   ✓ Complete & Picked Up
+                </button>
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  style={{ fontSize: '11px', padding: '6px 12px', background: '#FFF1F2', color: '#E11D48', borderColor: '#FECDD3', fontWeight: '700' }}
+                  onClick={() => handleDeleteCustomOrder(selectedCustomOrder.id, selectedCustomOrder.customerName)}
+                >
+                  Delete Order 🗑️
                 </button>
               </div>
             </div>
