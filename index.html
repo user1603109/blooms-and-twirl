@@ -940,17 +940,36 @@ function App() {
     return true;
   };
 
-  // Core Bouquets Collection
-  const [arrangements] = useState(() => getInitial('arrangements', [
-    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
-    { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
-    { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
-    { id: 'arr-4', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
-    { id: 'arr-5', name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
-    { id: 'arr-6', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
-    { id: 'arr-7', name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
-    { id: 'arr-8', name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false }
-  ]));
+  // Core Floral Collection (Arranged Products & Fresh Loose Stems)
+  const INITIAL_ARRANGEMENTS_DATA = [
+    // 1. Arranged Products
+    { id: 'arr-1', productType: 'arranged', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', productType: 'arranged', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', productType: 'arranged', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', productType: 'arranged', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', productType: 'arranged', name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', productType: 'arranged', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-7', productType: 'arranged', name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
+    { id: 'arr-8', productType: 'arranged', name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false },
+
+    // 2. Loose Flowers (Flowers Only / Unarranged Stems)
+    { id: 'flw-1', productType: 'flowers_only', name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
+    { id: 'flw-2', productType: 'flowers_only', name: 'Coral Charm Peony Stems', tag: 'Import Stems', category: 'Peonies', price: 180, unit: 'per stem', coldRoomCount: 35, sold30d: 110, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Lush coral peony stems that transform from deep peach to creamy apricot as they open in water. Cold-room conditioned.', stems: ['Coral Peony Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-3', productType: 'flowers_only', name: 'Peach Ranunculus Bunch (10 Stems)', tag: 'Wholesale Bunch', category: 'Ranunculus', price: 650, unit: 'per bunch (10 stems)', coldRoomCount: 22, sold30d: 85, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Paper-thin ruffled petals in soft sunset peach tones. Hand-bundled fresh from Baguio City growers with conditioning flower food.', stems: ['Peach Ranunculus Stems (x10)'], rating: 4.8, isLowStock: false },
+    { id: 'flw-4', productType: 'flowers_only', name: 'Dutch White Hydrangea Giant Head', tag: 'Fresh Cut', category: 'Hydrangeas', price: 220, unit: 'per stem', coldRoomCount: 18, sold30d: 65, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Jumbo cloud-white hydrangea stem, ideal for home vase styling or DIY wedding arrangements. Submerged hydration treated.', stems: ['Dutch White Hydrangea Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-5', productType: 'flowers_only', name: 'Sun-Drenched Golden Sunflowers', tag: 'Fresh Cut', category: 'Sunflowers', price: 110, unit: 'per stem', coldRoomCount: 45, sold30d: 140, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Bright, cheerful Philippine mountain sunflowers with thick, sturdy stalks and radiant golden ray petals.', stems: ['Highland Sunflower Stem'], rating: 4.8, isLowStock: false },
+    { id: 'flw-6', productType: 'flowers_only', name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
+  ];
+
+  const [arrangements] = useState(() => {
+    const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
+    const hasFlowersOnly = Array.isArray(loaded) && loaded.some(i => i.productType === 'flowers_only');
+    if (!hasFlowersOnly && Array.isArray(loaded)) {
+      const normalizedOld = loaded.map(i => ({ ...i, productType: i.productType || 'arranged' }));
+      return [...normalizedOld, ...INITIAL_ARRANGEMENTS_DATA.filter(i => i.productType === 'flowers_only')];
+    }
+    return loaded;
+  });
 
   const [orders, setOrders] = useState(() => getInitial('orders', [
     { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet', channel: 'Online', total: 8450, dueTime: '12:30', status: 'Arranging', date: '2026-10-01 09:12', courier: 'Jom' },
@@ -966,6 +985,9 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activePromoCode, setActivePromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
+
+  // Storefront Product Type Switcher: 'all' | 'arranged' | 'flowers_only'
+  const [storeProductType, setStoreProductType] = useState('all');
   const [catalogCategory, setCatalogCategory] = useState('All');
 
   // Customer Dashboard Order Tracker
@@ -1114,13 +1136,16 @@ function App() {
   // Catalogue Filtering
   const filteredArrangements = useMemo(() => {
     let list = arrangements;
+    if (storeProductType !== 'all') {
+      list = list.filter(a => (a.productType || 'arranged') === storeProductType);
+    }
     if (catalogCategory !== 'All') list = list.filter(a => a.category === catalogCategory || a.tag === catalogCategory);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
+      list = list.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q) || (a.stems && a.stems.join(' ').toLowerCase().includes(q)));
     }
     return list;
-  }, [arrangements, catalogCategory, searchQuery]);
+  }, [arrangements, storeProductType, catalogCategory, searchQuery]);
 
   return (
     <div className="app-container">
@@ -1674,10 +1699,49 @@ function App() {
               </div>
             </div>
 
+            {/* Collection Switcher Tabs (All / Arranged Products / Flowers Only) */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border-light)', paddingBottom: '14px', flexWrap: 'wrap' }}>
+              <button 
+                className={'switcher-btn ' + (storeProductType === 'all' ? 'active' : '')}
+                style={{ padding: '9px 18px', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => { setStoreProductType('all'); setCatalogCategory('All'); }}
+              >
+                <Icons.Sparkles /> All Floral Collections
+                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: storeProductType === 'all' ? 'rgba(255,255,255,0.25)' : '#F3F4F6', color: storeProductType === 'all' ? '#FFFFFF' : 'var(--text-muted)' }}>
+                  {arrangements.length}
+                </span>
+              </button>
+              <button 
+                className={'switcher-btn ' + (storeProductType === 'arranged' ? 'active' : '')}
+                style={{ padding: '9px 18px', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => { setStoreProductType('arranged'); setCatalogCategory('All'); }}
+              >
+                <Icons.Arrangements /> Arranged Products (Bouquets & Designs)
+                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: storeProductType === 'arranged' ? 'rgba(255,255,255,0.25)' : '#F3F4F6', color: storeProductType === 'arranged' ? '#FFFFFF' : 'var(--text-muted)' }}>
+                  {arrangements.filter(a => (a.productType || 'arranged') === 'arranged').length}
+                </span>
+              </button>
+              <button 
+                className={'switcher-btn ' + (storeProductType === 'flowers_only' ? 'active' : '')}
+                style={{ padding: '9px 18px', fontWeight: '700', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => { setStoreProductType('flowers_only'); setCatalogCategory('All'); }}
+              >
+                <Icons.Flower /> Fresh Flowers Only (Loose Stems)
+                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '999px', background: storeProductType === 'flowers_only' ? 'rgba(255,255,255,0.25)' : '#F3F4F6', color: storeProductType === 'flowers_only' ? '#FFFFFF' : 'var(--text-muted)' }}>
+                  {arrangements.filter(a => a.productType === 'flowers_only').length}
+                </span>
+              </button>
+            </div>
+
             {/* Category Filter Pills & Search */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {['All', 'Signature', 'Statement', 'Dried', 'Houseplant', 'Box', 'Bridal', 'Cheerful'].map(cat => (
+                {(storeProductType === 'flowers_only'
+                  ? ['All', 'Roses', 'Peonies', 'Ranunculus', 'Hydrangeas', 'Sunflowers', 'Foliage']
+                  : storeProductType === 'arranged'
+                  ? ['All', 'Signature', 'Statement', 'Dried', 'Houseplant', 'Box', 'Bridal', 'Cheerful']
+                  : ['All', 'Signature', 'Statement', 'Dried', 'Box', 'Bridal', 'Fresh Cut Stems']
+                ).map(cat => (
                   <button 
                     key={cat} 
                     className={'switcher-btn ' + (catalogCategory === cat ? 'active' : '')}
@@ -1692,7 +1756,7 @@ function App() {
                 <input 
                   type="text" 
                   className="form-control" 
-                  placeholder="Search bouquets or stems..."
+                  placeholder={storeProductType === 'flowers_only' ? 'Search loose stems or flowers...' : 'Search bouquets or designs...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -1701,45 +1765,73 @@ function App() {
 
             {/* Product Cards Grid */}
             <div id="store-catalogue-grid" className="product-grid">
-              {filteredArrangements.map(arr => (
-                <div key={arr.id} className="product-card">
-                  <span className="card-tag-pill">{arr.tag}</span>
-                  <img src={arr.image} alt={arr.name} className="product-img" />
-                  <div className="product-body">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                      <div className="product-title font-serif">{arr.name}</div>
-                      <div className="product-price">₱{arr.price.toLocaleString()}</div>
-                    </div>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.5' }}>
-                      {arr.description}
-                    </p>
+              {filteredArrangements.length === 0 ? (
+                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', background: '#FFFFFF', borderRadius: 'var(--radius-card)', border: '1px dashed var(--border-light)' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--primary-subtle)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+                    <Icons.Flower />
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', marginBottom: '6px' }}>No items found</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px' }}>
+                    No {storeProductType === 'flowers_only' ? 'loose flowers' : storeProductType === 'arranged' ? 'arranged products' : 'items'} match the selected filter.
+                  </p>
+                  <button className="btn-secondary" onClick={() => { setCatalogCategory('All'); setSearchQuery(''); }}>
+                    Reset Filters
+                  </button>
+                </div>
+              ) : (
+                filteredArrangements.map(arr => (
+                  <div key={arr.id} className="product-card">
+                    <span 
+                      className="card-tag-pill"
+                      style={arr.productType === 'flowers_only' ? { background: '#0F766E', color: '#FFFFFF' } : undefined}
+                    >
+                      {arr.tag || (arr.productType === 'flowers_only' ? 'Fresh Stems' : 'Design')}
+                    </span>
+                    <img src={arr.image} alt={arr.name} className="product-img" />
+                    <div className="product-body">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px', gap: '8px' }}>
+                        <div className="product-title font-serif">{arr.name}</div>
+                        <div className="product-price" style={{ whiteSpace: 'nowrap' }}>
+                          ₱{arr.price.toLocaleString()}
+                          {arr.unit && <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', display: 'block', textAlign: 'right' }}>/ {arr.unit}</span>}
+                        </div>
+                      </div>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.5' }}>
+                        {arr.description}
+                      </p>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <Icons.Star /> <strong>{arr.rating}</strong> ({arr.sold30d} orders)
-                      </span>
-                      <span>Cold Room: <strong style={{ color: arr.coldRoomCount <= 5 ? 'var(--status-rose)' : 'var(--text-main)' }}>{arr.coldRoomCount} stems ready</strong></span>
-                    </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Icons.Star /> <strong>{arr.rating}</strong> ({arr.sold30d} orders)
+                        </span>
+                        <span>
+                          {arr.productType === 'flowers_only' ? 'Cold Bucket: ' : 'Cold Room: '}
+                          <strong style={{ color: arr.coldRoomCount <= 5 ? 'var(--status-rose)' : 'var(--text-main)' }}>
+                            {arr.coldRoomCount} {arr.productType === 'flowers_only' ? 'stems' : 'designs'} ready
+                          </strong>
+                        </span>
+                      </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                      <button 
-                        className="btn-secondary" 
-                        style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
-                        onClick={() => setSelectedProduct(arr)}
-                      >
-                        Quick View
-                      </button>
-                      <button 
-                        className="btn-primary" 
-                        style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
-                        onClick={() => addToCart(arr)}
-                      >
-                        Add to Basket
-                      </button>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
+                          onClick={() => setSelectedProduct(arr)}
+                        >
+                          Quick View
+                        </button>
+                        <button 
+                          className="btn-primary" 
+                          style={{ padding: '8px 12px', fontSize: '13px', justifyContent: 'center' }}
+                          onClick={() => addToCart(arr)}
+                        >
+                          Add to Basket
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -2126,15 +2218,16 @@ function App() {
                 </div>
                 <div style={{ fontFamily: 'var(--font-serif)', fontSize: '26px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '14px' }}>
                   ₱{selectedProduct.price.toLocaleString()}
+                  {selectedProduct.unit && <span style={{ fontSize: '15px', fontWeight: '500', color: 'var(--text-muted)' }}> / {selectedProduct.unit}</span>}
                 </div>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '14px' }}>
                   {selectedProduct.description}
                 </p>
                 <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '4px' }}>
-                  Flower Stem Recipe:
+                  {selectedProduct.productType === 'flowers_only' ? 'Harvest Variety & Stem Details:' : 'Flower Stem Recipe:'}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px' }}>
-                  {selectedProduct.stems.join(' · ')}
+                  {selectedProduct.stems && selectedProduct.stems.length > 0 ? selectedProduct.stems.join(' · ') : 'Direct-cut fresh stems from Highland Growers, Baguio City'}
                 </div>
 
                 <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => {

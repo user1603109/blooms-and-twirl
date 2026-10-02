@@ -8,12 +8,16 @@ export type ArrangementCategory =
   | 'Bridal' 
   | 'Cheerful';
 
+export type ProductType = 'arranged' | 'flowers_only';
+
 export interface Arrangement {
   id: string;
   name: string;
-  tag: string; // e.g. "Signature", "Statement", "Dried", "Houseplant"
-  category: ArrangementCategory;
+  tag: string; // e.g. "Signature", "Statement", "Dried", "Houseplant", "Fresh Cut"
+  category: ArrangementCategory | string;
   price: number;
+  unit?: string; // e.g. "per stem", "per bunch (10 stems)", "per dozen"
+  productType?: ProductType;
   coldRoomCount: number;
   sold30d: number;
   image: string;
