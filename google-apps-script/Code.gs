@@ -20,7 +20,7 @@ function setupDatabase() {
   
   var sheets = {
     "Orders": ["Order ID", "Date", "Customer Name", "Phone", "Email", "Address", "Arrangement", "Total", "Due Time", "Channel", "Status", "Courier", "Card Message"],
-    "Products": ["ID", "Name", "Tag", "Category", "Price", "Cold Room Stock", "Sold 30d", "Rating", "Image URL", "Stems", "Description"],
+    "Products": ["ID", "Name", "Tag", "Category", "Price", "Cold Room Stock", "Sold 30d", "Rating", "Image URL", "Stems", "Description", "Is Featured"],
     "Inventory": ["ID", "Name", "Type", "In Stock", "Needed", "Unit", "Is Low"],
     "Customers": ["Customer ID", "Name", "Initials", "Email", "Phone", "Segment", "Orders Count", "Lifetime Value", "Last Order", "Since"],
     "Deliveries": ["Run ID", "Time", "Recipient", "Location", "Courier", "Status", "Order ID"],
@@ -99,6 +99,33 @@ function doPost(e) {
         o.cardMessage || ""
       ]);
       return ContentService.createTextOutput(JSON.stringify({ status: "success", orderId: o.id })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (action === "sync_products") {
+      var products = contents.products || [];
+      var pSheet = ss.getSheetByName("Products");
+      if (!pSheet) { setupDatabase(); pSheet = ss.getSheetByName("Products"); }
+      pSheet.clearContents();
+      pSheet.appendRow(["ID", "Name", "Tag", "Category", "Price", "Cold Room Stock", "Sold 30d", "Rating", "Image URL", "Stems", "Description", "Is Featured"]);
+      pSheet.getRange(1, 1, 1, 12).setFontWeight("bold").setBackground("#FFF0F5");
+      for (var i = 0; i < products.length; i++) {
+        var p = products[i];
+        pSheet.appendRow([
+          p.id || "",
+          p.name || "",
+          p.tag || "",
+          p.category || "",
+          p.price || 0,
+          p.coldRoomCount || 0,
+          p.sold30d || 0,
+          p.rating || 5.0,
+          p.image || "",
+          Array.isArray(p.stems) ? p.stems.join(", ") : (p.stems || ""),
+          p.description || "",
+          p.isFeatured ? "TRUE" : "FALSE"
+        ]);
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", count: products.length })).setMimeType(ContentService.MimeType.JSON);
     }
     
     if (action === "upload_drive_image") {

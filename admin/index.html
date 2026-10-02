@@ -552,20 +552,20 @@ function AdminApp() {
   // Primary Collections
   const INITIAL_ARRANGEMENTS_DATA = [
     // 1. Arranged Products (Bouquets, Vases, Boxes, Bridal)
-    { id: 'arr-1', productType: 'arranged', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Signature bouquet featuring Benguet highland roses in peach and cream with astilbe.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
-    { id: 'arr-2', productType: 'arranged', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Deep magenta peonies, ruby ranunculus, and eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
-    { id: 'arr-3', productType: 'arranged', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass and terracotta accents in ceramic.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
-    { id: 'arr-4', productType: 'arranged', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
-    { id: 'arr-5', productType: 'arranged', name: 'Sweet Blush Hatbox', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Round luxury hatbox with Dutch hydrangeas and cappuccino roses.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
-    { id: 'arr-6', productType: 'arranged', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with White O’Hara garden roses and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-1', productType: 'arranged', isFeatured: false, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Signature bouquet featuring Benguet highland roses in peach and cream with astilbe.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', productType: 'arranged', isFeatured: false, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Deep magenta peonies, ruby ranunculus, and eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', productType: 'arranged', isFeatured: false, name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass and terracotta accents in ceramic.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', productType: 'arranged', isFeatured: false, name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', productType: 'arranged', isFeatured: false, name: 'Sweet Blush Hatbox', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Round luxury hatbox with Dutch hydrangeas and cappuccino roses.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', productType: 'arranged', isFeatured: false, name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with White O’Hara garden roses and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
 
     // 2. Loose Flowers (Flowers Only / Unarranged Stems)
-    { id: 'flw-1', productType: 'flowers_only', name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
-    { id: 'flw-2', productType: 'flowers_only', name: 'Coral Charm Peony Stems', tag: 'Import Stems', category: 'Peonies', price: 180, unit: 'per stem', coldRoomCount: 35, sold30d: 110, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Lush coral peony stems that transform from deep peach to creamy apricot as they open in water. Cold-room conditioned.', stems: ['Coral Peony Stem'], rating: 4.9, isLowStock: false },
-    { id: 'flw-3', productType: 'flowers_only', name: 'Peach Ranunculus Bunch (10 Stems)', tag: 'Wholesale Bunch', category: 'Ranunculus', price: 650, unit: 'per bunch (10 stems)', coldRoomCount: 22, sold30d: 85, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Paper-thin ruffled petals in soft sunset peach tones. Hand-bundled fresh from Baguio City growers with conditioning flower food.', stems: ['Peach Ranunculus Stems (x10)'], rating: 4.8, isLowStock: false },
-    { id: 'flw-4', productType: 'flowers_only', name: 'Dutch White Hydrangea Giant Head', tag: 'Fresh Cut', category: 'Hydrangeas', price: 220, unit: 'per stem', coldRoomCount: 18, sold30d: 65, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Jumbo cloud-white hydrangea stem, ideal for home vase styling or DIY wedding arrangements. Submerged hydration treated.', stems: ['Dutch White Hydrangea Stem'], rating: 4.9, isLowStock: false },
-    { id: 'flw-5', productType: 'flowers_only', name: 'Sun-Drenched Golden Sunflowers', tag: 'Fresh Cut', category: 'Sunflowers', price: 110, unit: 'per stem', coldRoomCount: 45, sold30d: 140, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Bright, cheerful Philippine mountain sunflowers with thick, sturdy stalks and radiant golden ray petals.', stems: ['Highland Sunflower Stem'], rating: 4.8, isLowStock: false },
-    { id: 'flw-6', productType: 'flowers_only', name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
+    { id: 'flw-1', productType: 'flowers_only', isFeatured: false, name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
+    { id: 'flw-2', productType: 'flowers_only', isFeatured: false, name: 'Coral Charm Peony Stems', tag: 'Import Stems', category: 'Peonies', price: 180, unit: 'per stem', coldRoomCount: 35, sold30d: 110, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Lush coral peony stems that transform from deep peach to creamy apricot as they open in water. Cold-room conditioned.', stems: ['Coral Peony Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-3', productType: 'flowers_only', isFeatured: false, name: 'Peach Ranunculus Bunch (10 Stems)', tag: 'Wholesale Bunch', category: 'Ranunculus', price: 650, unit: 'per bunch (10 stems)', coldRoomCount: 22, sold30d: 85, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Paper-thin ruffled petals in soft sunset peach tones. Hand-bundled fresh from Baguio City growers with conditioning flower food.', stems: ['Peach Ranunculus Stems (x10)'], rating: 4.8, isLowStock: false },
+    { id: 'flw-4', productType: 'flowers_only', isFeatured: false, name: 'Dutch White Hydrangea Giant Head', tag: 'Fresh Cut', category: 'Hydrangeas', price: 220, unit: 'per stem', coldRoomCount: 18, sold30d: 65, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Jumbo cloud-white hydrangea stem, ideal for home vase styling or DIY wedding arrangements. Submerged hydration treated.', stems: ['Dutch White Hydrangea Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-5', productType: 'flowers_only', isFeatured: false, name: 'Sun-Drenched Golden Sunflowers', tag: 'Fresh Cut', category: 'Sunflowers', price: 110, unit: 'per stem', coldRoomCount: 45, sold30d: 140, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Bright, cheerful Philippine mountain sunflowers with thick, sturdy stalks and radiant golden ray petals.', stems: ['Highland Sunflower Stem'], rating: 4.8, isLowStock: false },
+    { id: 'flw-6', productType: 'flowers_only', isFeatured: false, name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
   ];
 
   // Dedicated In-App Toast & Confirmation System (Eliminates all browser native alert/confirm)
@@ -703,6 +703,7 @@ function AdminApp() {
     googleSheetId: '',
     googleDriveFolderId: ''
   }));
+  const [syncStatus, setSyncStatus] = useState('');
 
   // Modals
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
@@ -822,6 +823,64 @@ function AdminApp() {
         showToast(`"${arrName}" permanently removed from floral catalogue.`, 'success', 'Item Deleted');
       }
     });
+  };
+
+  // Toggle Featured on Landing Page
+  const handleToggleFeatured = (arrId) => {
+    const target = arrangements.find(a => a.id === arrId);
+    if (!target) return;
+    const nextState = !target.isFeatured;
+    const updated = arrangements.map(a => a.id === arrId ? { ...a, isFeatured: nextState } : a);
+    setArrangements(updated);
+    saveItem('arrangements', updated);
+    
+    // Save dedicated featured IDs key for instant sync across tabs and storefront
+    const featuredIds = updated.filter(a => a.isFeatured).map(a => a.id);
+    saveItem('featured_arrangement_ids', featuredIds);
+    
+    // If Google Apps Script is connected, trigger background sync
+    if (settings.googleAppsScriptUrl) {
+      try {
+        fetch(settings.googleAppsScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'sync_products', products: updated })
+        }).catch(() => {});
+      } catch(err) {}
+    }
+
+    showToast(
+      nextState 
+        ? `"${target.name}" is now featured on the Landing Page!` 
+        : `"${target.name}" removed from Landing Page features.`,
+      'success',
+      nextState ? 'Featured on Landing' : 'Removed from Featured'
+    );
+  };
+
+  // Google Sheets Connection Test
+  const testGoogleSync = async () => {
+    if (!settings.googleAppsScriptUrl) {
+      showToast('Please enter your Google Apps Script Web App URL first.', 'warning', 'Missing Web App URL');
+      return;
+    }
+    setSyncStatus('Testing connection with Google Sheets...');
+    try {
+      showToast('Testing Google Sheets connection...', 'info', 'Google Sync');
+      const res = await fetch(settings.googleAppsScriptUrl + (settings.googleAppsScriptUrl.includes('?') ? '&' : '?') + 't=' + Date.now());
+      const data = await res.json();
+      if (data && data.status === 'success') {
+        setSyncStatus('Connected to Google Sheets successfully at ' + new Date().toLocaleTimeString());
+        showToast('Google Sheets connected! Database and 5TB Drive sync are active.', 'success', 'Connected');
+      } else {
+        setSyncStatus('Received response from Google Cloud webhook.');
+        showToast('Google Webhook reachable!', 'success', 'Connection Tested');
+      }
+    } catch(err) {
+      setSyncStatus('Connection error: Please ensure Web App access is set to "Anyone".');
+      showToast('Connection failed. Make sure your Apps Script Web App is deployed with access "Anyone".', 'error', 'Sync Failed');
+    }
   };
 
   // Inventory CRUD Actions
@@ -1132,7 +1191,14 @@ function AdminApp() {
   const filteredArrangements = useMemo(() => {
     return arrangements.filter(a => {
       const itemType = a.productType || 'arranged';
-      const matchesType = arrangementTypeTab === 'all' || itemType === arrangementTypeTab;
+      let matchesType = false;
+      if (arrangementTypeTab === 'all') {
+        matchesType = true;
+      } else if (arrangementTypeTab === 'featured') {
+        matchesType = Boolean(a.isFeatured);
+      } else {
+        matchesType = itemType === arrangementTypeTab;
+      }
       const matchesCat = catalogCategory === 'All' || a.category === catalogCategory || a.tag === catalogCategory;
       const matchesQuery = !searchQuery || 
         a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -2280,7 +2346,7 @@ function AdminApp() {
                   type="button"
                   onClick={() => { setArrangementTypeTab('flowers_only'); setCatalogCategory('All'); }}
                   style={{
-                    flex: 1,
+                    flex: '1 1 200px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -2310,18 +2376,57 @@ function AdminApp() {
                     {arrangements.filter(a => a.productType === 'flowers_only').length}
                   </span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setArrangementTypeTab('featured'); setCatalogCategory('All'); }}
+                  style={{
+                    flex: '1 1 200px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '13px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: arrangementTypeTab === 'featured' ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'transparent',
+                    color: arrangementTypeTab === 'featured' ? '#FFFFFF' : '#B45309',
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: arrangementTypeTab === 'featured' ? '0 4px 14px rgba(217,119,6,0.3)' : 'none'
+                  }}
+                >
+                  <Icons.Star />
+                  <span>★ Featured on Landing</span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    background: arrangementTypeTab === 'featured' ? 'rgba(255,255,255,0.3)' : '#FEF3C7',
+                    color: arrangementTypeTab === 'featured' ? '#FFFFFF' : '#92400E'
+                  }}>
+                    {arrangements.filter(a => a.isFeatured).length}
+                  </span>
+                </button>
               </div>
 
               {/* Header Row */}
               <div className="page-header-row">
                 <div>
                   <h1 className="page-title">
-                    {arrangementTypeTab === 'arranged' ? 'Bouquets & Arranged Designs' : 'Fresh Flowers Only (Unarranged Stems)'}
+                    {arrangementTypeTab === 'featured'
+                      ? '★ Featured on Landing Page'
+                      : (arrangementTypeTab === 'arranged' ? 'Bouquets & Arranged Designs' : 'Fresh Flowers Only (Unarranged Stems)')}
                   </h1>
                   <p className="page-description">
-                    {arrangementTypeTab === 'arranged' 
-                      ? 'Manage atelier designs, bespoke wedding flowers, curated hatboxes, and gift sets ready for delivery.' 
-                      : 'Manage loose fresh-cut stems, wholesale bunches, and Baguio highland flower supply sold per stem or bunch.'}
+                    {arrangementTypeTab === 'featured'
+                      ? 'These arrangements are currently published on the public storefront homepage in FEATURED CREATIONS. Click "★ Featured on Landing" on any card to add or remove.'
+                      : (arrangementTypeTab === 'arranged' 
+                          ? 'Manage atelier designs, bespoke wedding flowers, curated hatboxes, and gift sets ready for delivery.' 
+                          : 'Manage loose fresh-cut stems, wholesale bunches, and Baguio highland flower supply sold per stem or bunch.')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -2335,8 +2440,8 @@ function AdminApp() {
                       <Icons.Settings /> Manage Flower Families ({flowerFamilies.length})
                     </button>
                   )}
-                  <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
-                    <Icons.Plus /> {arrangementTypeTab === 'arranged' ? 'New arranged product' : 'New flower variety'}
+                  <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab === 'featured' ? 'arranged' : arrangementTypeTab)}>
+                    <Icons.Plus /> {arrangementTypeTab === 'flowers_only' ? 'New flower variety' : 'New arranged product'}
                   </button>
                 </div>
               </div>
@@ -2368,6 +2473,11 @@ function AdminApp() {
                         <span className="card-tag-pill" style={{ background: '#A00048', color: '#FFFFFF', fontWeight: '700' }}>
                           {arr.tag || (isFlowersOnly ? 'Flowers Only' : 'Arranged')}
                         </span>
+                        {arr.isFeatured && (
+                          <span className="card-tag-pill" style={{ background: '#D97706', color: '#FFFFFF', fontWeight: '800', right: '12px', left: 'auto' }}>
+                            ★ Featured on Landing
+                          </span>
+                        )}
                         {arr.isLowStock && <span className="card-low-stock-pill">Low stock</span>}
                       </div>
                       <div className="arrangement-body">
@@ -2404,7 +2514,26 @@ function AdminApp() {
                               </span>
                             )}
                           </span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <button 
+                              type="button"
+                              className={arr.isFeatured ? "btn-primary" : "btn-secondary"}
+                              style={{ 
+                                padding: '6px 10px', 
+                                fontSize: '11px', 
+                                fontWeight: '700', 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                background: arr.isFeatured ? 'linear-gradient(135deg, #F59E0B, #D97706)' : '#FFF9FA',
+                                color: arr.isFeatured ? '#FFFFFF' : '#B45309',
+                                borderColor: arr.isFeatured ? '#D97706' : '#FDE68A'
+                              }}
+                              title={arr.isFeatured ? "Currently published on Landing Page. Click to unfeature." : "Click to feature this product on Landing Page"}
+                              onClick={() => handleToggleFeatured(arr.id)}
+                            >
+                              <Icons.Star /> {arr.isFeatured ? 'Featured on Landing' : 'Feature on Landing'}
+                            </button>
                             <button 
                               className="btn-restock" 
                               title={isFlowersOnly ? "Quick add +20 stems to cold bucket (auto-syncs inventory)" : "Quick add +5 to cold room"}
@@ -3580,6 +3709,7 @@ function AdminApp() {
               const stockCount = Number(fd.get('coldRoomCount')) || (editingArrangement ? editingArrangement.coldRoomCount : (modalProductType === 'flowers_only' ? 50 : 10));
               const stemsList = (fd.get('stems') || '').split(',').map(s => s.trim()).filter(Boolean);
               const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
+              const isFeaturedVal = fd.get('isFeatured') === 'on' || fd.get('isFeatured') === 'true';
 
               if (editingArrangement) {
                 const updated = arrangements.map(a => a.id === editingArrangement.id ? {
@@ -3594,11 +3724,26 @@ function AdminApp() {
                   image: finalImageUrl,
                   description: fd.get('description') || a.description,
                   stems: stemsList.length > 0 ? stemsList : a.stems,
-                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5)
+                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
+                  isFeatured: isFeaturedVal
                 } : a);
                 setArrangements(updated);
                 saveItem('arrangements', updated);
+                const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
+                saveItem('featured_arrangement_ids', featuredIds);
                 if (finalImageUrl) BT_IDB.saveImage(editingArrangement.id, finalImageUrl);
+
+                if (settings.googleAppsScriptUrl) {
+                  try {
+                    fetch(settings.googleAppsScriptUrl, {
+                      method: 'POST',
+                      mode: 'no-cors',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'sync_products', products: updated })
+                    }).catch(() => {});
+                  } catch(e) {}
+                }
+
                 setIsArrangementModalOpen(false);
                 setEditingArrangement(null);
                 setNewArrangementImage('');
@@ -3619,12 +3764,27 @@ function AdminApp() {
                   image: finalImageUrl,
                   description: fd.get('description') || (modalProductType === 'flowers_only' ? 'Freshly harvested highland stems from Baguio City.' : 'Handcrafted bespoke bouquet with highland blooms.'),
                   stems: stemsList.length > 0 ? stemsList : (modalProductType === 'flowers_only' ? [productName] : ['Benguet Roses', 'Astilbe']),
-                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5)
+                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
+                  isFeatured: isFeaturedVal
                 };
                 const updated = [newArr, ...arrangements];
                 setArrangements(updated);
                 saveItem('arrangements', updated);
+                const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
+                saveItem('featured_arrangement_ids', featuredIds);
                 if (finalImageUrl) BT_IDB.saveImage(newArr.id, finalImageUrl);
+
+                if (settings.googleAppsScriptUrl) {
+                  try {
+                    fetch(settings.googleAppsScriptUrl, {
+                      method: 'POST',
+                      mode: 'no-cors',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'sync_products', products: updated })
+                    }).catch(() => {});
+                  } catch(e) {}
+                }
+
                 setIsArrangementModalOpen(false);
                 setEditingArrangement(null);
                 setNewArrangementImage('');
@@ -3738,6 +3898,51 @@ function AdminApp() {
                   className="form-control" 
                   placeholder={modalProductType === 'flowers_only' ? 'Harvested daily from Baguio mountain terraces. Keep submerged in fresh cold water...' : 'Handcrafted bespoke bouquet with highland blooms...'} 
                 />
+              </div>
+
+              {/* Feature on Public Landing Page Switch */}
+              <div style={{
+                background: '#FFF0F5',
+                border: '1.5px dashed var(--primary-border)',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                marginBottom: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #F70077 0%, #D10056 100%)',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '15px'
+                  }}>
+                    ★
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
+                      Feature on Landing Page
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      Display this creation in the public storefront's "Featured Creations" section
+                    </div>
+                  </div>
+                </div>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', margin: 0 }}>
+                  <input 
+                    type="checkbox" 
+                    name="isFeatured" 
+                    defaultChecked={editingArrangement ? Boolean(editingArrangement.isFeatured) : false} 
+                    style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                  />
+                </label>
               </div>
 
               {/* Upload Image & Live Preview (Product-Images in GDrive) */}

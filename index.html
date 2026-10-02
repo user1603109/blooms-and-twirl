@@ -1220,22 +1220,22 @@ function App() {
   // Core Floral Collection (Arranged Products & Fresh Loose Stems)
   const INITIAL_ARRANGEMENTS_DATA = [
     // 1. Arranged Products
-    { id: 'arr-1', productType: 'arranged', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
-    { id: 'arr-2', productType: 'arranged', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
-    { id: 'arr-3', productType: 'arranged', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
-    { id: 'arr-4', productType: 'arranged', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
-    { id: 'arr-5', productType: 'arranged', name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
-    { id: 'arr-6', productType: 'arranged', name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
-    { id: 'arr-7', productType: 'arranged', name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
-    { id: 'arr-8', productType: 'arranged', name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false },
+    { id: 'arr-1', productType: 'arranged', isFeatured: false, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', productType: 'arranged', isFeatured: false, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', productType: 'arranged', isFeatured: false, name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', productType: 'arranged', isFeatured: false, name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', productType: 'arranged', isFeatured: false, name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', productType: 'arranged', isFeatured: false, name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-7', productType: 'arranged', isFeatured: false, name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
+    { id: 'arr-8', productType: 'arranged', isFeatured: false, name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false },
 
     // 2. Loose Flowers (Flowers Only / Unarranged Stems)
-    { id: 'flw-1', productType: 'flowers_only', name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
-    { id: 'flw-2', productType: 'flowers_only', name: 'Coral Charm Peony Stems', tag: 'Import Stems', category: 'Peonies', price: 180, unit: 'per stem', coldRoomCount: 35, sold30d: 110, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Lush coral peony stems that transform from deep peach to creamy apricot as they open in water. Cold-room conditioned.', stems: ['Coral Peony Stem'], rating: 4.9, isLowStock: false },
-    { id: 'flw-3', productType: 'flowers_only', name: 'Peach Ranunculus Bunch (10 Stems)', tag: 'Wholesale Bunch', category: 'Ranunculus', price: 650, unit: 'per bunch (10 stems)', coldRoomCount: 22, sold30d: 85, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Paper-thin ruffled petals in soft sunset peach tones. Hand-bundled fresh from Baguio City growers with conditioning flower food.', stems: ['Peach Ranunculus Stems (x10)'], rating: 4.8, isLowStock: false },
-    { id: 'flw-4', productType: 'flowers_only', name: 'Dutch White Hydrangea Giant Head', tag: 'Fresh Cut', category: 'Hydrangeas', price: 220, unit: 'per stem', coldRoomCount: 18, sold30d: 65, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Jumbo cloud-white hydrangea stem, ideal for home vase styling or DIY wedding arrangements. Submerged hydration treated.', stems: ['Dutch White Hydrangea Stem'], rating: 4.9, isLowStock: false },
-    { id: 'flw-5', productType: 'flowers_only', name: 'Sun-Drenched Golden Sunflowers', tag: 'Fresh Cut', category: 'Sunflowers', price: 110, unit: 'per stem', coldRoomCount: 45, sold30d: 140, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Bright, cheerful Philippine mountain sunflowers with thick, sturdy stalks and radiant golden ray petals.', stems: ['Highland Sunflower Stem'], rating: 4.8, isLowStock: false },
-    { id: 'flw-6', productType: 'flowers_only', name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
+    { id: 'flw-1', productType: 'flowers_only', isFeatured: false, name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
+    { id: 'flw-2', productType: 'flowers_only', isFeatured: false, name: 'Coral Charm Peony Stems', tag: 'Import Stems', category: 'Peonies', price: 180, unit: 'per stem', coldRoomCount: 35, sold30d: 110, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Lush coral peony stems that transform from deep peach to creamy apricot as they open in water. Cold-room conditioned.', stems: ['Coral Peony Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-3', productType: 'flowers_only', isFeatured: false, name: 'Peach Ranunculus Bunch (10 Stems)', tag: 'Wholesale Bunch', category: 'Ranunculus', price: 650, unit: 'per bunch (10 stems)', coldRoomCount: 22, sold30d: 85, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Paper-thin ruffled petals in soft sunset peach tones. Hand-bundled fresh from Baguio City growers with conditioning flower food.', stems: ['Peach Ranunculus Stems (x10)'], rating: 4.8, isLowStock: false },
+    { id: 'flw-4', productType: 'flowers_only', isFeatured: false, name: 'Dutch White Hydrangea Giant Head', tag: 'Fresh Cut', category: 'Hydrangeas', price: 220, unit: 'per stem', coldRoomCount: 18, sold30d: 65, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Jumbo cloud-white hydrangea stem, ideal for home vase styling or DIY wedding arrangements. Submerged hydration treated.', stems: ['Dutch White Hydrangea Stem'], rating: 4.9, isLowStock: false },
+    { id: 'flw-5', productType: 'flowers_only', isFeatured: false, name: 'Sun-Drenched Golden Sunflowers', tag: 'Fresh Cut', category: 'Sunflowers', price: 110, unit: 'per stem', coldRoomCount: 45, sold30d: 140, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Bright, cheerful Philippine mountain sunflowers with thick, sturdy stalks and radiant golden ray petals.', stems: ['Highland Sunflower Stem'], rating: 4.8, isLowStock: false },
+    { id: 'flw-6', productType: 'flowers_only', isFeatured: false, name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
   ];
 
   const [arrangements, setArrangements] = useState(() => {
@@ -1268,6 +1268,60 @@ function App() {
       } catch(err) {}
     })();
     return () => { isMounted = false; };
+  }, []);
+
+  // Real-time synchronization across browser tabs and Google Apps Script cloud
+  useEffect(() => {
+    // 1. Cross-tab real-time sync (e.g., admin toggles featured in another tab)
+    const handleStorageChange = (e) => {
+      if (!e.key || e.key === 'bt_arrangements_v2' || e.key === 'bt_featured_arrangement_ids_v2' || e.key === 'bt_deleted_arrangements_v2') {
+        const deleted = getInitial('deleted_arrangements', []);
+        const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
+        if (Array.isArray(loaded)) {
+          setArrangements(loaded.filter(a => !deleted.includes(a.id)));
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // 2. Cross-device cloud sync via Google Apps Script (if configured)
+    const settings = getInitial('settings', {});
+    const gasUrl = (settings && settings.googleAppsScriptUrl) || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('gas'));
+    if (gasUrl) {
+      fetch(gasUrl)
+        .then(res => res.json())
+        .then(res => {
+          if (res && res.status === 'success' && res.data && Array.isArray(res.data.Products) && res.data.Products.length > 0) {
+            const mapped = res.data.Products.map(p => ({
+              id: String(p.ID || p.id || 'arr-' + Math.random()),
+              productType: String(p.ID || '').startsWith('flw-') ? 'flowers_only' : 'arranged',
+              name: p.Name || p.name || 'Floral Arrangement',
+              tag: p.Tag || p.tag || 'Signature',
+              category: p.Category || p.category || 'Signature',
+              price: Number(p.Price || p.price) || 2000,
+              coldRoomCount: Number(p["Cold Room Stock"] || p.coldRoomCount) || 10,
+              sold30d: Number(p["Sold 30d"] || p.sold30d) || 0,
+              rating: Number(p.Rating || p.rating) || 5.0,
+              image: p["Image URL"] || p.image || '',
+              description: p.Description || p.description || '',
+              stems: typeof p.Stems === 'string' ? p.Stems.split(',').map(s => s.trim()) : (Array.isArray(p.Stems) ? p.Stems : []),
+              isFeatured: p["Is Featured"] === true || p["Is Featured"] === 'TRUE' || p["Is Featured"] === 'true' || p.isFeatured === true,
+              isLowStock: Number(p["Cold Room Stock"] || p.coldRoomCount) <= 5
+            }));
+            const deleted = getInitial('deleted_arrangements', []);
+            const valid = mapped.filter(a => !deleted.includes(a.id));
+            if (valid.length > 0) {
+              setArrangements(valid);
+              saveItem('arrangements', valid);
+              const featIds = valid.filter(a => a.isFeatured).map(a => a.id);
+              saveItem('featured_arrangement_ids', featIds);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const [orders, setOrders] = useState(() => {
@@ -1721,6 +1775,12 @@ function App() {
     return list;
   }, [arrangements, storeProductType, catalogCategory, searchQuery]);
 
+  // Dedicated Featured Creations assigned by Admin
+  const featuredArrangements = useMemo(() => {
+    const featuredIds = getInitial('featured_arrangement_ids', []);
+    return arrangements.filter(a => Boolean(a.isFeatured) || (Array.isArray(featuredIds) && featuredIds.includes(a.id)));
+  }, [arrangements]);
+
   return (
     <div className="app-container">
       {/* ========================================================================= */}
@@ -2110,66 +2170,88 @@ function App() {
                 </button>
               </div>
 
-              <div className="arrangements-grid">
-                {arrangements.slice(0, 4).map(arr => (
-                  <div key={arr.id} className="arrangement-card">
-                    <div 
-                      className="arrangement-image-wrap" 
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        if (requireAuthToShop()) setSelectedProduct(arr);
-                      }}
-                    >
-                      <img src={arr.image} alt={arr.name} />
-                      <span className="card-tag-pill">{arr.tag}</span>
-                      {(arr.isLowStock || arr.coldRoomCount <= 5) && (
-                        <span className="card-low-stock-pill">Low stock</span>
-                      )}
-                    </div>
-                    <div className="arrangement-body">
-                      <div className="arrangement-name-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                        <span className="arrangement-name" style={{ flex: '1 1 auto', minWidth: 0, wordBreak: 'break-word' }}>{arr.name}</span>
-                        <span className="arrangement-rating" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                          <Icons.Star /> <span>{arr.rating}</span>
+              {featuredArrangements.length > 0 ? (
+                <div className="arrangements-grid">
+                  {featuredArrangements.map(arr => (
+                    <div key={arr.id} className="arrangement-card">
+                      <div 
+                        className="arrangement-image-wrap" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          if (requireAuthToShop()) setSelectedProduct(arr);
+                        }}
+                      >
+                        <img src={arr.image} alt={arr.name} />
+                        <span className="card-tag-pill">{arr.tag || 'Featured'}</span>
+                        <span className="card-tag-pill" style={{ background: '#D97706', color: '#FFFFFF', fontWeight: '800', right: '12px', left: 'auto' }}>
+                          ★ Featured
                         </span>
+                        {(arr.isLowStock || arr.coldRoomCount <= 5) && (
+                          <span className="card-low-stock-pill">Low stock</span>
+                        )}
                       </div>
-                      <p className="arrangement-stems">{arr.stems.join(' · ')}</p>
-                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.4', flex: 1 }}>
-                        {arr.description.slice(0, 95)}...
-                      </p>
+                      <div className="arrangement-body">
+                        <div className="arrangement-name-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                          <span className="arrangement-name" style={{ flex: '1 1 auto', minWidth: 0, wordBreak: 'break-word' }}>{arr.name}</span>
+                          <span className="arrangement-rating" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            <Icons.Star /> <span>{arr.rating}</span>
+                          </span>
+                        </div>
+                        <p className="arrangement-stems">{arr.stems ? arr.stems.join(' · ') : ''}</p>
+                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px', lineHeight: '1.4', flex: 1 }}>
+                          {(arr.description || '').slice(0, 95)}...
+                        </p>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                        <span>Cold room: <strong>{arr.coldRoomCount} ready</strong></span>
-                        <span style={{ color: 'var(--primary)', fontWeight: '600' }}>Highland Choice</span>
-                      </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
+                          <span>Cold room: <strong>{arr.coldRoomCount} ready</strong></span>
+                          <span style={{ color: 'var(--primary)', fontWeight: '600' }}>Highland Choice</span>
+                        </div>
 
-                      <div className="arrangement-footer-row">
-                        <span className="arrangement-price">₱{arr.price.toLocaleString()}</span>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button 
-                            className="btn-secondary" 
-                            style={{ padding: '7px 12px', fontSize: '12px' }}
-                            onClick={() => {
-                              if (requireAuthToShop()) setSelectedProduct(arr);
-                            }}
-                          >
-                            Quick View
-                          </button>
-                          <button 
-                            className="btn-primary" 
-                            style={{ padding: '7px 14px', fontSize: '12px' }}
-                            onClick={() => {
-                              if (requireAuthToShop()) addToCart(arr);
-                            }}
-                          >
-                            <Icons.Plus /> Add to Cart
-                          </button>
+                        <div className="arrangement-footer-row">
+                          <span className="arrangement-price">₱{arr.price.toLocaleString()}</span>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              className="btn-secondary" 
+                              style={{ padding: '7px 12px', fontSize: '12px' }}
+                              onClick={() => {
+                                if (requireAuthToShop()) setSelectedProduct(arr);
+                              }}
+                            >
+                              Quick View
+                            </button>
+                            <button 
+                              className="btn-primary" 
+                              style={{ padding: '7px 14px', fontSize: '12px' }}
+                              onClick={() => {
+                                if (requireAuthToShop()) addToCart(arr);
+                              }}
+                            >
+                              <Icons.Plus /> Add to Cart
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '48px 24px', background: '#FFFFFF', borderRadius: 'var(--radius-card)', border: '1px dashed var(--border-light)' }}>
+                  <div style={{ width: '48px', height: '48px', margin: '0 auto 14px', borderRadius: '50%', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                    <Icons.Flower />
                   </div>
-                ))}
-              </div>
+                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', margin: '0 0 8px 0', color: 'var(--text-main)' }}>
+                    Curating Fresh Atelier Highlights
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '520px', margin: '0 auto 20px', lineHeight: '1.6' }}>
+                    New seasonal arrangements are currently being hand-styled by Shaira. Explore our complete catalogue of hand-tied bouquets, hatboxes, and Baguio fresh-cut stems in the store.
+                  </p>
+                  <button className="btn-primary" onClick={() => {
+                    if (requireAuthToShop()) setViewMode('store');
+                  }}>
+                    <Icons.ShoppingBag /> Browse Full Studio Catalogue ({arrangements.length} Items)
+                  </button>
+                </div>
+              )}
             </section>
 
             {/* Wedding & Custom Event Consultations Banner */}
