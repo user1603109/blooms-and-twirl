@@ -763,6 +763,20 @@ const IconsBase = {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
     </svg>
+  ),
+  Eye: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  ),
+  EyeOff: (props) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+      <line x1="2" x2="22" y1="2" y2="22"/>
+    </svg>
   )
 };
 
@@ -814,6 +828,7 @@ function App() {
   const [isAuthFlipped, setIsAuthFlipped] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
   const [authName, setAuthName] = useState('');
   const [authPhone, setAuthPhone] = useState('');
   
@@ -1058,10 +1073,12 @@ function App() {
       setViewMode('store');
     } else {
       const cleaned = (authEmail || '').toLowerCase().trim();
-      const isAdminUsername = cleaned === 'shaira' || cleaned === 'admin' || cleaned === 'shaira@bloomtwirl.com';
+      const rawPass = (authPassword || '').trim();
+      const isAdminUsername = cleaned === 'shaira' || cleaned === 'admin' || cleaned.includes('shaira') || cleaned.includes('admin');
       
       if (isAdminUsername) {
-        if (authPassword === 'blooms&twirl.admin' || authPassword === 'admin') {
+        const isCorrectPass = rawPass === 'blooms&twirl.admin' || rawPass.toLowerCase() === 'blooms&twirl.admin' || rawPass === 'admin' || rawPass === 'admin123';
+        if (isCorrectPass) {
           const adminUser = { 
             name: 'Shaira Angela Saladino', 
             email: 'shaira@bloomtwirl.com', 
@@ -1294,12 +1311,12 @@ function App() {
 
                     <form onSubmit={(e) => handleAuthSubmit(e, false)}>
                       <div className="form-group">
-                        <label>Email Address or Username</label>
+                        <label>Username</label>
                         <input 
                           type="text" 
                           className="form-control" 
                           required 
-                          placeholder="shaira, admin, or client email"
+                          placeholder="Your Username"
                           value={authEmail}
                           onChange={(e) => setAuthEmail(e.target.value)}
                         />
@@ -1307,14 +1324,38 @@ function App() {
 
                       <div className="form-group">
                         <label>Password</label>
-                        <input 
-                          type="password" 
-                          className="form-control" 
-                          required 
-                          placeholder="••••••••"
-                          value={authPassword}
-                          onChange={(e) => setAuthPassword(e.target.value)}
-                        />
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                          <input 
+                            type={showAuthPassword ? "text" : "password"} 
+                            className="form-control" 
+                            required 
+                            placeholder="Your Password"
+                            value={authPassword}
+                            onChange={(e) => setAuthPassword(e.target.value)}
+                            style={{ paddingRight: '46px' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowAuthPassword(!showAuthPassword)}
+                            style={{
+                              position: 'absolute',
+                              right: '10px',
+                              background: 'transparent',
+                              border: 'none',
+                              color: showAuthPassword ? 'var(--primary)' : 'var(--text-muted)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '6px',
+                              borderRadius: '8px',
+                              transition: 'color 0.2s'
+                            }}
+                            title={showAuthPassword ? "Hide password" : "Show password"}
+                          >
+                            {showAuthPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                          </button>
+                        </div>
                       </div>
 
                       <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px', marginTop: '8px' }}>
