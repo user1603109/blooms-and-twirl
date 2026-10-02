@@ -234,11 +234,66 @@ const Icons = new Proxy(IconsBase, {
   }
 });
 
+// --- High-Resolution 50MB Image Engine (IndexedDB + Canvas) ---
+const BT_IDB = {
+  DB_NAME: 'BT_HighRes_FloralVault',
+  STORE_NAME: 'product_images_hd',
+  async getDB() {
+    if (!window.indexedDB) return null;
+    return new Promise((resolve) => {
+      const req = indexedDB.open(this.DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+          db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = () => resolve(null);
+    });
+  },
+  async saveImage(id, dataUrl) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id || !dataUrl) return;
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      tx.objectStore(this.STORE_NAME).put({ id, dataUrl, timestamp: Date.now() });
+    } catch(e) {
+      console.warn('IDB saveImage error:', e);
+    }
+  },
+  async getImage(id) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.STORE_NAME, 'readonly');
+        const req = tx.objectStore(this.STORE_NAME).get(id);
+        req.onsuccess = () => resolve(req.result ? req.result.dataUrl : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch(e) {
+      return null;
+    }
+  },
+  async deleteImage(id) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id) return;
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      tx.objectStore(this.STORE_NAME).delete(id);
+    } catch(e) {}
+  }
+};
+
 const getInitial = (key, fallback) => {
   try {
     const raw = localStorage.getItem('bt_' + key + '_v2');
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed !== undefined && parsed !== null ? parsed : fallback;
   } catch(e) {
+    console.warn('Error reading bt_' + key + '_v2 from localStorage:', e);
     return fallback;
   }
 };
@@ -246,7 +301,27 @@ const getInitial = (key, fallback) => {
 const saveItem = (key, data) => {
   try {
     localStorage.setItem('bt_' + key + '_v2', JSON.stringify(data));
-  } catch(e) {}
+  } catch(e) {
+    console.warn('localStorage quota reached. Storing lightweight manifest (HD assets preserved in IndexedDB):', key);
+    if (key === 'arrangements' && Array.isArray(data)) {
+      try {
+        data.forEach(item => {
+          if (item.image && item.image.startsWith('data:image')) {
+            BT_IDB.saveImage(item.id, item.image);
+          }
+        });
+        const lightweightData = data.map(item => {
+          if (item.image && item.image.startsWith('data:image') && item.image.length > 50000) {
+            return { ...item, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80' };
+          }
+          return item;
+        });
+        localStorage.setItem('bt_' + key + '_v2', JSON.stringify(lightweightData));
+      } catch(err2) {
+        console.error('Critical quota error saving arrangements:', err2);
+      }
+    }
+  }
 };
 
 function AdminApp() {
@@ -504,6 +579,29 @@ function AdminApp() {
     return loaded;
   });
 
+  // Hydrate high-resolution 50MB studio photos from IndexedDB Vault
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const updated = await Promise.all(
+          arrangements.map(async (arr) => {
+            const hdImg = await BT_IDB.getImage(arr.id);
+            if (hdImg && hdImg !== arr.image) {
+              return { ...arr, image: hdImg };
+            }
+            return arr;
+          })
+        );
+        if (isMounted) {
+          const hasDiff = updated.some((a, i) => a.image !== arrangements[i].image);
+          if (hasDiff) setArrangements(updated);
+        }
+      } catch(err) {}
+    })();
+    return () => { isMounted = false; };
+  }, []);
+
   const [orders, setOrders] = useState(() => {
     const raw = getInitial('orders', [
       { id: 'BT-2041', customerName: 'Marisol Reyes', customerInitials: 'MR', email: 'marisol.reyes@gmail.com', phone: '+63 917 888 2391', address: 'Luna, Apayao', arrangementName: 'Petal Parade bridal bouquet (×1)', itemType: 'arranged', channel: 'Online', total: 8450, payment: 'GCash', dueTime: '12:30', status: 'Ready to Ship', date: '2026-10-01 09:12', courier: 'Jom' },
@@ -601,10 +699,63 @@ function AdminApp() {
   const handleImageFileChange = (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    setImageFileName(file.name);
+
+    // 50MB Upload Limit Validation
+    const MAX_SIZE_MB = 50;
+    const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      alert(`The selected image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed upload size is ${MAX_SIZE_MB}MB. Please select a photo up to 50MB.`);
+      e.target.value = '';
+      return;
+    }
+
+    const fileSizeFormatted = (file.size / (1024 * 1024)).toFixed(1) + 'MB';
+    setImageFileName(`${file.name} (${fileSizeFormatted})`);
+    setIsUploadingImage(true);
+
     const reader = new FileReader();
     reader.onload = (event) => {
-      setNewArrangementImage(event.target.result);
+      const rawData = event.target.result;
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // Full HD 1920px processing with high-detail smoothing (ideal for 50MB high-res flower photography)
+          const maxDim = 1920;
+          let width = img.width;
+          let height = img.height;
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Premium 0.88 high-definition quality
+          const ultraQualityData = canvas.toDataURL('image/jpeg', 0.88);
+          setNewArrangementImage(ultraQualityData);
+        } catch(err) {
+          setNewArrangementImage(rawData);
+        } finally {
+          setIsUploadingImage(false);
+        }
+      };
+      img.onerror = () => {
+        setNewArrangementImage(rawData);
+        setIsUploadingImage(false);
+      };
+      img.src = rawData;
+    };
+    reader.onerror = () => {
+      alert('Error reading high-resolution image. Please try again.');
+      setIsUploadingImage(false);
     };
     reader.readAsDataURL(file);
   };
@@ -628,7 +779,10 @@ function AdminApp() {
 
   const handleDeleteArrangement = (arrId, arrName) => {
     if (window.confirm('Are you sure you want to delete "' + arrName + '" from the floral catalogue?')) {
-      setArrangements(arrangements.filter(a => a.id !== arrId));
+      const updated = arrangements.filter(a => a.id !== arrId);
+      setArrangements(updated);
+      saveItem('arrangements', updated);
+      BT_IDB.deleteImage(arrId);
     }
   };
 
@@ -2969,7 +3123,7 @@ function AdminApp() {
               const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
 
               if (editingArrangement) {
-                setArrangements(arrangements.map(a => a.id === editingArrangement.id ? {
+                const updated = arrangements.map(a => a.id === editingArrangement.id ? {
                   ...a,
                   productType: modalProductType,
                   name: productName,
@@ -2982,7 +3136,10 @@ function AdminApp() {
                   description: fd.get('description') || a.description,
                   stems: stemsList.length > 0 ? stemsList : a.stems,
                   isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5)
-                } : a));
+                } : a);
+                setArrangements(updated);
+                saveItem('arrangements', updated);
+                if (finalImageUrl) BT_IDB.saveImage(editingArrangement.id, finalImageUrl);
                 setIsArrangementModalOpen(false);
                 setEditingArrangement(null);
                 setNewArrangementImage('');
@@ -3005,12 +3162,15 @@ function AdminApp() {
                   stems: stemsList.length > 0 ? stemsList : (modalProductType === 'flowers_only' ? [productName] : ['Benguet Roses', 'Astilbe']),
                   isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5)
                 };
-                setArrangements([newArr, ...arrangements]);
+                const updated = [newArr, ...arrangements];
+                setArrangements(updated);
+                saveItem('arrangements', updated);
+                if (finalImageUrl) BT_IDB.saveImage(newArr.id, finalImageUrl);
                 setIsArrangementModalOpen(false);
                 setEditingArrangement(null);
                 setNewArrangementImage('');
                 setImageFileName('');
-                alert(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published! Image saved to Google Drive Product-Images folder.`);
+                alert(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published!`);
               }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -3121,11 +3281,11 @@ function AdminApp() {
                 />
               </div>
 
-              {/* Upload Image & Live Preview (Product-Images in GDrive) */}
+              {/* Upload Image & Live Preview (Product-Images in GDrive & 50MB Vault) */}
               <div className="form-group" style={{ marginBottom: '18px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span>Upload Product Image</span>
-                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>📁 GDrive: Product-Images</span>
+                  <span>Upload High-Resolution Product Image</span>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>📸 Up to 50MB • HD Studio Quality</span>
                 </label>
 
                 <input 
@@ -3141,7 +3301,7 @@ function AdminApp() {
                   style={{
                     border: '2px dashed var(--primary-border)',
                     borderRadius: '14px',
-                    padding: '16px 14px',
+                    padding: '18px 14px',
                     textAlign: 'center',
                     cursor: 'pointer',
                     background: '#FFF8FA',
@@ -3152,11 +3312,13 @@ function AdminApp() {
                   <div style={{ color: 'var(--primary)', marginBottom: '4px' }}>
                     <Icons.Flower />
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
-                    {imageFileName ? imageFileName : (newArrangementImage ? 'Click to Change Uploaded Photo' : 'Click to Browse & Upload Photo')}
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: isUploadingImage ? 'var(--primary)' : 'var(--text-main)' }}>
+                    {isUploadingImage 
+                      ? 'Processing & optimizing high-res photo...' 
+                      : (imageFileName ? imageFileName : (newArrangementImage ? 'Click to Change Uploaded Photo' : 'Click to Browse & Upload High-Res Photo'))}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    Select flower photo from your phone or computer
+                    {isUploadingImage ? 'Preparing ultra-sharp studio imagery...' : 'Supports high-resolution images up to 50MB (JPEG, PNG, WebP)'}
                   </div>
                 </div>
 
@@ -3187,11 +3349,16 @@ function AdminApp() {
                 )}
               </div>
 
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px' }}>
-                {editingArrangement 
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={isUploadingImage}
+                style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px', opacity: isUploadingImage ? 0.6 : 1, cursor: isUploadingImage ? 'not-allowed' : 'pointer' }}
+              >
+                {isUploadingImage ? 'Processing Photo...' : (editingArrangement 
                   ? (`Save ${modalProductType === 'flowers_only' ? 'Flower Variety' : 'Arrangement'} Changes`) 
                   : (`Publish ${modalProductType === 'flowers_only' ? 'Flower Variety' : 'Arrangement'}`)
-                }
+                )}
               </button>
             </form>
           </div>

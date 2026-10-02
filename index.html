@@ -797,12 +797,49 @@ const Icons = new Proxy(IconsBase, {
   }
 });
 
+// --- High-Resolution 50MB Image Engine (IndexedDB + Canvas) ---
+const BT_IDB = {
+  DB_NAME: 'BT_HighRes_FloralVault',
+  STORE_NAME: 'product_images_hd',
+  async getDB() {
+    if (!window.indexedDB) return null;
+    return new Promise((resolve) => {
+      const req = indexedDB.open(this.DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+          db.createObjectStore(this.STORE_NAME, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = () => resolve(null);
+    });
+  },
+  async getImage(id) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction(this.STORE_NAME, 'readonly');
+        const req = tx.objectStore(this.STORE_NAME).get(id);
+        req.onsuccess = () => resolve(req.result ? req.result.dataUrl : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch(e) {
+      return null;
+    }
+  }
+};
+
 // Storage Helpers
 const getInitial = (key, fallback) => {
   try {
     const raw = localStorage.getItem('bt_' + key + '_v2');
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return parsed !== undefined && parsed !== null ? parsed : fallback;
   } catch(e) {
+    console.warn('Error reading bt_' + key + '_v2 from localStorage:', e);
     return fallback;
   }
 };
@@ -810,7 +847,22 @@ const getInitial = (key, fallback) => {
 const saveItem = (key, data) => {
   try {
     localStorage.setItem('bt_' + key + '_v2', JSON.stringify(data));
-  } catch(e) {}
+  } catch(e) {
+    console.warn('localStorage.setItem failed for key:', key, e);
+    if (key === 'arrangements' && Array.isArray(data)) {
+      try {
+        const lightweightData = data.map(item => {
+          if (item.image && item.image.startsWith('data:image') && item.image.length > 50000) {
+            return { ...item, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80' };
+          }
+          return item;
+        });
+        localStorage.setItem('bt_' + key + '_v2', JSON.stringify(lightweightData));
+      } catch(err2) {
+        console.error('Critical quota error saving in index.html:', err2);
+      }
+    }
+  }
 };
 
 // --- APP COMPONENT ---
@@ -981,6 +1033,29 @@ function App() {
     }
     return loaded;
   });
+
+  // Hydrate high-resolution 50MB studio photos from IndexedDB Vault
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const updated = await Promise.all(
+          arrangements.map(async (arr) => {
+            const hdImg = await BT_IDB.getImage(arr.id);
+            if (hdImg && hdImg !== arr.image) {
+              return { ...arr, image: hdImg };
+            }
+            return arr;
+          })
+        );
+        if (isMounted) {
+          const hasDiff = updated.some((a, i) => a.image !== arrangements[i].image);
+          if (hasDiff) setArrangements(updated);
+        }
+      } catch(err) {}
+    })();
+    return () => { isMounted = false; };
+  }, []);
 
   const [orders, setOrders] = useState(() => {
     const rawOrders = getInitial('orders', [
