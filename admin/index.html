@@ -552,12 +552,14 @@ function AdminApp() {
   // Primary Collections
   const INITIAL_ARRANGEMENTS_DATA = [
     // 1. Arranged Products (Bouquets, Vases, Boxes, Bridal)
-    { id: 'arr-1', productType: 'arranged', isFeatured: false, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Signature bouquet featuring Benguet highland roses in peach and cream with astilbe.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
-    { id: 'arr-2', productType: 'arranged', isFeatured: false, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Deep magenta peonies, ruby ranunculus, and eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
-    { id: 'arr-3', productType: 'arranged', isFeatured: false, name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with pampas grass and terracotta accents in ceramic.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
-    { id: 'arr-4', productType: 'arranged', isFeatured: false, name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
-    { id: 'arr-5', productType: 'arranged', isFeatured: false, name: 'Sweet Blush Hatbox', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Round luxury hatbox with Dutch hydrangeas and cappuccino roses.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
-    { id: 'arr-6', productType: 'arranged', isFeatured: false, name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with White O’Hara garden roses and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-1', productType: 'arranged', isFeatured: false, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-2', productType: 'arranged', isFeatured: false, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
+    { id: 'arr-3', productType: 'arranged', isFeatured: false, name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
+    { id: 'arr-4', productType: 'arranged', isFeatured: false, name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
+    { id: 'arr-5', productType: 'arranged', isFeatured: false, name: 'Sweet Blush Box', tag: 'Box', category: 'Box', price: 2850, coldRoomCount: 6, sold30d: 62, image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=800&q=80', description: 'Luxury round hatbox with Dutch hydrangeas, cappuccino roses, and blush carnations.', stems: ['Hydrangeas', 'Cappuccino roses', 'Blush carnations'], rating: 4.9, isLowStock: false },
+    { id: 'arr-6', productType: 'arranged', isFeatured: false, name: 'Bridal Serenade', tag: 'Bridal', category: 'Bridal', price: 4800, coldRoomCount: 4, sold30d: 29, image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', description: 'Couture bridal bouquet with cascading White O’Hara garden roses, fragrant sweet peas, and pure silk ribbon.', stems: ['White O’Hara roses', 'Sweet peas', 'Calla lilies'], rating: 5.0, isLowStock: true },
+    { id: 'arr-7', productType: 'arranged', isFeatured: false, name: 'Sunny Gerbera', tag: 'Cheerful', category: 'Cheerful', price: 1550, coldRoomCount: 11, sold30d: 84, image: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80', description: 'Sun-drenched golden gerbera daisies, coral spray roses, and fresh chamomile buds.', stems: ['Golden gerberas', 'Coral spray roses', 'Chamomile'], rating: 4.8, isLowStock: false },
+    { id: 'arr-8', productType: 'arranged', isFeatured: false, name: 'Velvet Romance', tag: 'Signature', category: 'Signature', price: 3100, coldRoomCount: 9, sold30d: 40, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Two dozen deep red velvet Ecuadorian roses wrapped in black and blush bespoke papers with satin ribbon.', stems: ['Ecuadorian red roses', 'Eucalyptus gunnii'], rating: 4.9, isLowStock: false },
 
     // 2. Loose Flowers (Flowers Only / Unarranged Stems)
     { id: 'flw-1', productType: 'flowers_only', isFeatured: false, name: 'Benguet Highland Red Roses', tag: 'Fresh Cut', category: 'Roses', price: 85, unit: 'per stem', coldRoomCount: 120, sold30d: 340, image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80', description: 'Long-stemmed velvet crimson roses freshly harvested from mountain terrace farms in Benguet. Unarranged single stem with thorns stripped.', stems: ['Benguet Red Rose Stem'], rating: 5.0, isLowStock: false },
@@ -597,13 +599,39 @@ function AdminApp() {
     }
   }, [toast]);
 
+  // Strict Deduplication Helper to prevent duplicate products and clean up existing clones
+  const deduplicateArrangements = (list) => {
+    if (!Array.isArray(list)) return [];
+    const seenIds = new Set();
+    const seenNames = new Set();
+    const result = [];
+    for (const item of list) {
+      if (!item || !item.id) continue;
+      const normName = (item.name || '').trim().toLowerCase();
+      if (!seenIds.has(item.id) && (!normName || !seenNames.has(normName))) {
+        seenIds.add(item.id);
+        if (normName) seenNames.add(normName);
+        result.push({ ...item });
+      } else if (item.isFeatured) {
+        // If a duplicate item was marked featured, preserve featured on the master record
+        const existing = result.find(r => r.id === item.id || ((r.name || '').trim().toLowerCase() === normName && normName));
+        if (existing) {
+          existing.isFeatured = true;
+        }
+      }
+    }
+    return result;
+  };
+
   const [arrangements, setArrangements] = useState(() => {
     const deleted = getInitial('deleted_arrangements', []);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
+    let cleaned = INITIAL_ARRANGEMENTS_DATA;
     if (Array.isArray(loaded)) {
-      return loaded.filter(a => !deleted.includes(a.id));
+      cleaned = deduplicateArrangements(loaded.filter(a => !deleted.includes(a.id)));
     }
-    return loaded;
+    saveItem('arrangements', cleaned);
+    return cleaned;
   });
 
   // Hydrate high-resolution 50MB studio photos from IndexedDB Vault
@@ -622,7 +650,7 @@ function AdminApp() {
         );
         if (isMounted) {
           const hasDiff = updated.some((a, i) => a.image !== arrangements[i].image);
-          if (hasDiff) setArrangements(updated);
+          if (hasDiff) setArrangements(deduplicateArrangements(updated));
         }
       } catch(err) {}
     })();
@@ -708,6 +736,9 @@ function AdminApp() {
   // Modals
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
+  const [isAssignFeaturedModalOpen, setIsAssignFeaturedModalOpen] = useState(false);
+  const [featuredSearchQuery, setFeaturedSearchQuery] = useState('');
+  const [isSubmittingArrangement, setIsSubmittingArrangement] = useState(false);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   
@@ -812,14 +843,29 @@ function AdminApp() {
       confirmText: 'Delete Item',
       isDestructive: true,
       onConfirm: () => {
-        const updated = arrangements.filter(a => a.id !== arrId);
+        const normName = (arrName || '').trim().toLowerCase();
+        const updated = deduplicateArrangements(arrangements.filter(a => a.id !== arrId && (!normName || (a.name || '').trim().toLowerCase() !== normName)));
         setArrangements(updated);
         saveItem('arrangements', updated);
         const deleted = getInitial('deleted_arrangements', []);
         if (!deleted.includes(arrId)) {
           saveItem('deleted_arrangements', [...deleted, arrId]);
         }
+        const featuredIds = updated.filter(a => a.isFeatured).map(a => a.id);
+        saveItem('featured_arrangement_ids', featuredIds);
         BT_IDB.deleteImage(arrId);
+
+        if (settings.googleAppsScriptUrl) {
+          try {
+            fetch(settings.googleAppsScriptUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'sync_products', products: updated })
+            }).catch(() => {});
+          } catch(err) {}
+        }
+
         showToast(`"${arrName}" permanently removed from floral catalogue.`, 'success', 'Item Deleted');
       }
     });
@@ -830,7 +876,7 @@ function AdminApp() {
     const target = arrangements.find(a => a.id === arrId);
     if (!target) return;
     const nextState = !target.isFeatured;
-    const updated = arrangements.map(a => a.id === arrId ? { ...a, isFeatured: nextState } : a);
+    const updated = deduplicateArrangements(arrangements.map(a => a.id === arrId ? { ...a, isFeatured: nextState } : a));
     setArrangements(updated);
     saveItem('arrangements', updated);
     
@@ -1189,7 +1235,7 @@ function AdminApp() {
   }, [customOrders, customOrderFilter, searchQuery]);
 
   const filteredArrangements = useMemo(() => {
-    return arrangements.filter(a => {
+    const list = deduplicateArrangements(arrangements).filter(a => {
       const itemType = a.productType || 'arranged';
       let matchesType = false;
       if (arrangementTypeTab === 'all') {
@@ -1206,6 +1252,7 @@ function AdminApp() {
         (a.description && a.description.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesType && matchesCat && matchesQuery;
     });
+    return deduplicateArrangements(list);
   }, [arrangements, arrangementTypeTab, catalogCategory, searchQuery]);
 
   // =========================================================================
@@ -2430,27 +2477,49 @@ function AdminApp() {
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {arrangementTypeTab === 'flowers_only' && (
-                    <button 
-                      type="button"
-                      className="btn-secondary" 
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: '700' }}
-                      onClick={() => setIsFamilyManagerOpen(true)}
-                    >
-                      <Icons.Settings /> Manage Flower Families ({flowerFamilies.length})
-                    </button>
+                  {arrangementTypeTab === 'featured' ? (
+                    <>
+                      <button 
+                        type="button"
+                        className="btn-primary" 
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => setIsAssignFeaturedModalOpen(true)}
+                      >
+                        <Icons.Star /> Assign From Studio Catalogue
+                      </button>
+                      <button 
+                        type="button"
+                        className="btn-secondary" 
+                        onClick={() => handleOpenNewArrangement('arranged')}
+                      >
+                        <Icons.Plus /> New arranged product
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {arrangementTypeTab === 'flowers_only' && (
+                        <button 
+                          type="button"
+                          className="btn-secondary" 
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: '700' }}
+                          onClick={() => setIsFamilyManagerOpen(true)}
+                        >
+                          <Icons.Settings /> Manage Flower Families ({flowerFamilies.length})
+                        </button>
+                      )}
+                      <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
+                        <Icons.Plus /> {arrangementTypeTab === 'flowers_only' ? 'New flower variety' : 'New arranged product'}
+                      </button>
+                    </>
                   )}
-                  <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab === 'featured' ? 'arranged' : arrangementTypeTab)}>
-                    <Icons.Plus /> {arrangementTypeTab === 'flowers_only' ? 'New flower variety' : 'New arranged product'}
-                  </button>
                 </div>
               </div>
 
               {/* Dynamic Category Filter Pills */}
               <div className="filter-tabs" style={{ marginBottom: '20px' }}>
-                {(arrangementTypeTab === 'arranged'
-                  ? ['All', 'Signature', 'Statement', 'Bridal', 'Dried', 'Box', 'Houseplant']
-                  : ['All', ...flowerFamilies]
+                {(arrangementTypeTab === 'flowers_only'
+                  ? ['All', ...flowerFamilies]
+                  : ['All', 'Signature', 'Statement', 'Bridal', 'Dried', 'Box', 'Houseplant']
                 ).map(cat => (
                   <button 
                     key={cat} 
@@ -2575,14 +2644,24 @@ function AdminApp() {
                 <div style={{ textAlign: 'center', padding: '60px 20px', background: '#FFFFFF', borderRadius: '16px', border: '1px dashed var(--border-light)', marginTop: '20px' }}>
                   <div style={{ color: 'var(--text-muted)', marginBottom: '12px' }}><Icons.Flower /></div>
                   <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', margin: '0 0 6px 0' }}>
-                    No {arrangementTypeTab === 'arranged' ? 'arranged products' : 'loose flowers'} found
+                    {arrangementTypeTab === 'featured'
+                      ? 'No Featured Arrangements Selected'
+                      : (arrangementTypeTab === 'arranged' ? 'No arranged products found' : 'No loose flowers found')}
                   </h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '16px' }}>
-                    Try switching filters or add a new entry to this section.
+                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '500px', margin: '0 auto 18px', lineHeight: '1.5' }}>
+                    {arrangementTypeTab === 'featured'
+                      ? 'Pick from your existing bouquets or flower varieties to showcase them in FEATURED CREATIONS on the public landing page.'
+                      : 'Try switching filters or add a new entry to this section.'}
                   </p>
-                  <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
-                    <Icons.Plus /> {arrangementTypeTab === 'arranged' ? 'Add Arranged Product' : 'Add Flower Variety (Stems Only)'}
-                  </button>
+                  {arrangementTypeTab === 'featured' ? (
+                    <button className="btn-primary" onClick={() => setIsAssignFeaturedModalOpen(true)}>
+                      <Icons.Star /> Choose Products From Catalogue
+                    </button>
+                  ) : (
+                    <button className="btn-primary" onClick={() => handleOpenNewArrangement(arrangementTypeTab)}>
+                      <Icons.Plus /> {arrangementTypeTab === 'arranged' ? 'Add Arranged Product' : 'Add Flower Variety (Stems Only)'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -3684,112 +3763,146 @@ function AdminApp() {
 
             <form key={(editingArrangement ? editingArrangement.id : 'new-item') + '-' + modalProductType} onSubmit={async (e) => {
               e.preventDefault();
-              const fd = new FormData(e.target);
-              const productName = fd.get('name') || (editingArrangement ? editingArrangement.name : (modalProductType === 'flowers_only' ? 'Fresh Flower Stems' : 'Artisanal Bouquet'));
-              let finalImageUrl = newArrangementImage || (editingArrangement ? editingArrangement.image : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80');
-              
-              if (newArrangementImage && newArrangementImage.startsWith('data:image') && settings.googleAppsScriptUrl) {
-                try {
-                  const uploadPayload = {
-                    action: 'upload_drive_image',
-                    folderName: 'Product-Images',
-                    parentFolderName: 'Blooms&Twirl by Shaira',
-                    fileName: productName.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + '.jpg',
-                    base64Data: newArrangementImage
-                  };
-                  fetch(settings.googleAppsScriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(uploadPayload)
-                  }).catch(() => {});
-                } catch(err) {}
-              }
+              if (isSubmittingArrangement) return;
+              setIsSubmittingArrangement(true);
 
-              const stockCount = Number(fd.get('coldRoomCount')) || (editingArrangement ? editingArrangement.coldRoomCount : (modalProductType === 'flowers_only' ? 50 : 10));
-              const stemsList = (fd.get('stems') || '').split(',').map(s => s.trim()).filter(Boolean);
-              const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
-              const isFeaturedVal = fd.get('isFeatured') === 'on' || fd.get('isFeatured') === 'true';
-
-              if (editingArrangement) {
-                const updated = arrangements.map(a => a.id === editingArrangement.id ? {
-                  ...a,
-                  productType: modalProductType,
-                  name: productName,
-                  category: fd.get('category') || a.category,
-                  tag: fd.get('tag') || a.tag || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
-                  price: Number(fd.get('price')) || a.price,
-                  unit: unitVal,
-                  coldRoomCount: stockCount,
-                  image: finalImageUrl,
-                  description: fd.get('description') || a.description,
-                  stems: stemsList.length > 0 ? stemsList : a.stems,
-                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
-                  isFeatured: isFeaturedVal
-                } : a);
-                setArrangements(updated);
-                saveItem('arrangements', updated);
-                const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
-                saveItem('featured_arrangement_ids', featuredIds);
-                if (finalImageUrl) BT_IDB.saveImage(editingArrangement.id, finalImageUrl);
-
-                if (settings.googleAppsScriptUrl) {
+              try {
+                const fd = new FormData(e.target);
+                const productName = (fd.get('name') || (editingArrangement ? editingArrangement.name : (modalProductType === 'flowers_only' ? 'Fresh Flower Stems' : 'Artisanal Bouquet'))).trim();
+                let finalImageUrl = newArrangementImage || (editingArrangement ? editingArrangement.image : 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80');
+                
+                if (newArrangementImage && newArrangementImage.startsWith('data:image') && settings.googleAppsScriptUrl) {
                   try {
+                    const uploadPayload = {
+                      action: 'upload_drive_image',
+                      folderName: 'Product-Images',
+                      parentFolderName: 'Blooms&Twirl by Shaira',
+                      fileName: productName.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + '.jpg',
+                      base64Data: newArrangementImage
+                    };
                     fetch(settings.googleAppsScriptUrl, {
                       method: 'POST',
                       mode: 'no-cors',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'sync_products', products: updated })
+                      body: JSON.stringify(uploadPayload)
                     }).catch(() => {});
-                  } catch(e) {}
+                  } catch(err) {}
                 }
 
-                setIsArrangementModalOpen(false);
-                setEditingArrangement(null);
-                setNewArrangementImage('');
-                setImageFileName('');
-                showToast(`"${productName}" updated successfully in floral catalogue!`, 'success', 'Catalogue Updated');
-              } else {
-                const newArr = {
-                  id: (modalProductType === 'flowers_only' ? 'flw-' : 'arr-') + Date.now(),
-                  productType: modalProductType,
-                  name: productName,
-                  category: fd.get('category') || (modalProductType === 'flowers_only' ? 'Roses' : 'Signature'),
-                  tag: fd.get('tag') || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
-                  price: Number(fd.get('price')) || (modalProductType === 'flowers_only' ? 85 : 2450),
-                  unit: unitVal,
-                  coldRoomCount: stockCount,
-                  sold30d: 0,
-                  rating: 5.0,
-                  image: finalImageUrl,
-                  description: fd.get('description') || (modalProductType === 'flowers_only' ? 'Freshly harvested highland stems from Baguio City.' : 'Handcrafted bespoke bouquet with highland blooms.'),
-                  stems: stemsList.length > 0 ? stemsList : (modalProductType === 'flowers_only' ? [productName] : ['Benguet Roses', 'Astilbe']),
-                  isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
-                  isFeatured: isFeaturedVal
-                };
-                const updated = [newArr, ...arrangements];
-                setArrangements(updated);
-                saveItem('arrangements', updated);
-                const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
-                saveItem('featured_arrangement_ids', featuredIds);
-                if (finalImageUrl) BT_IDB.saveImage(newArr.id, finalImageUrl);
+                const stockCount = Number(fd.get('coldRoomCount')) || (editingArrangement ? editingArrangement.coldRoomCount : (modalProductType === 'flowers_only' ? 50 : 10));
+                const stemsList = (fd.get('stems') || '').split(',').map(s => s.trim()).filter(Boolean);
+                const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
+                const isFeaturedVal = fd.get('isFeatured') === 'on' || fd.get('isFeatured') === 'true';
 
-                if (settings.googleAppsScriptUrl) {
-                  try {
-                    fetch(settings.googleAppsScriptUrl, {
-                      method: 'POST',
-                      mode: 'no-cors',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'sync_products', products: updated })
-                    }).catch(() => {});
-                  } catch(e) {}
+                if (editingArrangement) {
+                  const updated = deduplicateArrangements(arrangements.map(a => a.id === editingArrangement.id ? {
+                    ...a,
+                    productType: modalProductType,
+                    name: productName,
+                    category: fd.get('category') || a.category,
+                    tag: fd.get('tag') || a.tag || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
+                    price: Number(fd.get('price')) || a.price,
+                    unit: unitVal,
+                    coldRoomCount: stockCount,
+                    image: finalImageUrl,
+                    description: fd.get('description') || a.description,
+                    stems: stemsList.length > 0 ? stemsList : a.stems,
+                    isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
+                    isFeatured: isFeaturedVal
+                  } : a));
+                  setArrangements(updated);
+                  saveItem('arrangements', updated);
+                  const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
+                  saveItem('featured_arrangement_ids', featuredIds);
+                  if (finalImageUrl) BT_IDB.saveImage(editingArrangement.id, finalImageUrl);
+
+                  if (settings.googleAppsScriptUrl) {
+                    try {
+                      fetch(settings.googleAppsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'sync_products', products: updated })
+                      }).catch(() => {});
+                    } catch(e) {}
+                  }
+
+                  setIsArrangementModalOpen(false);
+                  setEditingArrangement(null);
+                  setNewArrangementImage('');
+                  setImageFileName('');
+                  showToast(`"${productName}" updated successfully in floral catalogue!`, 'success', 'Catalogue Updated');
+                } else {
+                  // Duplicate prevention: If item with same name exists, update rather than duplicating
+                  const existingMatch = arrangements.find(a => (a.name || '').trim().toLowerCase() === productName.toLowerCase());
+                  let updated;
+                  let targetId;
+
+                  if (existingMatch) {
+                    targetId = existingMatch.id;
+                    updated = deduplicateArrangements(arrangements.map(a => a.id === existingMatch.id ? {
+                      ...a,
+                      productType: modalProductType,
+                      name: productName,
+                      category: fd.get('category') || a.category,
+                      tag: fd.get('tag') || a.tag || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
+                      price: Number(fd.get('price')) || a.price,
+                      unit: unitVal,
+                      coldRoomCount: stockCount,
+                      image: finalImageUrl,
+                      description: fd.get('description') || a.description,
+                      stems: stemsList.length > 0 ? stemsList : a.stems,
+                      isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
+                      isFeatured: isFeaturedVal
+                    } : a));
+                    showToast(`"${productName}" already exists in catalogue — updated existing item & landing page status!`, 'info', 'Catalogue Updated');
+                  } else {
+                    targetId = (modalProductType === 'flowers_only' ? 'flw-' : 'arr-') + Date.now();
+                    const newArr = {
+                      id: targetId,
+                      productType: modalProductType,
+                      name: productName,
+                      category: fd.get('category') || (modalProductType === 'flowers_only' ? 'Roses' : 'Signature'),
+                      tag: fd.get('tag') || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
+                      price: Number(fd.get('price')) || (modalProductType === 'flowers_only' ? 85 : 2450),
+                      unit: unitVal,
+                      coldRoomCount: stockCount,
+                      sold30d: 0,
+                      rating: 5.0,
+                      image: finalImageUrl,
+                      description: fd.get('description') || (modalProductType === 'flowers_only' ? 'Freshly harvested highland stems from Baguio City.' : 'Handcrafted bespoke bouquet with highland blooms.'),
+                      stems: stemsList.length > 0 ? stemsList : (modalProductType === 'flowers_only' ? [productName] : ['Benguet Roses', 'Astilbe']),
+                      isLowStock: stockCount <= (modalProductType === 'flowers_only' ? 20 : 5),
+                      isFeatured: isFeaturedVal
+                    };
+                    updated = deduplicateArrangements([newArr, ...arrangements]);
+                    showToast(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published!`, 'success', 'Published');
+                  }
+
+                  setArrangements(updated);
+                  saveItem('arrangements', updated);
+                  const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
+                  saveItem('featured_arrangement_ids', featuredIds);
+                  if (finalImageUrl) BT_IDB.saveImage(targetId, finalImageUrl);
+
+                  if (settings.googleAppsScriptUrl) {
+                    try {
+                      fetch(settings.googleAppsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'sync_products', products: updated })
+                      }).catch(() => {});
+                    } catch(e) {}
+                  }
+
+                  setIsArrangementModalOpen(false);
+                  setEditingArrangement(null);
+                  setNewArrangementImage('');
+                  setImageFileName('');
                 }
-
-                setIsArrangementModalOpen(false);
-                setEditingArrangement(null);
-                setNewArrangementImage('');
-                setImageFileName('');
-                showToast(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published!`, 'success', 'Published');
+              } finally {
+                setIsSubmittingArrangement(false);
               }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -4016,15 +4129,141 @@ function AdminApp() {
               <button 
                 type="submit" 
                 className="btn-primary" 
-                disabled={isUploadingImage}
-                style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px', opacity: isUploadingImage ? 0.6 : 1, cursor: isUploadingImage ? 'not-allowed' : 'pointer' }}
+                disabled={isUploadingImage || isSubmittingArrangement}
+                style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px', opacity: (isUploadingImage || isSubmittingArrangement) ? 0.6 : 1, cursor: (isUploadingImage || isSubmittingArrangement) ? 'not-allowed' : 'pointer' }}
               >
-                {isUploadingImage ? 'Processing Photo...' : (editingArrangement 
+                {isUploadingImage ? 'Processing Photo...' : isSubmittingArrangement ? 'Saving Catalogue...' : (editingArrangement 
                   ? (`Save ${modalProductType === 'flowers_only' ? 'Flower Variety' : 'Arrangement'} Changes`) 
                   : (`Publish ${modalProductType === 'flowers_only' ? 'Flower Variety' : 'Arrangement'}`)
                 )}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: ASSIGN FEATURED CREATIONS TO LANDING PAGE (DEDUPLICATED)            */}
+      {/* ========================================================================= */}
+      {isAssignFeaturedModalOpen && (
+        <div className="modal-backdrop" onClick={() => setIsAssignFeaturedModalOpen(false)}>
+          <div className="modal-card" style={{ maxWidth: '640px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>
+                  ★ Assign Featured on Landing Page
+                </h3>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Select existing creations to publish in FEATURED CREATIONS on your public storefront.
+                </div>
+              </div>
+              <button onClick={() => setIsAssignFeaturedModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+
+            <div style={{ padding: '14px 20px 8px 20px' }}>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="Search catalogue by name, category, or flower..."
+                  value={featuredSearchQuery}
+                  onChange={(e) => setFeaturedSearchQuery(e.target.value)}
+                  style={{ paddingLeft: '34px' }}
+                />
+                <div style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-muted)' }}>
+                  <Icons.Search />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '10px 20px 20px 20px', overflowY: 'auto', flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {deduplicateArrangements(arrangements)
+                  .filter(a => {
+                    if (!featuredSearchQuery.trim()) return true;
+                    const q = featuredSearchQuery.toLowerCase();
+                    return (a.name || '').toLowerCase().includes(q) || (a.category || '').toLowerCase().includes(q);
+                  })
+                  .map(arr => {
+                    const isFeat = Boolean(arr.isFeatured);
+                    return (
+                      <div 
+                        key={arr.id} 
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          border: isFeat ? '1.5px solid #F59E0B' : '1px solid var(--border-subtle)',
+                          background: isFeat ? '#FFFBEB' : '#FFFFFF',
+                          transition: 'all 0.2s ease',
+                          gap: '12px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                          <img 
+                            src={arr.image} 
+                            alt={arr.name} 
+                            style={{ width: '46px', height: '46px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }} 
+                          />
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {arr.name}
+                              </span>
+                              {isFeat && (
+                                <span style={{ background: '#D97706', color: '#fff', fontSize: '10px', fontWeight: '800', padding: '1px 6px', borderRadius: '4px', flexShrink: 0 }}>
+                                  ★ Live
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                              ₱{arr.price.toLocaleString()} {arr.unit ? `(${arr.unit})` : ''} · {arr.category || arr.tag || 'Signature'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleFeatured(arr.id)}
+                          style={{
+                            padding: '7px 14px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            border: isFeat ? '1px solid #D97706' : '1px solid var(--primary-border)',
+                            background: isFeat ? '#FEF3C7' : 'var(--primary)',
+                            color: isFeat ? '#92400E' : '#FFFFFF',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <Icons.Star /> {isFeat ? 'Featured' : 'Feature'}
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border-subtle)', background: '#FAF7F8', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '0 0 16px 16px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                {arrangements.filter(a => a.isFeatured).length} arrangements currently active on Landing Page
+              </span>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ padding: '8px 18px', fontSize: '13px' }}
+                onClick={() => setIsAssignFeaturedModalOpen(false)}
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

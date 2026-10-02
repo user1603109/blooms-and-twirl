@@ -1238,13 +1238,38 @@ function App() {
     { id: 'flw-6', productType: 'flowers_only', isFeatured: false, name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
   ];
 
+  // Strict Deduplication Helper to guarantee zero duplicate creations on storefront
+  const deduplicateArrangements = (list) => {
+    if (!Array.isArray(list)) return [];
+    const seenIds = new Set();
+    const seenNames = new Set();
+    const result = [];
+    for (const item of list) {
+      if (!item || !item.id) continue;
+      const normName = (item.name || '').trim().toLowerCase();
+      if (!seenIds.has(item.id) && (!normName || !seenNames.has(normName))) {
+        seenIds.add(item.id);
+        if (normName) seenNames.add(normName);
+        result.push({ ...item });
+      } else if (item.isFeatured) {
+        const existing = result.find(r => r.id === item.id || ((r.name || '').trim().toLowerCase() === normName && normName));
+        if (existing) {
+          existing.isFeatured = true;
+        }
+      }
+    }
+    return result;
+  };
+
   const [arrangements, setArrangements] = useState(() => {
     const deleted = getInitial('deleted_arrangements', []);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
+    let cleaned = INITIAL_ARRANGEMENTS_DATA;
     if (Array.isArray(loaded)) {
-      return loaded.filter(a => !deleted.includes(a.id));
+      cleaned = deduplicateArrangements(loaded.filter(a => !deleted.includes(a.id)));
     }
-    return loaded;
+    saveItem('arrangements', cleaned);
+    return cleaned;
   });
 
   // Hydrate high-resolution 50MB studio photos from IndexedDB Vault
@@ -1263,7 +1288,7 @@ function App() {
         );
         if (isMounted) {
           const hasDiff = updated.some((a, i) => a.image !== arrangements[i].image);
-          if (hasDiff) setArrangements(updated);
+          if (hasDiff) setArrangements(deduplicateArrangements(updated));
         }
       } catch(err) {}
     })();
@@ -1278,7 +1303,7 @@ function App() {
         const deleted = getInitial('deleted_arrangements', []);
         const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
         if (Array.isArray(loaded)) {
-          setArrangements(loaded.filter(a => !deleted.includes(a.id)));
+          setArrangements(deduplicateArrangements(loaded.filter(a => !deleted.includes(a.id))));
         }
       }
     };
@@ -1761,9 +1786,9 @@ function App() {
     }
   };
 
-  // Catalogue Filtering
+  // Catalogue Filtering (Strictly deduplicated)
   const filteredArrangements = useMemo(() => {
-    let list = arrangements;
+    let list = deduplicateArrangements(arrangements);
     if (storeProductType !== 'all') {
       list = list.filter(a => (a.productType || 'arranged') === storeProductType);
     }
@@ -1772,13 +1797,26 @@ function App() {
       const q = searchQuery.toLowerCase();
       list = list.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q) || (a.stems && a.stems.join(' ').toLowerCase().includes(q)));
     }
-    return list;
+    return deduplicateArrangements(list);
   }, [arrangements, storeProductType, catalogCategory, searchQuery]);
 
-  // Dedicated Featured Creations assigned by Admin
+  // Dedicated Featured Creations assigned by Admin (Guaranteed unique items)
   const featuredArrangements = useMemo(() => {
     const featuredIds = getInitial('featured_arrangement_ids', []);
-    return arrangements.filter(a => Boolean(a.isFeatured) || (Array.isArray(featuredIds) && featuredIds.includes(a.id)));
+    const list = arrangements.filter(a => Boolean(a.isFeatured) || (Array.isArray(featuredIds) && featuredIds.includes(a.id)));
+    const seenIds = new Set();
+    const seenNames = new Set();
+    const unique = [];
+    for (const item of list) {
+      if (!item || !item.id) continue;
+      const normName = (item.name || '').trim().toLowerCase();
+      if (!seenIds.has(item.id) && (!normName || !seenNames.has(normName))) {
+        seenIds.add(item.id);
+        if (normName) seenNames.add(normName);
+        unique.push(item);
+      }
+    }
+    return unique;
   }, [arrangements]);
 
   return (
@@ -1788,11 +1826,6 @@ function App() {
       {/* ========================================================================= */}
       {viewMode === 'landing' && (
         <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
-          {/* Announcement Bar */}
-          <div style={{ background: '#2E121E', color: '#FCE2E8', textAlign: 'center', padding: '9px 16px', fontSize: '13px', fontWeight: '600' }}>
-            Studio Atelier in Apayao, Northern Luzon · Handpicked highland blooms from Baguio City (The Flower Capital of Luzon) · Use code <strong>TWIRLFIRST</strong> for ₱200 off!
-          </div>
-
           {/* Landing Header */}
           <header className="landing-header">
             <div className="header-brand-row">
