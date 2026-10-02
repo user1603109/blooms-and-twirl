@@ -1058,20 +1058,25 @@ function App() {
       setViewMode('store');
     } else {
       const cleaned = (authEmail || '').toLowerCase().trim();
-      const isAdmin = cleaned === 'admin' || cleaned.includes('admin') || authPassword === 'admin' || authPassword === 'admin123';
+      const isAdminUsername = cleaned === 'shaira' || cleaned === 'admin' || cleaned === 'shaira@bloomtwirl.com';
       
-      if (isAdmin) {
-        const adminUser = { 
-          name: 'Shaira Angela Saladino', 
-          email: authEmail || 'admin@bloomtwirl.com', 
-          role: 'admin' 
-        };
-        setCurrentUser(adminUser);
-        try {
-          localStorage.setItem('bt_currentUser_v2', JSON.stringify(adminUser));
-        } catch(err) {}
-        alert('Welcome back, Admin! Redirecting to Blooms&Twirl Admin Studio Console...');
-        window.location.href = './admin/index.html';
+      if (isAdminUsername) {
+        if (authPassword === 'blooms&twirl.admin' || authPassword === 'admin') {
+          const adminUser = { 
+            name: 'Shaira Angela Saladino', 
+            email: 'shaira@bloomtwirl.com', 
+            role: 'admin' 
+          };
+          setCurrentUser(adminUser);
+          try {
+            localStorage.setItem('bt_currentUser_v2', JSON.stringify(adminUser));
+            localStorage.setItem('bt_admin_auth', 'true');
+          } catch(err) {}
+          alert('Welcome back, Shaira! Redirecting to Blooms&Twirl Admin Studio Console...');
+          window.location.href = './admin/index.html';
+        } else {
+          alert('Incorrect password for admin account "' + authEmail + '". Please enter the correct password (blooms&twirl.admin).');
+        }
       } else {
         const clientName = authEmail.includes('@') ? authEmail.split('@')[0] : (authEmail || 'Valued Client');
         const clientUser = { 
@@ -1294,7 +1299,7 @@ function App() {
                           type="text" 
                           className="form-control" 
                           required 
-                          placeholder="client@domain.ph or admin"
+                          placeholder="shaira, admin, or client email"
                           value={authEmail}
                           onChange={(e) => setAuthEmail(e.target.value)}
                         />
