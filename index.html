@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blooms&Twirl by Shaira | Artisanal Floral Studio Northern Luzon</title>
   <meta name="description" content="Blooms&Twirl by Shaira - Artisanal flower studio in Apayao, Northern Luzon. Fresh highland mountain blooms supplied directly from Baguio City. Bespoke bouquets, bridal arrangements, and express Northern Luzon delivery.">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   
   <!-- Google Fonts: Fraunces (Serif) & Plus Jakarta Sans with display=block to eliminate Times New Roman FOUT -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1033,7 +1036,26 @@ const BT_IDB = {
   }
 };
 
-// Storage Helpers
+// Storage Helpers & Automatic Client-Side Version Updater
+// Clients NEVER need to clear cache: this automatically detects new builds and loads latest data
+const BT_BUILD_STAMP = '20261002_build_v3';
+try {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const activeStamp = localStorage.getItem('bt_build_stamp');
+    if (activeStamp !== BT_BUILD_STAMP) {
+      localStorage.removeItem('bt_arrangements_v2');
+      localStorage.removeItem('bt_custom_options_v2');
+      localStorage.setItem('bt_build_stamp', BT_BUILD_STAMP);
+    }
+  }
+} catch(e) {}
+
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    for (const reg of regs) reg.unregister();
+  }).catch(() => {});
+}
+
 const getInitial = (key, fallback) => {
   try {
     const raw = localStorage.getItem('bt_' + key + '_v2');
@@ -1490,42 +1512,100 @@ function App() {
   const [customPickupType, setCustomPickupType] = useState('Atelier Front Counter Pickup');
   const [customCardMessage, setCustomCardMessage] = useState('');
 
-  // Design Catalogues
-  const WRAPPER_DESIGNS = [
-    { id: 'w-1', name: 'Matte Korean Blush Bouquet Wrap', image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=80', desc: 'Soft frosted blush waterproof paper with delicate folds' },
-    { id: 'w-2', name: 'Vintage Embossed Noir & Gold', image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=400&q=80', desc: 'Textured charcoal paper with metallic gold foil borders' },
-    { id: 'w-3', name: 'Frosted Luxury Ivory & Gold', image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=400&q=80', desc: 'Translucent pearlescent Korean vellum wrap' },
-    { id: 'w-4', name: 'Pearlescent Opal Tissue Wrap', image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=400&q=80', desc: 'Iridescent layered tissue capturing ambient candlelight' },
-    { id: 'w-5', name: 'Earthy Sage Korean Kraft Wrap', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=400&q=80', desc: 'Eco-artisan muted sage and natural kraft paper' },
-    { id: 'w-6', name: 'Deep Midnight Velvet Indigo Paper', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80', desc: 'Royal indigo velvet finish with silk ribbon binding' }
-  ];
+  // Default Bespoke Design Catalogues & Selections
+  const DEFAULT_CUSTOM_OPTIONS = {
+    wrappers: [
+      { id: 'w-1', name: 'Matte Korean Blush Bouquet Wrap', image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=80', desc: 'Soft frosted blush waterproof paper with delicate folds' },
+      { id: 'w-2', name: 'Vintage Embossed Noir & Gold', image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=400&q=80', desc: 'Textured charcoal paper with metallic gold foil borders' },
+      { id: 'w-3', name: 'Frosted Luxury Ivory & Gold', image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=400&q=80', desc: 'Translucent pearlescent Korean vellum wrap' },
+      { id: 'w-4', name: 'Pearlescent Opal Tissue Wrap', image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=400&q=80', desc: 'Iridescent layered tissue capturing ambient candlelight' },
+      { id: 'w-5', name: 'Earthy Sage Korean Kraft Wrap', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=400&q=80', desc: 'Eco-artisan muted sage and natural kraft paper' },
+      { id: 'w-6', name: 'Deep Midnight Velvet Indigo Paper', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80', desc: 'Royal indigo velvet finish with silk ribbon binding' }
+    ],
+    colorThemes: [
+      { id: 'ct-1', name: 'Ethereal Pastels (Blush, Cream & Mint)', dot: '#FBCFE8' },
+      { id: 'ct-2', name: 'Crimson Velvet & Deep Rose', dot: '#9F1239' },
+      { id: 'ct-3', name: 'Highland Sunset (Coral, Peach & Gold)', dot: '#FB923C' },
+      { id: 'ct-4', name: 'Pure Mountain White & Sage', dot: '#E2E8F0' },
+      { id: 'ct-5', name: 'Lavender Dream & Soft Mauve', dot: '#C084FC' },
+      { id: 'ct-6', name: 'Midnight Velvet & Sapphire', dot: '#1E1B4B' }
+    ],
+    ribbons: [
+      { id: 'rb-1', name: 'Dusty Rose French Silk' },
+      { id: 'rb-2', name: 'Champagne Gold Double Satin' },
+      { id: 'rb-3', name: 'Deep Burgundy Velvet' },
+      { id: 'rb-4', name: 'Ivory Chiffon with Frayed Edge' },
+      { id: 'rb-5', name: 'Midnight Navy Grosgrain' },
+      { id: 'rb-6', name: 'Rose Gold Metallic Foil Trim' }
+    ],
+    materials: [
+      { id: 'mat-1', name: "Preserved White Baby's Breath Clouds", price: 250 },
+      { id: 'mat-2', name: "Sparkling Fairy Lights Garland (Warm Glow)", price: 180 },
+      { id: 'mat-3', name: "24k Edible Gold Leaf Accents", price: 350 },
+      { id: 'mat-4', name: "Delicate Golden Butterfly Pins", price: 150 },
+      { id: 'mat-5', name: "Silvery Seeded Eucalyptus Foliage Bunch", price: 200 },
+      { id: 'mat-6', name: "Clear Minimalist Glass Vase", price: 450 }
+    ]
+  };
 
-  const COLOR_THEMES = [
-    { name: 'Ethereal Pastels (Blush, Cream & Mint)', dot: '#FBCFE8' },
-    { name: 'Crimson Velvet & Deep Rose', dot: '#9F1239' },
-    { name: 'Highland Sunset (Coral, Peach & Gold)', dot: '#FB923C' },
-    { name: 'Pure Mountain White & Sage', dot: '#E2E8F0' },
-    { name: 'Lavender Dream & Soft Mauve', dot: '#C084FC' },
-    { name: 'Midnight Velvet & Sapphire', dot: '#1E1B4B' }
-  ];
+  const [customOptions, setCustomOptions] = useState(() => getInitial('custom_options', DEFAULT_CUSTOM_OPTIONS));
 
-  const RIBBON_STYLES = [
-    'Dusty Rose French Silk',
-    'Champagne Gold Double Satin',
-    'Deep Burgundy Velvet',
-    'Ivory Chiffon with Frayed Edge',
-    'Midnight Navy Grosgrain',
-    'Rose Gold Metallic Foil Trim'
-  ];
+  // Sync custom options live across browser tabs whenever admin updates them
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'bt_custom_options_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (fresh && typeof fresh === 'object') setCustomOptions(fresh);
+        } catch(err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
-  const ADDITIONAL_MATERIALS = [
-    { name: "Preserved White Baby's Breath Clouds", price: 250 },
-    { name: "Sparkling Fairy Lights Garland (Warm Glow)", price: 180 },
-    { name: "24k Edible Gold Leaf Accents", price: 350 },
-    { name: "Delicate Golden Butterfly Pins", price: 150 },
-    { name: "Silvery Seeded Eucalyptus Foliage Bunch", price: 200 },
-    { name: "Clear Minimalist Glass Vase", price: 450 }
-  ];
+  const WRAPPER_DESIGNS = (customOptions && customOptions.wrappers && customOptions.wrappers.length > 0) ? customOptions.wrappers : DEFAULT_CUSTOM_OPTIONS.wrappers;
+  const COLOR_THEMES = (customOptions && customOptions.colorThemes && customOptions.colorThemes.length > 0) ? customOptions.colorThemes : DEFAULT_CUSTOM_OPTIONS.colorThemes;
+  const RIBBON_STYLES = (customOptions && customOptions.ribbons && customOptions.ribbons.length > 0) 
+    ? customOptions.ribbons.map(r => typeof r === 'string' ? r : r.name) 
+    : DEFAULT_CUSTOM_OPTIONS.ribbons.map(r => typeof r === 'string' ? r : r.name);
+  const ADDITIONAL_MATERIALS = (customOptions && customOptions.materials && customOptions.materials.length > 0) ? customOptions.materials : DEFAULT_CUSTOM_OPTIONS.materials;
+
+  // Rating & Review System for Delivered Orders (Connected to /admin#reviews)
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewAuthor, setReviewAuthor] = useState('');
+  const [hasReviewed, setHasReviewed] = useState(() => getInitial('has_reviewed_orders', {}));
+
+  const handleCustomerSubmitReview = (orderToReview) => {
+    if (!reviewComment.trim()) {
+      showToast('Please enter your review comments or feedback.', 'error', 'Missing Feedback');
+      return;
+    }
+    const orderId = orderToReview.id;
+    const author = reviewAuthor.trim() || orderToReview.customerName || (currentUser ? currentUser.name : 'Verified Client');
+    const newRev = {
+      id: 'rev-' + Date.now(),
+      customerName: author,
+      quote: reviewComment.trim(),
+      rating: reviewRating,
+      badge: 'Verified Buyer',
+      date: new Date().toISOString().slice(0, 10),
+      orderId: orderId,
+      productName: orderToReview.arrangementName || orderToReview.customFlowerName || 'Handcrafted Floral Bouquet'
+    };
+
+    const currentReviews = getInitial('reviews', []);
+    const updatedReviews = [newRev, ...currentReviews];
+    saveItem('reviews', updatedReviews);
+
+    const updatedReviewed = { ...hasReviewed, [orderId]: true };
+    setHasReviewed(updatedReviewed);
+    saveItem('has_reviewed_orders', updatedReviewed);
+
+    setReviewComment('');
+    showToast('🌟 Thank you! Your review has been submitted and posted to Atelier Reviews.', 'success', 'Review Published');
+  };
 
   // Custom Order Dynamic Price Calculation
   const calculateCustomOrderPrice = () => {
@@ -2912,6 +2992,96 @@ function App() {
                         )}
                       </div>
 
+                      {/* Customer Rating & Review Form for Custom Orders */}
+                      {(currentStep === 5 || ['picked up / completed', 'completed', 'delivered'].includes((trackedCustomOrder.status || '').toLowerCase())) && (
+                        <div style={{ background: '#FFF9FB', border: '2px solid #FBCFE8', borderRadius: '18px', padding: '24px', marginTop: '24px', boxShadow: '0 8px 24px rgba(244,63,94,0.08)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '24px' }}>💐</span>
+                            <div>
+                              <h3 style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: '20px', color: '#1C1917' }}>
+                                Commission Received! Share Your Review with Shaira
+                              </h3>
+                              <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                                We hope your bespoke arrangement exceeded expectations! Please rate and review your custom commission for our atelier portfolio.
+                              </p>
+                            </div>
+                          </div>
+
+                          {hasReviewed && hasReviewed[trackedCustomOrder.id] ? (
+                            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 20px', marginTop: '16px', color: '#15803D', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ fontSize: '22px' }}>✓</span>
+                              <div>
+                                <strong style={{ fontSize: '14px' }}>Thank you for reviewing your custom commission!</strong>
+                                <div style={{ fontSize: '12px', marginTop: '2px', color: '#166534' }}>
+                                  Your feedback has been published to our live Atelier Reviews ledger.
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <form onSubmit={(e) => { e.preventDefault(); handleCustomerSubmitReview(trackedCustomOrder); }} style={{ marginTop: '18px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>Your Rating:</label>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <button
+                                      key={star}
+                                      type="button"
+                                      onClick={() => setReviewRating(star)}
+                                      style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '26px',
+                                        color: star <= reviewRating ? '#F59E0B' : '#D1D5DB',
+                                        cursor: 'pointer',
+                                        padding: '2px',
+                                        lineHeight: 1
+                                      }}
+                                    >
+                                      ★
+                                    </button>
+                                  ))}
+                                </div>
+                                <span style={{ fontSize: '13px', fontWeight: '800', color: '#D97706' }}>
+                                  {reviewRating === 5 ? '5.0 - Artisanal Masterpiece' : `${reviewRating}.0 Stars`}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                                <div>
+                                  <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Reviewer Name</label>
+                                  <input 
+                                    type="text" 
+                                    className="form-control" 
+                                    placeholder={trackedCustomOrder.customerName || "Your Name"}
+                                    value={reviewAuthor}
+                                    onChange={(e) => setReviewAuthor(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+
+                              <div style={{ marginBottom: '14px' }}>
+                                <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Custom Commission Feedback</label>
+                                <textarea
+                                  className="form-control"
+                                  rows="3"
+                                  placeholder="How did the custom wrapper, color palette, and highland blooms turn out? What was the recipient's reaction?"
+                                  value={reviewComment}
+                                  onChange={(e) => setReviewComment(e.target.value)}
+                                  required
+                                  style={{ width: '100%', resize: 'vertical' }}
+                                />
+                              </div>
+
+                              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <button type="submit" className="btn-primary" style={{ padding: '10px 24px', fontSize: '13px', fontWeight: '700' }}>
+                                  ⭐ Publish Bespoke Review
+                                </button>
+                              </div>
+                            </form>
+                          )}
+                        </div>
+                      )}
+
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '12px' }}>
                         <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                           Florist Atelier Hotline: <strong>+63 917 555 0142</strong> (Apayao Studio & Baguio City Hub)
@@ -3118,6 +3288,96 @@ function App() {
                           </div>
                         )}
                       </div>
+
+                      {/* Customer Rating & Review Form (Triggered once order reaches Delivered / Received stage) */}
+                      {(currentStep === 5 || ['delivered', 'received by customer'].includes((trackedOrder.status || '').toLowerCase())) && (
+                        <div style={{ background: '#FFF9FB', border: '2px solid #FBCFE8', borderRadius: '18px', padding: '24px', marginTop: '24px', boxShadow: '0 8px 24px rgba(244,63,94,0.08)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '24px' }}>🎉</span>
+                            <div>
+                              <h3 style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: '20px', color: '#1C1917' }}>
+                                Your Blooms Have Arrived! Rate & Review Your Experience
+                              </h3>
+                              <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--text-muted)' }}>
+                                Please share your feedback on flower freshness, arrangement design, and presentation. Your review will be featured in our Atelier Reviews!
+                              </p>
+                            </div>
+                          </div>
+
+                          {hasReviewed && hasReviewed[trackedOrder.id] ? (
+                            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '16px 20px', marginTop: '16px', color: '#15803D', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ fontSize: '22px' }}>✓</span>
+                              <div>
+                                <strong style={{ fontSize: '14px' }}>Thank you for your rating & review!</strong>
+                                <div style={{ fontSize: '12px', marginTop: '2px', color: '#166534' }}>
+                                  Your review has been successfully submitted and connected to our studio reviews ledger.
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <form onSubmit={(e) => { e.preventDefault(); handleCustomerSubmitReview(trackedOrder); }} style={{ marginTop: '18px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                                <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>Your Rating:</label>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                  {[1, 2, 3, 4, 5].map(star => (
+                                    <button
+                                      key={star}
+                                      type="button"
+                                      onClick={() => setReviewRating(star)}
+                                      style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '26px',
+                                        color: star <= reviewRating ? '#F59E0B' : '#D1D5DB',
+                                        cursor: 'pointer',
+                                        padding: '2px',
+                                        lineHeight: 1
+                                      }}
+                                    >
+                                      ★
+                                    </button>
+                                  ))}
+                                </div>
+                                <span style={{ fontSize: '13px', fontWeight: '800', color: '#D97706' }}>
+                                  {reviewRating === 5 ? '5.0 - Exceptional Quality' : `${reviewRating}.0 Stars`}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                                <div>
+                                  <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Reviewer Name</label>
+                                  <input 
+                                    type="text" 
+                                    className="form-control" 
+                                    placeholder={trackedOrder.customerName || "Your Name"}
+                                    value={reviewAuthor}
+                                    onChange={(e) => setReviewAuthor(e.target.value)}
+                                  />
+                                </div>
+                              </div>
+
+                              <div style={{ marginBottom: '14px' }}>
+                                <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Feedback & Product Review</label>
+                                <textarea
+                                  className="form-control"
+                                  rows="3"
+                                  placeholder="How were the petals, fragrance, and wrapping? What did you or the recipient love most about it?"
+                                  value={reviewComment}
+                                  onChange={(e) => setReviewComment(e.target.value)}
+                                  required
+                                  style={{ width: '100%', resize: 'vertical' }}
+                                />
+                              </div>
+
+                              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <button type="submit" className="btn-primary" style={{ padding: '10px 24px', fontSize: '13px', fontWeight: '700' }}>
+                                  ⭐ Submit Review to Atelier
+                                </button>
+                              </div>
+                            </form>
+                          )}
+                        </div>
+                      )}
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '12px' }}>
                         <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>

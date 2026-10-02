@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blooms&Twirl by Shaira | Admin Studio Console</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -286,6 +289,25 @@ const BT_IDB = {
   }
 };
 
+// Storage Helpers & Automatic Client-Side Version Updater
+const BT_BUILD_STAMP = '20261002_build_v3';
+try {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const activeStamp = localStorage.getItem('bt_build_stamp');
+    if (activeStamp !== BT_BUILD_STAMP) {
+      localStorage.removeItem('bt_arrangements_v2');
+      localStorage.removeItem('bt_custom_options_v2');
+      localStorage.setItem('bt_build_stamp', BT_BUILD_STAMP);
+    }
+  }
+} catch(e) {}
+
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    for (const reg of regs) reg.unregister();
+  }).catch(() => {});
+}
+
 const getInitial = (key, fallback) => {
   try {
     const raw = localStorage.getItem('bt_' + key + '_v2');
@@ -543,6 +565,47 @@ function AdminApp() {
     }
   ];
 
+  // Bespoke Custom Commissions Default Selection Options
+  const DEFAULT_CUSTOM_OPTIONS = {
+    wrappers: [
+      { id: 'w-1', name: 'Matte Korean Blush Bouquet Wrap', image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=80', desc: 'Soft frosted blush waterproof paper with delicate folds' },
+      { id: 'w-2', name: 'Vintage Embossed Noir & Gold', image: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=400&q=80', desc: 'Textured charcoal paper with metallic gold foil borders' },
+      { id: 'w-3', name: 'Frosted Luxury Ivory & Gold', image: 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=400&q=80', desc: 'Translucent pearlescent Korean vellum wrap' },
+      { id: 'w-4', name: 'Pearlescent Opal Tissue Wrap', image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=400&q=80', desc: 'Iridescent layered tissue capturing ambient candlelight' },
+      { id: 'w-5', name: 'Earthy Sage Korean Kraft Wrap', image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=400&q=80', desc: 'Eco-artisan muted sage and natural kraft paper' },
+      { id: 'w-6', name: 'Deep Midnight Velvet Indigo Paper', image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80', desc: 'Royal indigo velvet finish with silk ribbon binding' }
+    ],
+    colorThemes: [
+      { id: 'ct-1', name: 'Ethereal Pastels (Blush, Cream & Mint)', dot: '#FBCFE8' },
+      { id: 'ct-2', name: 'Crimson Velvet & Deep Rose', dot: '#9F1239' },
+      { id: 'ct-3', name: 'Highland Sunset (Coral, Peach & Gold)', dot: '#FB923C' },
+      { id: 'ct-4', name: 'Pure Mountain White & Sage', dot: '#E2E8F0' },
+      { id: 'ct-5', name: 'Lavender Dream & Soft Mauve', dot: '#C084FC' },
+      { id: 'ct-6', name: 'Midnight Velvet & Sapphire', dot: '#1E1B4B' }
+    ],
+    ribbons: [
+      { id: 'rb-1', name: 'Dusty Rose French Silk' },
+      { id: 'rb-2', name: 'Champagne Gold Double Satin' },
+      { id: 'rb-3', name: 'Deep Burgundy Velvet' },
+      { id: 'rb-4', name: 'Ivory Chiffon with Frayed Edge' },
+      { id: 'rb-5', name: 'Midnight Navy Grosgrain' },
+      { id: 'rb-6', name: 'Rose Gold Metallic Foil Trim' }
+    ],
+    materials: [
+      { id: 'mat-1', name: "Preserved White Baby's Breath Clouds", price: 250 },
+      { id: 'mat-2', name: "Sparkling Fairy Lights Garland (Warm Glow)", price: 180 },
+      { id: 'mat-3', name: "24k Edible Gold Leaf Accents", price: 350 },
+      { id: 'mat-4', name: "Delicate Golden Butterfly Pins", price: 150 },
+      { id: 'mat-5', name: "Silvery Seeded Eucalyptus Foliage Bunch", price: 200 },
+      { id: 'mat-6', name: "Clear Minimalist Glass Vase", price: 450 }
+    ]
+  };
+
+  const [customOptions, setCustomOptions] = useState(() => getInitial('custom_options', DEFAULT_CUSTOM_OPTIONS));
+  useEffect(() => saveItem('custom_options', customOptions), [customOptions]);
+  const [isCustomOptionsManagerOpen, setIsCustomOptionsManagerOpen] = useState(false);
+  const [customOptionSubTab, setCustomOptionSubTab] = useState('wrappers'); // 'wrappers' | 'colorThemes' | 'ribbons' | 'materials'
+
   const [customOrders, setCustomOrders] = useState(() => getInitial('custom_orders', INITIAL_CUSTOM_ORDERS));
   useEffect(() => saveItem('custom_orders', customOrders), [customOrders]);
   const [customOrderFilter, setCustomOrderFilter] = useState('All');
@@ -718,6 +781,21 @@ function AdminApp() {
     { id: 'r-2', customerName: 'Kaito Nakamura', quote: 'The eucalyptus and peonies in the Fuchsia Fable stayed fragrant for over two weeks in San Juan.', rating: 5, badge: 'Verified Buyer', date: '2026-09-29' },
     { id: 'r-3', customerName: 'Highland Pine Cafe', quote: 'Our weekly cafe tables look magnificent. Reliable delivery every single Monday without fail.', rating: 5, badge: 'Corporate Client', date: '2026-09-25' }
   ]));
+  useEffect(() => saveItem('reviews', reviews), [reviews]);
+
+  // Synchronize reviews instantly across browser tabs when customers submit reviews
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'bt_reviews_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (Array.isArray(fresh)) setReviews(fresh);
+        } catch(err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const [settings, setSettings] = useState(() => getInitial('settings', {
     shopName: 'Blooms&Twirl by Shaira',
@@ -1101,16 +1179,27 @@ function AdminApp() {
 
   // Order Actions
   const advanceOrderStatus = (orderId, newStatus) => {
+    const target = orders.find(o => o.id === orderId);
     const updated = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
     setOrders(updated);
     saveItem('orders', updated);
+
+    const norm = normalizeSubStatus(newStatus);
+    if (['Delivered', 'Received by Customer'].includes(norm) && target) {
+      showToast(`✉️ Delivery confirmed! Automatic success email and review invitation sent to ${target.customerName} (${target.email || 'customer@ph.com'})!`, 'success', 'Delivery Success Emailed');
+    }
   };
 
   // Custom Order Actions
   const handleUpdateCustomOrderStatus = (customOrderId, newStatus) => {
+    const target = customOrders.find(co => co.id === customOrderId);
     const updated = customOrders.map(co => co.id === customOrderId ? { ...co, status: newStatus } : co);
     setCustomOrders(updated);
     saveItem('custom_orders', updated);
+
+    if (newStatus === 'Picked Up / Completed' && target) {
+      showToast(`✉️ Commission delivered & completed! Success notification and review request emailed to ${target.customerName} (${target.email || 'customer@ph.com'})!`, 'success', 'Delivery Success Emailed');
+    }
   };
 
   const handleProposeSubstitution = (customOrderId, reason, alternativeName, alternativeImg, priceDiff) => {
@@ -1456,8 +1545,8 @@ function AdminApp() {
           </div>
 
           <div className="topbar-actions">
-            <a href="../index.html?view=customer_dashboard" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              ← Customer Dashboard Preview
+            <a href="../index.html" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }} title="Open live customer storefront in a new tab">
+              🌸 View Live Storefront
             </a>
             <button 
               type="button" 
@@ -2122,13 +2211,31 @@ function AdminApp() {
 
               {/* Custom Orders Main Table */}
               <div className="content-card">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h3 className="card-title" style={{ margin: 0 }}>Custom Floral Commissions Book</h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
-                      Showing {filteredCustomOrders.length} bespoke arrangement orders
+                    <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                      Showing {filteredCustomOrders.length} bespoke commissions · Click any row to view complete commission ticket in modal
                     </p>
                   </div>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      fontWeight: '700', 
+                      borderColor: 'var(--primary)', 
+                      color: 'var(--primary)',
+                      background: '#FFF0F5',
+                      padding: '8px 16px',
+                      borderRadius: '10px'
+                    }}
+                    onClick={() => setIsCustomOptionsManagerOpen(true)}
+                  >
+                    ⚙️ Manage Custom Commission Options
+                  </button>
                 </div>
 
                 <div className="table-responsive">
@@ -2136,20 +2243,18 @@ function AdminApp() {
                     <thead>
                       <tr>
                         <th>Commission ID</th>
-                        <th>Customer / Contact</th>
-                        <th>Requested Flower & Stems</th>
-                        <th>Wrapper & Ribbon</th>
-                        <th>Extra Materials</th>
-                        <th>Scheduled Fulfillment</th>
-                        <th>Price</th>
-                        <th>Studio Status (9 Stages)</th>
-                        <th>Actions</th>
+                        <th>Customer</th>
+                        <th>Floral Request</th>
+                        <th>Fulfillment</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th style={{ textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredCustomOrders.length === 0 ? (
                         <tr>
-                          <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                          <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                             No custom orders found matching "{customOrderFilter}".
                           </td>
                         </tr>
@@ -2159,7 +2264,15 @@ function AdminApp() {
                           const statusClass = (co.status || 'newpending').toLowerCase().replace(/[^a-z]/g, '');
 
                           return (
-                            <tr key={co.id}>
+                            <tr 
+                              key={co.id} 
+                              onClick={(e) => {
+                                if (e.target.closest('button') || e.target.closest('select')) return;
+                                setSelectedCustomOrder(co);
+                              }}
+                              style={{ cursor: 'pointer', transition: 'background-color 0.15s ease' }}
+                              title="Click to view full commission specification ticket"
+                            >
                               <td>
                                 <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{co.id}</div>
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
@@ -2170,79 +2283,30 @@ function AdminApp() {
                                 <div style={{ fontWeight: '700', fontSize: '13px' }}>{co.customerName}</div>
                                 <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{co.phone}</div>
                                 {co.recipient && (
-                                  <div style={{ fontSize: '11px', color: '#0369A1', marginTop: '2px' }}>
-                                    For: {co.recipient}
+                                  <div style={{ fontSize: '11px', color: '#0369A1', marginTop: '1px' }}>
+                                    Recipient: {co.recipient}
                                   </div>
                                 )}
                               </td>
-                              <td style={{ maxWidth: '220px' }}>
-                                {isCustomWritten ? (
-                                  <div>
-                                    <span style={{ 
-                                      display: 'inline-block', 
-                                      background: '#FFF1F2', 
-                                      color: '#E11D48', 
-                                      border: '1px solid #FECDD3',
-                                      fontSize: '10px', 
-                                      fontWeight: '800', 
-                                      padding: '2px 6px', 
-                                      borderRadius: '4px',
-                                      marginBottom: '4px'
-                                    }}>
-                                      CUSTOM WRITTEN (VERIFY AVAILABILITY)
-                                    </span>
-                                    <div style={{ fontWeight: '700', fontSize: '13px', color: '#1C1917' }}>
-                                      {co.customFlowerName}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div>
-                                    <div style={{ fontWeight: '700', fontSize: '13px', color: '#1C1917' }}>
-                                      {co.selectedBlooms ? co.selectedBlooms.join(' + ') : co.customFlowerName}
-                                    </div>
-                                  </div>
-                                )}
+                              <td style={{ maxWidth: '240px' }}>
+                                <div style={{ fontWeight: '700', fontSize: '13px', color: '#1C1917', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {isCustomWritten ? (co.customFlowerName || 'Custom Request') : (co.selectedBlooms ? co.selectedBlooms.join(' + ') : (co.customFlowerName || 'Custom Blooms'))}
+                                </div>
                                 <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
-                                  <span style={{ fontSize: '11px', background: '#FDF2F8', color: '#BE185D', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}>
+                                  <span style={{ fontSize: '11px', background: '#FDF2F8', color: '#BE185D', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
                                     {co.stemCount || 24} Stems
                                   </span>
                                   {co.colorTheme && (
-                                    <span style={{ fontSize: '11px', background: '#F3F4F6', color: '#374151', padding: '2px 6px', borderRadius: '4px' }}>
-                                      {co.colorTheme}
+                                    <span style={{ fontSize: '11px', background: '#F3F4F6', color: '#374151', padding: '1px 6px', borderRadius: '4px' }}>
+                                      {co.colorTheme.split('(')[0].trim()}
+                                    </span>
+                                  )}
+                                  {isCustomWritten && (
+                                    <span style={{ fontSize: '10px', background: '#FFF1F2', color: '#E11D48', padding: '1px 5px', borderRadius: '4px', fontWeight: '800' }}>
+                                      Custom Written
                                     </span>
                                   )}
                                 </div>
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  {co.wrapperImage ? (
-                                    <img 
-                                      src={co.wrapperImage} 
-                                      alt="Wrapper" 
-                                      style={{ width: '38px', height: '38px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--border-light)' }} 
-                                    />
-                                  ) : null}
-                                  <div>
-                                    <div style={{ fontSize: '12px', fontWeight: '600' }}>{co.wrapperStyle || 'Matte Wrap'}</div>
-                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Ribbon: {co.ribbonStyle || 'Satin'}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td style={{ maxWidth: '160px' }}>
-                                {co.additionalMaterials && co.additionalMaterials.length > 0 ? (
-                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                                    {co.additionalMaterials.map((mat, mi) => (
-                                      <span 
-                                        key={mi} 
-                                        style={{ fontSize: '10px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: '600' }}
-                                      >
-                                        + {mat}
-                                      </span>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Standard</span>
-                                )}
                               </td>
                               <td>
                                 <div style={{ fontWeight: '700', fontSize: '12px' }}>{co.requestedDate}</div>
@@ -2260,7 +2324,10 @@ function AdminApp() {
                               <td>
                                 <select 
                                   value={co.status} 
-                                  onChange={(e) => handleUpdateCustomOrderStatus(co.id, e.target.value)}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    handleUpdateCustomOrderStatus(co.id, e.target.value);
+                                  }}
                                   className={'status-chip ' + statusClass}
                                   style={{ padding: '6px 10px', fontSize: '12px', cursor: 'pointer', border: 'none', outline: 'none' }}
                                 >
@@ -2272,56 +2339,43 @@ function AdminApp() {
                                 </select>
                                 {co.substitutionProposal && co.status === 'Substitution Needed' && (
                                   <div style={{ fontSize: '10px', color: '#86198F', fontWeight: '700', marginTop: '4px' }}>
-                                    Feedback Sent: {co.substitutionProposal.proposedAlternative}
+                                    Feedback Sent
                                   </div>
                                 )}
                               </td>
-                              <td>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                              <td style={{ textAlign: 'right' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                                   <button
                                     type="button"
                                     className="btn-secondary"
-                                    style={{ 
-                                      padding: '4px 8px', 
-                                      fontSize: '11px', 
-                                      whiteSpace: 'nowrap',
-                                      color: '#BE185D',
-                                      borderColor: '#FCE7F3',
-                                      background: '#FDF2F8',
-                                      fontWeight: '700'
+                                    style={{ padding: '5px 10px', fontSize: '11px', fontWeight: '700', whiteSpace: 'nowrap', borderColor: '#FECDD3', background: '#FFF1F2', color: 'var(--primary)' }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedCustomOrder(co);
                                     }}
-                                    onClick={() => setSubstitutionModalOrder(co)}
-                                    title="Send unavailable feedback with alternative flower"
+                                    title="Open comprehensive commission modal ticket"
                                   >
-                                    Propose Alternative 💬
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="btn-secondary"
-                                    style={{ padding: '4px 8px', fontSize: '11px', whiteSpace: 'nowrap' }}
-                                    onClick={() => setSelectedCustomOrder(co)}
-                                    title="Open full florist workshop design sheet"
-                                  >
-                                    Design Ticket 📋
+                                    View Ticket 📋
                                   </button>
 
                                   <button
                                     type="button"
                                     className="btn-secondary"
                                     style={{ 
-                                      padding: '4px 8px', 
+                                      padding: '5px 8px', 
                                       fontSize: '11px', 
                                       whiteSpace: 'nowrap',
                                       color: '#E11D48',
                                       borderColor: '#FECDD3',
-                                      background: '#FFF1F2',
-                                      fontWeight: '600'
+                                      background: '#FFF1F2'
                                     }}
-                                    onClick={() => handleDeleteCustomOrder(co.id, co.customerName)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCustomOrder(co.id, co.customerName);
+                                    }}
                                     title="Delete custom order"
                                   >
-                                    Delete 🗑️
+                                    🗑️
                                   </button>
                                 </div>
                               </td>
@@ -2904,20 +2958,60 @@ function AdminApp() {
               <div className="content-card">
                 <div className="card-title" style={{ marginBottom: '16px' }}>Client Quotes & Testimonials</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {reviews.map(rev => (
-                    <div key={rev.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                      <div>
-                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{rev.customerName}</div>
-                        <div style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-main)', marginTop: '2px' }}>"{rev.quote}"</div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '9999px', background: '#FDF0F3', color: 'var(--primary)' }}>
-                          {rev.badge}
-                        </span>
-                        <span style={{ fontWeight: '700', color: '#D97706' }}>{'★'.repeat(rev.rating)}</span>
-                      </div>
+                  {reviews.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                      No customer reviews submitted yet. When customers receive deliveries, their feedback appears here.
                     </div>
-                  ))}
+                  ) : (
+                    reviews.map(rev => (
+                      <div key={rev.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ flex: 1, minWidth: '260px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: '700', fontSize: '14px' }}>{rev.customerName}</span>
+                            <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '9999px', background: '#FDF0F3', color: 'var(--primary)' }}>
+                              {rev.badge || 'Verified Client'}
+                            </span>
+                            {rev.date && (
+                              <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{rev.date}</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-main)', marginTop: '4px', lineHeight: '1.4' }}>
+                            "{rev.quote}"
+                          </div>
+                          {(rev.orderId || rev.productName) && (
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '3px' }}>
+                              Bloom: <strong style={{ color: 'var(--primary)' }}>{rev.productName || 'Artisanal Bouquet'}</strong> {rev.orderId ? `(${rev.orderId})` : ''}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontWeight: '800', color: '#D97706', fontSize: '15px' }}>{'★'.repeat(rev.rating || 5)}</span>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            style={{ fontSize: '11px', padding: '4px 8px', color: '#E11D48', borderColor: '#FECDD3' }}
+                            onClick={() => {
+                              requestConfirm({
+                                title: 'Remove Review?',
+                                message: `Are you sure you want to remove this review by ${rev.customerName}?`,
+                                confirmText: 'Delete Review',
+                                isDestructive: true,
+                                onConfirm: () => {
+                                  const updated = reviews.filter(r => r.id !== rev.id);
+                                  setReviews(updated);
+                                  saveItem('reviews', updated);
+                                  showToast('Review removed from atelier records.', 'info');
+                                }
+                              });
+                            }}
+                            title="Delete review"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -4630,66 +4724,455 @@ function AdminApp() {
               </div>
             </div>
 
-            {/* Quick Status Advance in Modal */}
-            <div style={{ background: '#F9FAFB', border: '1px solid var(--border-light)', borderRadius: '14px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            {/* Pricing & Financial Breakdown Card */}
+            <div style={{ background: '#FFFDF9', border: '1px solid #FEF3C7', borderRadius: '14px', padding: '16px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Flow Stage:</div>
-                <div style={{ fontWeight: '800', fontSize: '14px', color: 'var(--primary)' }}>{selectedCustomOrder.status}</div>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                  Commission Total & Settlement
+                </span>
+                <div style={{ fontSize: '22px', fontWeight: '800', color: 'var(--primary)', marginTop: '2px' }}>
+                  ₱{(selectedCustomOrder.estimatedPrice || selectedCustomOrder.total || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Includes fresh highland stems ({selectedCustomOrder.stemCount || 24} stems), artisan wrapping, ribbon & selected accent add-ons.
+                </div>
               </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', background: '#DCFCE7', color: '#15803D', padding: '4px 10px', borderRadius: '6px', fontWeight: '800' }}>
+                  PAID IN FULL
+                </span>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  style={{ fontSize: '12px', padding: '6px 14px', background: '#FFF1F2', borderColor: '#FECDD3', color: 'var(--primary)', fontWeight: '700' }}
+                  onClick={() => {
+                    showToast(`✉️ Delivery confirmation & review invitation email sent to ${selectedCustomOrder.customerName} (${selectedCustomOrder.email || 'customer@ph.com'})!`, 'success', 'Email Dispatched');
+                  }}
+                  title="Notify customer via email with order status & link to provide reviews"
+                >
+                  ✉️ Email Status & Review Link
+                </button>
+              </div>
+            </div>
+
+            {/* Studio Production Stage Selector in Modal */}
+            <div style={{ background: '#F9FAFB', border: '1px solid var(--border-light)', borderRadius: '14px', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Studio Flow Stage:</div>
+                  <select 
+                    value={selectedCustomOrder.status}
+                    onChange={(e) => {
+                      const newSt = e.target.value;
+                      handleUpdateCustomOrderStatus(selectedCustomOrder.id, newSt);
+                      setSelectedCustomOrder({ ...selectedCustomOrder, status: newSt });
+                    }}
+                    style={{
+                      fontWeight: '800',
+                      fontSize: '14px',
+                      color: 'var(--primary)',
+                      border: '1.5px solid var(--primary)',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      background: '#FFFFFF',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      marginTop: '3px'
+                    }}
+                  >
+                    {CUSTOM_ORDER_ADMIN_STAGES.map(st => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <button 
                   type="button" 
                   className="btn-secondary" 
-                  style={{ fontSize: '11px', padding: '6px 12px' }}
+                  style={{ fontSize: '12px', padding: '7px 12px', color: '#BE185D', borderColor: '#FCE7F3', background: '#FDF2F8', fontWeight: '700' }}
                   onClick={() => {
-                    handleUpdateCustomOrderStatus(selectedCustomOrder.id, 'Arranging in Progress');
-                    setSelectedCustomOrder({ ...selectedCustomOrder, status: 'Arranging in Progress' });
+                    setSubstitutionModalOrder(selectedCustomOrder);
                   }}
                 >
-                  ➔ Arranging in Progress
+                  Propose Alt 💬
                 </button>
                 <button 
                   type="button" 
                   className="btn-secondary" 
-                  style={{ fontSize: '11px', padding: '6px 12px' }}
-                  onClick={() => {
-                    handleUpdateCustomOrderStatus(selectedCustomOrder.id, 'Ready in Cold Room');
-                    setSelectedCustomOrder({ ...selectedCustomOrder, status: 'Ready in Cold Room' });
-                  }}
+                  style={{ fontSize: '12px', padding: '7px 12px' }}
+                  onClick={() => window.print()}
                 >
-                  ➔ Ready in Cold Room
+                  🖨️ Print Ticket
                 </button>
                 <button 
                   type="button" 
                   className="btn-secondary" 
-                  style={{ fontSize: '11px', padding: '6px 12px', background: '#DCFCE7', color: '#15803D', borderColor: '#BBF7D0' }}
-                  onClick={() => {
-                    handleUpdateCustomOrderStatus(selectedCustomOrder.id, 'Ready at Front Counter');
-                    setSelectedCustomOrder({ ...selectedCustomOrder, status: 'Ready at Front Counter' });
-                  }}
+                  style={{ fontSize: '12px', padding: '7px 12px', background: '#FFF1F2', color: '#E11D48', borderColor: '#FECDD3', fontWeight: '700' }}
+                  onClick={() => handleDeleteCustomOrder(selectedCustomOrder.id, selectedCustomOrder.customerName)}
                 >
-                  ➔ Ready at Front Counter
+                  Delete 🗑️
                 </button>
                 <button 
                   type="button" 
                   className="btn-primary" 
-                  style={{ fontSize: '11px', padding: '6px 14px' }}
-                  onClick={() => {
-                    handleUpdateCustomOrderStatus(selectedCustomOrder.id, 'Picked Up / Completed');
-                    setSelectedCustomOrder({ ...selectedCustomOrder, status: 'Picked Up / Completed' });
-                  }}
+                  style={{ fontSize: '12px', padding: '7px 16px' }}
+                  onClick={() => setSelectedCustomOrder(null)}
                 >
-                  ✓ Complete & Picked Up
-                </button>
-                <button 
-                  type="button" 
-                  className="btn-secondary" 
-                  style={{ fontSize: '11px', padding: '6px 12px', background: '#FFF1F2', color: '#E11D48', borderColor: '#FECDD3', fontWeight: '700' }}
-                  onClick={() => handleDeleteCustomOrder(selectedCustomOrder.id, selectedCustomOrder.customerName)}
-                >
-                  Delete Order 🗑️
+                  Done
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 7: BESPOKE FLORAL COMMISSIONS SELECTION & MATERIAL MANAGER           */}
+      {/* ========================================================================= */}
+      {isCustomOptionsManagerOpen && (
+        <div className="modal-backdrop" onClick={() => setIsCustomOptionsManagerOpen(false)}>
+          <div className="modal-card modal-lg" onClick={e => e.stopPropagation()} style={{ maxWidth: '880px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--primary)' }}>
+                  STUDIO BESPOKE CATALOGUE BUILDER
+                </span>
+                <h3 style={{ margin: '4px 0 0', fontFamily: 'Fraunces, serif', fontSize: '22px' }}>
+                  Manage Bespoke Commission Options
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Configure the wrapping papers, color themes, ribbons, and extra materials available in the customer's "Design Your Custom Floral Arrangement" builder.
+                </p>
+              </div>
+              <button onClick={() => setIsCustomOptionsManagerOpen(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+            </div>
+
+            {/* Sub-tab navigation */}
+            <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'wrappers', label: 'Wrappers (' + (customOptions.wrappers || []).length + ')', icon: '🎀' },
+                { id: 'colorThemes', label: 'Color Themes (' + (customOptions.colorThemes || []).length + ')', icon: '🎨' },
+                { id: 'ribbons', label: 'Ribbons (' + (customOptions.ribbons || []).length + ')', icon: '🎗️' },
+                { id: 'materials', label: 'Extra Materials (' + (customOptions.materials || []).length + ')', icon: '✨' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setCustomOptionSubTab(tab.id)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '10px',
+                    border: customOptionSubTab === tab.id ? '1.5px solid var(--primary)' : '1px solid var(--border-light)',
+                    background: customOptionSubTab === tab.id ? '#FFF0F5' : '#FFFFFF',
+                    color: customOptionSubTab === tab.id ? 'var(--primary)' : 'var(--text-main)',
+                    fontWeight: customOptionSubTab === tab.id ? '700' : '500',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* TAB 1: WRAPPERS */}
+            {customOptionSubTab === 'wrappers' && (
+              <div>
+                {/* Add new wrapper form */}
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const name = (fd.get('name') || '').trim();
+                    const image = (fd.get('image') || '').trim();
+                    const desc = (fd.get('desc') || '').trim();
+                    if (!name) return;
+                    const newWrap = {
+                      id: 'w-' + Date.now(),
+                      name,
+                      image: image || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=80',
+                      desc: desc || 'Artisanal floral wrap paper'
+                    };
+                    const updated = { ...customOptions, wrappers: [...(customOptions.wrappers || []), newWrap] };
+                    setCustomOptions(updated);
+                    saveItem('custom_options', updated);
+                    e.target.reset();
+                    showToast(`Added wrapper "${name}"! Storefront custom builder updated.`, 'success', 'Wrapper Added');
+                  }}
+                  style={{ background: '#FFF9FB', border: '1px solid #FFE4E6', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}
+                >
+                  <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    + Add New Wrapping Paper Design
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Wrapper Name</label>
+                      <input name="name" type="text" className="form-control" placeholder="e.g. Vintage Italian Marble Paper" required />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '11px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Image URL</label>
+                      <input name="image" type="url" className="form-control" placeholder="https://images.unsplash.com/..." />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Description</label>
+                    <input name="desc" type="text" className="form-control" placeholder="e.g. Textured matte paper with gold foil floral embossing" />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button type="submit" className="btn-primary" style={{ padding: '8px 18px', fontSize: '12px' }}>
+                      + Add Wrapping Option
+                    </button>
+                  </div>
+                </form>
+
+                {/* List of Wrappers */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+                  {(customOptions.wrappers || []).map((wrap, idx) => (
+                    <div key={wrap.id || idx} style={{ border: '1px solid var(--border-light)', borderRadius: '12px', overflow: 'hidden', background: '#FFFFFF', display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ height: '110px', overflow: 'hidden', background: '#F8FAFC' }}>
+                        <img src={wrap.image} alt={wrap.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ fontWeight: '700', fontSize: '13px', color: '#1C1917', marginBottom: '4px' }}>{wrap.name}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.4' }}>{wrap.desc}</div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            style={{ fontSize: '11px', padding: '3px 8px', color: '#E11D48', borderColor: '#FECDD3' }}
+                            onClick={() => {
+                              const updatedList = (customOptions.wrappers || []).filter((_, i) => i !== idx);
+                              const updated = { ...customOptions, wrappers: updatedList };
+                              setCustomOptions(updated);
+                              saveItem('custom_options', updated);
+                              showToast(`Removed wrapper "${wrap.name}".`, 'info');
+                            }}
+                          >
+                            Remove 🗑️
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: COLOR THEMES */}
+            {customOptionSubTab === 'colorThemes' && (
+              <div>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const name = (fd.get('name') || '').trim();
+                    const dot = (fd.get('dot') || '#FBCFE8').trim();
+                    if (!name) return;
+                    const newTheme = { id: 'ct-' + Date.now(), name, dot };
+                    const updated = { ...customOptions, colorThemes: [...(customOptions.colorThemes || []), newTheme] };
+                    setCustomOptions(updated);
+                    saveItem('custom_options', updated);
+                    e.target.reset();
+                    showToast(`Added color theme "${name}"!`, 'success');
+                  }}
+                  style={{ background: '#FFF9FB', border: '1px solid #FFE4E6', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}
+                >
+                  <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    + Add New Color Palette Theme
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                      <input name="name" type="text" className="form-control" placeholder="e.g. Alpine Frost & Slate Blue" required />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: '700' }}>Dot Color:</label>
+                      <input name="dot" type="color" defaultValue="#FB7185" style={{ width: '42px', height: '38px', borderRadius: '8px', border: '1px solid var(--border-light)', cursor: 'pointer', padding: '2px' }} />
+                    </div>
+                    <button type="submit" className="btn-primary" style={{ padding: '8px 18px', fontSize: '12px' }}>
+                      + Add Theme
+                    </button>
+                  </div>
+                </form>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                  {(customOptions.colorThemes || []).map((theme, idx) => (
+                    <div key={theme.id || idx} style={{ border: '1px solid var(--border-light)', borderRadius: '12px', padding: '12px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: theme.dot, border: '1px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#1C1917' }}>{theme.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        style={{ fontSize: '10px', padding: '3px 6px', color: '#E11D48', borderColor: '#FECDD3' }}
+                        onClick={() => {
+                          const updatedList = (customOptions.colorThemes || []).filter((_, i) => i !== idx);
+                          const updated = { ...customOptions, colorThemes: updatedList };
+                          setCustomOptions(updated);
+                          saveItem('custom_options', updated);
+                          showToast(`Removed theme "${theme.name}".`, 'info');
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: RIBBON STYLES */}
+            {customOptionSubTab === 'ribbons' && (
+              <div>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const name = (fd.get('name') || '').trim();
+                    if (!name) return;
+                    const newRibbon = { id: 'rb-' + Date.now(), name };
+                    const updated = { ...customOptions, ribbons: [...(customOptions.ribbons || []), newRibbon] };
+                    setCustomOptions(updated);
+                    saveItem('custom_options', updated);
+                    e.target.reset();
+                    showToast(`Added ribbon style "${name}"!`, 'success');
+                  }}
+                  style={{ background: '#FFF9FB', border: '1px solid #FFE4E6', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}
+                >
+                  <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    + Add New Ribbon Fabric & Style
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <input name="name" type="text" className="form-control" placeholder="e.g. Forest Velvet Silk Ribbon" required />
+                    <button type="submit" className="btn-primary" style={{ padding: '8px 18px', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                      + Add Ribbon
+                    </button>
+                  </div>
+                </form>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                  {(customOptions.ribbons || []).map((rib, idx) => {
+                    const ribName = typeof rib === 'string' ? rib : rib.name;
+                    return (
+                      <div key={idx} style={{ border: '1px solid var(--border-light)', borderRadius: '10px', padding: '10px 14px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '600' }}>🎗️ {ribName}</span>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          style={{ fontSize: '10px', padding: '3px 6px', color: '#E11D48', borderColor: '#FECDD3' }}
+                          onClick={() => {
+                            const updatedList = (customOptions.ribbons || []).filter((_, i) => i !== idx);
+                            const updated = { ...customOptions, ribbons: updatedList };
+                            setCustomOptions(updated);
+                            saveItem('custom_options', updated);
+                            showToast(`Removed ribbon "${ribName}".`, 'info');
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: EXTRA MATERIALS */}
+            {customOptionSubTab === 'materials' && (
+              <div>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.target);
+                    const name = (fd.get('name') || '').trim();
+                    const price = Math.max(0, Number(fd.get('price')) || 0);
+                    if (!name) return;
+                    const newMat = { id: 'mat-' + Date.now(), name, price };
+                    const updated = { ...customOptions, materials: [...(customOptions.materials || []), newMat] };
+                    setCustomOptions(updated);
+                    saveItem('custom_options', updated);
+                    e.target.reset();
+                    showToast(`Added accent material "${name}" (+₱${price})!`, 'success');
+                  }}
+                  style={{ background: '#FFF9FB', border: '1px solid #FFE4E6', borderRadius: '14px', padding: '16px', marginBottom: '20px' }}
+                >
+                  <div style={{ fontSize: '12px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    + Add New Luxury Accent Material & Add-on
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr auto', gap: '12px', alignItems: 'center' }}>
+                    <input name="name" type="text" className="form-control" placeholder="e.g. Diamond Crystal Pearl Floral Pins" required />
+                    <input name="price" type="number" className="form-control" placeholder="Price (₱)" defaultValue={150} required />
+                    <button type="submit" className="btn-primary" style={{ padding: '8px 18px', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                      + Add Material
+                    </button>
+                  </div>
+                </form>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+                  {(customOptions.materials || []).map((mat, idx) => (
+                    <div key={mat.id || idx} style={{ border: '1px solid var(--border-light)', borderRadius: '10px', padding: '12px 14px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#1C1917' }}>{mat.name}</div>
+                        <div style={{ fontSize: '12px', fontWeight: '800', color: '#B45309', marginTop: '2px' }}>+₱{mat.price}</div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        style={{ fontSize: '10px', padding: '3px 6px', color: '#E11D48', borderColor: '#FECDD3' }}
+                        onClick={() => {
+                          const updatedList = (customOptions.materials || []).filter((_, i) => i !== idx);
+                          const updated = { ...customOptions, materials: updatedList };
+                          setCustomOptions(updated);
+                          saveItem('custom_options', updated);
+                          showToast(`Removed material "${mat.name}".`, 'info');
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer with Reset to Defaults and Done button */}
+            <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ fontSize: '12px', color: 'var(--text-muted)' }}
+                onClick={() => {
+                  requestConfirm({
+                    title: 'Reset to Atelier Defaults?',
+                    message: 'Are you sure you want to reset all custom order options (wrappers, colors, ribbons, materials) to default studio selections?',
+                    confirmText: 'Reset Defaults',
+                    isDestructive: true,
+                    onConfirm: () => {
+                      setCustomOptions(DEFAULT_CUSTOM_OPTIONS);
+                      saveItem('custom_options', DEFAULT_CUSTOM_OPTIONS);
+                      showToast('Bespoke custom selections reset to defaults.', 'info');
+                    }
+                  });
+                }}
+              >
+                Reset Studio Defaults
+              </button>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ padding: '8px 24px' }} 
+                onClick={() => setIsCustomOptionsManagerOpen(false)}
+              >
+                Save & Close Manager
+              </button>
             </div>
           </div>
         </div>
