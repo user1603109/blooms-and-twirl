@@ -197,6 +197,34 @@
       50% { transform: scale(1.06); opacity: 0.88; }
     }
 
+    /* Header Styles & Mobile Responsiveness */
+    .landing-header, .site-header {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      padding: 16px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.2s ease;
+    }
+    .header-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .landing-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     /* Landing Specific Styles */
     .landing-hero {
       background: radial-gradient(circle at 10% 20%, #FFF5F7 0%, #FEE8EE 50%, #FDF0F3 100%);
@@ -236,6 +264,11 @@
       margin-bottom: 30px;
       max-width: 600px;
     }
+    .landing-hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
     .stats-pill-group {
       display: flex;
       gap: 16px;
@@ -260,12 +293,181 @@
       color: var(--primary);
       font-weight: 800;
     }
+
+    /* Feature Overview Cards */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    /* Auth Flip Card 2-col Grid */
+    .auth-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Bridal Banner */
+    .bridal-banner {
+      background: linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%);
+      border-radius: var(--radius-card);
+      padding: 48px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    /* About Us Modal Responsive Grid */
+    .about-us-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    /* Mobile Responsive Overrides */
     @media (max-width: 900px) {
       .landing-hero {
         padding: 40px 24px;
       }
       .landing-hero h1 {
         font-size: 38px;
+      }
+    }
+    @media (max-width: 768px) {
+      .landing-header, .site-header {
+        padding: 12px 16px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .header-brand-row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+      }
+      .landing-nav {
+        width: 100% !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        padding-bottom: 4px !important;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px !important;
+      }
+      .landing-nav::-webkit-scrollbar {
+        display: none;
+      }
+      .landing-nav button,
+      .landing-nav .btn-primary,
+      .landing-nav .btn-secondary,
+      .landing-nav .switcher-btn {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        padding: 8px 14px !important;
+        font-size: 13px !important;
+      }
+      .page-content {
+        padding: 16px 14px 60px 14px !important;
+      }
+      .landing-hero {
+        padding: 30px 18px !important;
+        border-radius: 18px !important;
+        margin-bottom: 28px !important;
+      }
+      .landing-hero h1 {
+        font-size: 28px !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.4px !important;
+        margin: 12px 0 14px !important;
+      }
+      .landing-hero p {
+        font-size: 14px !important;
+        line-height: 1.55 !important;
+        margin-bottom: 22px !important;
+      }
+      .landing-hero-actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+      }
+      .landing-hero-actions .btn-primary,
+      .landing-hero-actions .btn-secondary {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 18px !important;
+        font-size: 14px !important;
+      }
+      .stats-pill-group {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 18px !important;
+        width: 100% !important;
+      }
+      .stat-mini-pill {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding: 9px 14px !important;
+        font-size: 12px !important;
+      }
+      .overview-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+      }
+      .overview-grid .content-card {
+        padding: 22px 18px !important;
+      }
+      #auth-panel-section {
+        padding: 40px 0 50px !important;
+        margin-bottom: 40px !important;
+      }
+      #auth-panel-section h2 {
+        font-size: 26px !important;
+      }
+      .flip-scene {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .flip-card-face {
+        padding: 24px 18px !important;
+        border-radius: 18px !important;
+      }
+      .auth-grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+      }
+      .bridal-banner {
+        padding: 26px 18px !important;
+        border-radius: 18px !important;
+        gap: 18px !important;
+      }
+      .bridal-banner h3 {
+        font-size: 22px !important;
+      }
+      .bridal-banner .btn-secondary {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .about-us-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .about-us-banner {
+        padding: 24px 18px !important;
+      }
+      .about-us-banner-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 14px !important;
+      }
+      .about-us-body {
+        padding: 20px 18px !important;
       }
     }
 
@@ -1532,39 +1734,28 @@ function App() {
           </div>
 
           {/* Landing Header */}
-          <header style={{ background: 'rgba(255, 255, 255, 0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid var(--border-light)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1000 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
-              <div className="brand-icon-box">
-                <Icons.Flower />
-              </div>
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
-                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
-                </h1>
-                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  BY SHAIRA · FLORAL STUDIO
+          <header className="landing-header">
+            <div className="header-brand-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+                <div className="brand-icon-box">
+                  <Icons.Flower />
+                </div>
+                <div>
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                    Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                  </h1>
+                  <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    BY SHAIRA · FLORAL STUDIO
+                  </div>
                 </div>
               </div>
             </div>
 
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-              <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
-                document.getElementById('brand-overview-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}>
-                Studio Overview
-              </button>
+            <nav className="landing-nav">
               <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
                 document.getElementById('featured-products-section')?.scrollIntoView({ behavior: 'smooth' });
               }}>
                 Featured Blooms
-              </button>
-              <button 
-                type="button"
-                className="btn-secondary" 
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FFF0F5', borderColor: '#FBCFE8', color: 'var(--primary)', fontWeight: '700' }}
-                onClick={() => setIsCustomOrderModalOpen(true)}
-              >
-                <Icons.Sparkles /> Bespoke Custom Order
               </button>
               {currentUser ? (
                 <button className="switcher-btn" style={{ color: 'var(--primary)', fontWeight: '700' }} onClick={() => setViewMode('customer_dashboard')}>
@@ -1582,7 +1773,7 @@ function App() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
                 onClick={() => setIsOwnerModalOpen(true)}
               >
-                <Icons.User /> Owner Profile
+                <Icons.User /> About Us
               </button>
               <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
                 Track Order
@@ -1607,7 +1798,7 @@ function App() {
                   Handcrafted bouquets, architectural botanicals, and bespoke wedding arrangements by <strong>Shaira Angela Saladino</strong>. Designed at our studio in <strong>Apayao, Northern Luzon</strong> with highland fresh flowers sourced directly from <strong>Baguio City — the City of Flowers of Luzon</strong>.
                 </p>
 
-                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                <div className="landing-hero-actions">
                   <button className="btn-primary" style={{ padding: '14px 28px', fontSize: '15px' }} onClick={() => {
                     if (requireAuthToShop()) setViewMode('store');
                   }}>
@@ -1636,10 +1827,10 @@ function App() {
 
             {/* Quick Overview Feature Cards */}
             <section id="brand-overview-section" style={{ marginBottom: '48px' }}>
-              <div className="page-eyebrow" style={{ textAlign: 'center' }}>STUDIO OVERVIEW</div>
+              <div className="page-eyebrow" style={{ textAlign: 'center' }}>ARTISANAL FLORAL ATELIER</div>
               <h2 className="page-title" style={{ textAlign: 'center', marginBottom: '28px' }}>Artisanal Care from Bench to Doorstep</h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+              <div className="overview-grid">
                 <div className="content-card" style={{ padding: '32px 28px' }}>
                   <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', marginBottom: '16px' }}>
                     <Icons.Flower />
@@ -1794,7 +1985,7 @@ function App() {
                         />
                       </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="auth-grid-2col">
                         <div className="form-group">
                           <label>Email</label>
                           <input 
@@ -1982,7 +2173,7 @@ function App() {
             </section>
 
             {/* Wedding & Custom Event Consultations Banner */}
-            <section style={{ background: 'linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%)', borderRadius: 'var(--radius-card)', padding: '48px', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px', marginBottom: '40px' }}>
+            <section className="bridal-banner">
               <div style={{ maxWidth: '580px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', borderRadius: '9999px', background: 'rgba(255,255,255,0.2)', fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '12px' }}>
                   <Icons.Calendar /> 2026/2027 BESPOKE BRIDAL BOOKINGS
@@ -2011,22 +2202,24 @@ function App() {
             Studio Atelier in Apayao, Northern Luzon · Handpicked highland blooms from Baguio City (The Flower Capital of Luzon) · Use code <strong>TWIRLFIRST</strong> for ₱200 off!
           </div>
 
-          <header style={{ background: 'rgba(255, 255, 255, 0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid var(--border-light)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1000 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
-              <div className="brand-icon-box">
-                <Icons.Flower />
-              </div>
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
-                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
-                </h1>
-                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  BY SHAIRA · FLORAL STUDIO
+          <header className="landing-header">
+            <div className="header-brand-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+                <div className="brand-icon-box">
+                  <Icons.Flower />
+                </div>
+                <div>
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                    Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                  </h1>
+                  <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    BY SHAIRA · FLORAL STUDIO
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <div className="landing-nav">
               <button 
                 type="button"
                 className="btn-secondary" 
@@ -2040,10 +2233,7 @@ function App() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
                 onClick={() => setIsOwnerModalOpen(true)}
               >
-                <Icons.User /> Owner Profile
-              </button>
-              <button className="btn-secondary" onClick={() => setViewMode('landing')}>
-                Studio Overview
+                <Icons.User /> About Us
               </button>
               <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
                 Track Order
@@ -2221,22 +2411,24 @@ function App() {
       {/* ========================================================================= */}
       {viewMode === 'customer_dashboard' && (
         <div style={{ width: '100%', minHeight: '100vh', background: 'var(--bg-page)' }}>
-          <header style={{ background: 'rgba(255, 255, 255, 0.96)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: '1px solid var(--border-light)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 1000 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
-              <div className="brand-icon-box">
-                <Icons.Flower />
-              </div>
-              <div>
-                <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
-                  Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
-                </h1>
-                <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  CUSTOMER CARE & LIVE TRACKING
+          <header className="landing-header">
+            <div className="header-brand-row">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setViewMode('landing')}>
+                <div className="brand-icon-box">
+                  <Icons.Flower />
+                </div>
+                <div>
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: '700', lineHeight: '1.1' }}>
+                    Blooms<span style={{ color: 'var(--primary)' }}>&</span>Twirl
+                  </h1>
+                  <div style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                    CUSTOMER CARE & LIVE TRACKING
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <div className="landing-nav">
               <button 
                 type="button"
                 className="btn-secondary" 
@@ -2250,10 +2442,7 @@ function App() {
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', borderColor: 'var(--primary-border)', color: 'var(--primary)', fontWeight: '700' }}
                 onClick={() => setIsOwnerModalOpen(true)}
               >
-                <Icons.User /> Owner Profile
-              </button>
-              <button className="btn-secondary" onClick={() => setViewMode('landing')}>
-                Studio Overview
+                <Icons.User /> About Us
               </button>
               <button className="btn-primary" onClick={() => setViewMode('store')}>
                 <Icons.ShoppingBag /> Shop Studio
@@ -3109,12 +3298,12 @@ function App() {
         </div>
       )}
 
-      {/* --- OWNER PROFILE MODAL WITH OWNER_IMAGE & ZERO EMOJIS --- */}
+      {/* --- ABOUT US / OWNER PROFILE MODAL WITH OWNER_IMAGE & ZERO EMOJIS --- */}
       {isOwnerModalOpen && (
         <div className="modal-overlay" onClick={() => setIsOwnerModalOpen(false)}>
           <div className="modal-card" style={{ maxWidth: '640px', overflow: 'hidden', padding: 0 }} onClick={(e) => e.stopPropagation()}>
             {/* Header Banner with Owner Image from assets */}
-            <div style={{ background: 'linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%)', padding: '36px 32px 32px', color: '#FFFFFF', position: 'relative' }}>
+            <div className="about-us-banner" style={{ background: 'linear-gradient(135deg, #2E121E 0%, #4D0025 60%, var(--primary) 100%)', padding: '36px 32px 32px', color: '#FFFFFF', position: 'relative' }}>
               <button 
                 className="modal-close-btn" 
                 style={{ position: 'absolute', top: '18px', right: '18px', color: '#FFFFFF', background: 'rgba(255,255,255,0.18)', border: 'none' }}
@@ -3123,10 +3312,10 @@ function App() {
                 ✕
               </button>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
+              <div className="about-us-banner-header" style={{ display: 'flex', alignItems: 'center', gap: '22px', flexWrap: 'wrap' }}>
                 <img 
                   src="./assets/Owner_Image.jpg" 
-                  alt="Shaira Angela Saladino - Owner of Blooms&Twirl" 
+                  alt="Shaira Angela Saladino - Founder & Owner of Blooms&Twirl" 
                   style={{ 
                     width: '108px', 
                     height: '108px', 
@@ -3139,7 +3328,7 @@ function App() {
                 />
                 <div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.18)', padding: '5px 14px', borderRadius: '9999px', fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px', color: '#FFE4EE' }}>
-                    <Icons.Flower /> Founder & Head Floral Stylist
+                    <Icons.Flower /> About Us · Founder & Head Floral Stylist
                   </div>
                   <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', margin: '0 0 4px 0', color: '#FFFFFF', letterSpacing: '-0.3px', lineHeight: 1.15 }}>
                     Shaira Angela Saladino
@@ -3152,9 +3341,9 @@ function App() {
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: '28px 32px' }}>
+            <div className="about-us-body" style={{ padding: '28px 32px' }}>
               {/* Studio & Sourcing Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '22px' }}>
+              <div className="about-us-grid">
                 <div style={{ background: '#FFF0F6', border: '1px solid var(--primary-border)', padding: '16px', borderRadius: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>
                     <Icons.Home /> Floral Atelier Base
