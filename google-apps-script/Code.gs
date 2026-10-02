@@ -102,15 +102,36 @@ function doPost(e) {
     }
     
     if (action === "upload_drive_image") {
-      // 5TB Google Drive Asset Handler
-      var folderId = contents.folderId;
-      var base64Data = contents.base64Data;
-      var fileName = contents.fileName || "flower_" + Date.now() + ".jpg";
+      // 5TB Google Drive Asset Handler: Product-Images folder in Blooms&Twirl by Shaira
+      var base64Data = contents.base64Data || "";
+      var fileName = contents.fileName || ("arrangement_" + Date.now() + ".jpg");
       
-      var folder = folderId ? DriveApp.getFolderById(folderId) : DriveApp.getRootFolder();
+      var targetFolder = null;
+      if (contents.folderId) {
+        try { targetFolder = DriveApp.getFolderById(contents.folderId); } catch(e) {}
+      }
+      
+      if (!targetFolder) {
+        // Look for Blooms&Twirl by Shaira or Blooms&Twirll by Shaira parent folder
+        var parentIter = DriveApp.getFoldersByName("Blooms&Twirl by Shaira");
+        if (!parentIter.hasNext()) {
+          parentIter = DriveApp.getFoldersByName("Blooms&Twirll by Shaira");
+        }
+        
+        var parentFolder = parentIter.hasNext() ? parentIter.next() : DriveApp.getRootFolder();
+        
+        // Look for or create "Product-Images" subfolder
+        var subIter = parentFolder.getFoldersByName("Product-Images");
+        if (subIter.hasNext()) {
+          targetFolder = subIter.next();
+        } else {
+          targetFolder = parentFolder.createFolder("Product-Images");
+        }
+      }
+      
       var decoded = Utilities.base64Decode(base64Data.split(",")[1] || base64Data);
       var blob = Utilities.newBlob(decoded, "image/jpeg", fileName);
-      var file = folder.createFile(blob);
+      var file = targetFolder.createFile(blob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       
       var fileId = file.getId();
@@ -119,7 +140,8 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({
         status: "success",
         fileId: fileId,
-        directUrl: directUrl
+        directUrl: directUrl,
+        folderName: targetFolder.getName()
       })).setMimeType(ContentService.MimeType.JSON);
     }
     

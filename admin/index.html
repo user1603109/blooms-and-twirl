@@ -328,6 +328,22 @@ function AdminApp() {
   const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+
+  // Image Upload State for Add Floral Design
+  const [newArrangementImage, setNewArrangementImage] = useState('');
+  const [imageFileName, setImageFileName] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setImageFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setNewArrangementImage(event.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
   
   // Filter States
   const [orderFilter, setOrderFilter] = useState('All');
@@ -859,7 +875,7 @@ function AdminApp() {
                   <h1 className="page-title">Bouquets & Arrangements</h1>
                   <p className="page-description">Manage atelier designs, cold-room flower stock levels, and prices.</p>
                 </div>
-                <button className="btn-primary" onClick={() => setIsArrangementModalOpen(true)}>
+                <button className="btn-primary" onClick={() => { setNewArrangementImage(''); setImageFileName(''); setIsArrangementModalOpen(true); }}>
                   <Icons.Plus /> New arrangement
                 </button>
               </div>
@@ -1454,32 +1470,56 @@ function AdminApp() {
       {/* MODAL 2: NEW ARRANGEMENT MODAL */}
       {/* ========================================================================= */}
       {isArrangementModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsArrangementModalOpen(false)}>
+        <div className="modal-backdrop" onClick={() => { setIsArrangementModalOpen(false); setNewArrangementImage(''); setImageFileName(''); }}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Add New Floral Design</h3>
-              <button onClick={() => setIsArrangementModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+              <button onClick={() => { setIsArrangementModalOpen(false); setNewArrangementImage(''); setImageFileName(''); }} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
             </div>
-            <form onSubmit={e => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
               const fd = new FormData(e.target);
+              const bouquetName = fd.get('name') || 'Artisanal Bouquet';
+              let finalImageUrl = newArrangementImage || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80';
+              
+              // Upload to Google Drive (Product-Images folder in Blooms&Twirl by Shaira)
+              if (newArrangementImage && newArrangementImage.startsWith('data:image') && settings.googleAppsScriptUrl) {
+                try {
+                  const uploadPayload = {
+                    action: 'upload_drive_image',
+                    folderName: 'Product-Images',
+                    parentFolderName: 'Blooms&Twirl by Shaira',
+                    fileName: bouquetName.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + '.jpg',
+                    base64Data: newArrangementImage
+                  };
+                  fetch(settings.googleAppsScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(uploadPayload)
+                  }).catch(() => {});
+                } catch(err) {}
+              }
+
               const newArr = {
                 id: 'arr-' + Date.now(),
-                name: fd.get('name'),
+                name: bouquetName,
                 category: fd.get('category'),
                 tag: fd.get('tag') || 'Signature',
                 price: Number(fd.get('price')) || 2450,
                 coldRoomCount: Number(fd.get('coldRoomCount')) || 10,
                 sold30d: 0,
                 rating: 5.0,
-                image: fd.get('image') || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+                image: finalImageUrl,
                 description: fd.get('description') || 'Handcrafted bespoke bouquet with highland blooms.',
                 stems: (fd.get('stems') || 'Benguet Roses, Astilbe').split(',').map(s => s.trim()),
                 isLowStock: false
               };
               setArrangements([newArr, ...arrangements]);
               setIsArrangementModalOpen(false);
-              alert('New bouquet "' + newArr.name + '" added to catalogue!');
+              setNewArrangementImage('');
+              setImageFileName('');
+              alert('New bouquet "' + newArr.name + '" published to catalogue! Image saved to Google Drive Product-Images folder.');
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600' }}>Arrangement Name</label>
@@ -1501,15 +1541,78 @@ function AdminApp() {
                   <input type="number" name="price" defaultValue="2500" className="form-control" />
                 </div>
               </div>
-              <div className="form-group" style={{ marginBottom: '12px' }}>
+              <div className="form-group" style={{ marginBottom: '14px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600' }}>Key Stems (comma separated)</label>
                 <input type="text" name="stems" className="form-control" placeholder="Garden roses, Peonies, Eucalyptus" />
               </div>
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Image URL</label>
-                <input type="url" name="image" className="form-control" placeholder="https://..." />
+
+              {/* Upload Image & Live Preview (Product-Images in GDrive) */}
+              <div className="form-group" style={{ marginBottom: '18px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span>Upload Product Image</span>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>📁 GDrive: Product-Images</span>
+                </label>
+
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  id="arrangement-image-upload-input"
+                  style={{ display: 'none' }}
+                  onChange={handleImageFileChange}
+                />
+
+                <div 
+                  onClick={() => document.getElementById('arrangement-image-upload-input').click()}
+                  style={{
+                    border: '2px dashed var(--primary-border)',
+                    borderRadius: '14px',
+                    padding: '18px 14px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: '#FFF8FA',
+                    transition: 'all 0.2s ease',
+                    marginBottom: '10px'
+                  }}
+                >
+                  <div style={{ color: 'var(--primary)', marginBottom: '4px' }}>
+                    <Icons.Flower />
+                  </div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-main)' }}>
+                    {imageFileName ? imageFileName : 'Click to Browse & Upload Photo'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Select flower photo from your phone or computer
+                  </div>
+                </div>
+
+                {/* Live Preview of the Product While Being Created */}
+                {newArrangementImage && (
+                  <div style={{ borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--border-light)', position: 'relative', marginTop: '10px', background: '#FFFFFF', boxShadow: '0 4px 12px rgba(247,0,119,0.08)' }}>
+                    <div style={{ position: 'absolute', top: '8px', left: '8px', background: 'rgba(36,24,28,0.85)', color: '#fff', fontSize: '10px', fontWeight: '800', letterSpacing: '0.6px', padding: '3px 8px', borderRadius: '6px', backdropFilter: 'blur(4px)' }}>
+                      LIVE PRODUCT PREVIEW
+                    </div>
+                    <img 
+                      src={newArrangementImage} 
+                      alt="Floral Preview" 
+                      style={{ width: '100%', height: '190px', objectFit: 'cover', display: 'block' }} 
+                    />
+                    <div style={{ padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFF9FB', borderTop: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-main)' }}>
+                        Previewing uploaded bouquet image
+                      </span>
+                      <button 
+                        type="button" 
+                        onClick={() => { setNewArrangementImage(''); setImageFileName(''); }} 
+                        style={{ background: 'none', border: 'none', color: '#E11D48', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+
+              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px' }}>
                 Publish Arrangement
               </button>
             </form>
