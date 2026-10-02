@@ -568,13 +568,40 @@ function AdminApp() {
     { id: 'flw-6', productType: 'flowers_only', name: 'Silvery Seeded Eucalyptus Bunch', tag: 'Foliage Bunch', category: 'Foliage', price: 240, unit: 'per bunch', coldRoomCount: 30, sold30d: 95, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Fragrant aromatic blue-green eucalyptus with textured seed pods. Fresh unarranged bunch ready for vase fill.', stems: ['Eucalyptus gunnii'], rating: 5.0, isLowStock: false }
   ];
 
+  // Dedicated In-App Toast & Confirmation System (Eliminates all browser native alert/confirm)
+  const [toast, setToast] = useState(null); // { message, type: 'success'|'error'|'info', title?: string }
+  const [confirmModal, setConfirmModal] = useState(null); // { title, message, confirmText, cancelText, isDestructive, onConfirm }
+
+  const showToast = (message, type = 'success', title = '') => {
+    setToast({ message, type, title });
+  };
+
+  const requestConfirm = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', isDestructive = false, onConfirm }) => {
+    setConfirmModal({
+      title,
+      message,
+      confirmText,
+      cancelText,
+      isDestructive,
+      onConfirm: () => {
+        setConfirmModal(null);
+        if (typeof onConfirm === 'function') onConfirm();
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4200);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const [arrangements, setArrangements] = useState(() => {
+    const deleted = getInitial('deleted_arrangements', []);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
-    // If cached data only has old items without flowers_only, merge the loose flowers
-    const hasFlowersOnly = Array.isArray(loaded) && loaded.some(i => i.productType === 'flowers_only');
-    if (!hasFlowersOnly && Array.isArray(loaded)) {
-      const normalizedOld = loaded.map(i => ({ ...i, productType: i.productType || 'arranged' }));
-      return [...normalizedOld, ...INITIAL_ARRANGEMENTS_DATA.filter(i => i.productType === 'flowers_only')];
+    if (Array.isArray(loaded)) {
+      return loaded.filter(a => !deleted.includes(a.id));
     }
     return loaded;
   });
@@ -704,7 +731,7 @@ function AdminApp() {
     const MAX_SIZE_MB = 50;
     const MAX_BYTES = MAX_SIZE_MB * 1024 * 1024;
     if (file.size > MAX_BYTES) {
-      alert(`The selected image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed upload size is ${MAX_SIZE_MB}MB. Please select a photo up to 50MB.`);
+      showToast(`The selected image is ${(file.size / (1024 * 1024)).toFixed(1)}MB. Maximum allowed upload size is ${MAX_SIZE_MB}MB. Please select a photo up to 50MB.`, 'error', 'Image Size Limit');
       e.target.value = '';
       return;
     }
@@ -754,7 +781,7 @@ function AdminApp() {
       img.src = rawData;
     };
     reader.onerror = () => {
-      alert('Error reading high-resolution image. Please try again.');
+      showToast('Error reading high-resolution image. Please try again.', 'error', 'Upload Error');
       setIsUploadingImage(false);
     };
     reader.readAsDataURL(file);
@@ -778,12 +805,23 @@ function AdminApp() {
   };
 
   const handleDeleteArrangement = (arrId, arrName) => {
-    if (window.confirm('Are you sure you want to delete "' + arrName + '" from the floral catalogue?')) {
-      const updated = arrangements.filter(a => a.id !== arrId);
-      setArrangements(updated);
-      saveItem('arrangements', updated);
-      BT_IDB.deleteImage(arrId);
-    }
+    requestConfirm({
+      title: 'Delete from Catalogue?',
+      message: `Are you sure you want to permanently remove "${arrName}" from the floral catalogue? This item will not reappear on refresh.`,
+      confirmText: 'Delete Item',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = arrangements.filter(a => a.id !== arrId);
+        setArrangements(updated);
+        saveItem('arrangements', updated);
+        const deleted = getInitial('deleted_arrangements', []);
+        if (!deleted.includes(arrId)) {
+          saveItem('deleted_arrangements', [...deleted, arrId]);
+        }
+        BT_IDB.deleteImage(arrId);
+        showToast(`"${arrName}" permanently removed from floral catalogue.`, 'success', 'Item Deleted');
+      }
+    });
   };
 
   // Inventory CRUD Actions
@@ -798,30 +836,53 @@ function AdminApp() {
   };
 
   const handleDeleteInventory = (itemId, itemName) => {
-    if (window.confirm('Are you sure you want to delete stock line "' + itemName + '" from cold room inventory?')) {
-      setInventory(inventory.filter(i => i.id !== itemId));
-    }
+    requestConfirm({
+      title: 'Delete Stock Line?',
+      message: `Are you sure you want to delete stock line "${itemName}" from cold room inventory?`,
+      confirmText: 'Delete Stock',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = inventory.filter(i => i.id !== itemId);
+        setInventory(updated);
+        saveItem('inventory', updated);
+        showToast(`Stock line "${itemName}" removed from inventory.`, 'success', 'Inventory Updated');
+      }
+    });
   };
 
   // Order Delete Action
   const handleDeleteOrder = (orderId) => {
-    if (window.confirm('Are you sure you want to remove order ' + orderId + ' from the studio book?')) {
-      const updated = orders.filter(o => o.id !== orderId);
-      setOrders(updated);
-      saveItem('orders', updated);
-      const updatedDeliveries = deliveries.filter(d => d.orderId !== orderId);
-      setDeliveries(updatedDeliveries);
-      saveItem('deliveries', updatedDeliveries);
-    }
+    requestConfirm({
+      title: 'Remove Order Record?',
+      message: `Are you sure you want to remove order #${orderId} from the studio book?`,
+      confirmText: 'Remove Order',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = orders.filter(o => o.id !== orderId);
+        setOrders(updated);
+        saveItem('orders', updated);
+        const updatedDeliveries = deliveries.filter(d => d.orderId !== orderId);
+        setDeliveries(updatedDeliveries);
+        saveItem('deliveries', updatedDeliveries);
+        showToast(`Order #${orderId} removed from studio book.`, 'success', 'Order Removed');
+      }
+    });
   };
 
   // Promo Delete Action
   const handleDeletePromo = (promoId, promoCode) => {
-    if (window.confirm('Delete promotion code "' + promoCode + '"?')) {
-      const updated = promotions.filter(p => p.id !== promoId);
-      setPromotions(updated);
-      saveItem('promotions', updated);
-    }
+    requestConfirm({
+      title: 'Delete Promo Code?',
+      message: `Are you sure you want to delete promotion voucher "${promoCode}"?`,
+      confirmText: 'Delete Voucher',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = promotions.filter(p => p.id !== promoId);
+        setPromotions(updated);
+        saveItem('promotions', updated);
+        showToast(`Promotion code "${promoCode}" deleted.`, 'success', 'Voucher Removed');
+      }
+    });
   };
   
   // Filter States
@@ -844,11 +905,12 @@ function AdminApp() {
     const trimmed = (name || '').trim();
     if (!trimmed) return;
     if (flowerFamilies.some(f => f.toLowerCase() === trimmed.toLowerCase())) {
-      alert('Flower family "' + trimmed + '" already exists!');
+      showToast('Flower family "' + trimmed + '" already exists!', 'error', 'Duplicate Family');
       return;
     }
     setFlowerFamilies([...flowerFamilies, trimmed]);
     setNewFamilyInput('');
+    showToast(`Added "${trimmed}" to flower families.`, 'success', 'Family Added');
   };
 
   const handleSaveEditFamily = (oldName) => {
@@ -861,20 +923,28 @@ function AdminApp() {
     setArrangements(prev => prev.map(a => a.category === oldName ? { ...a, category: newName } : a));
     setEditingFamily(null);
     setEditingFamilyNewName('');
+    showToast(`Renamed "${oldName}" to "${newName}".`, 'success', 'Family Updated');
   };
 
   const handleDeleteFamily = (familyName) => {
     if (flowerFamilies.length <= 1) {
-      alert('You must have at least one flower family.');
+      showToast('You must have at least one flower family in the atelier.', 'error', 'Action Restricted');
       return;
     }
     const affectedCount = arrangements.filter(a => a.category === familyName).length;
-    if (window.confirm('Delete flower family "' + familyName + '"? ' + (affectedCount > 0 ? (affectedCount + ' product(s) will be moved to General.') : ''))) {
-      const next = flowerFamilies.filter(f => f !== familyName);
-      setFlowerFamilies(next);
-      const fallbackFamily = next[0] || 'General';
-      setArrangements(prev => prev.map(a => a.category === familyName ? { ...a, category: fallbackFamily } : a));
-    }
+    requestConfirm({
+      title: 'Delete Flower Family?',
+      message: `Delete flower family "${familyName}"?` + (affectedCount > 0 ? ` ${affectedCount} product(s) will be moved to General.` : ''),
+      confirmText: 'Delete Family',
+      isDestructive: true,
+      onConfirm: () => {
+        const next = flowerFamilies.filter(f => f !== familyName);
+        setFlowerFamilies(next);
+        const fallbackFamily = next[0] || 'General';
+        setArrangements(prev => prev.map(a => a.category === familyName ? { ...a, category: fallbackFamily } : a));
+        showToast(`Flower family "${familyName}" deleted.`, 'success', 'Family Removed');
+      }
+    });
   };
 
   // Connected Restock: Arrangements <-> Inventory Sync
@@ -901,7 +971,7 @@ function AdminApp() {
     if (item.linkedFlowerId) {
       setArrangements(prev => prev.map(a => a.id === item.linkedFlowerId ? { ...a, coldRoomCount: a.coldRoomCount + delta } : a));
     }
-    alert('Checked in +' + delta + ' units for ' + item.name + '. Connected catalogue stock synchronized!');
+    showToast('Checked in +' + delta + ' units for ' + item.name + '. Connected catalogue stock synchronized!', 'success', 'Inventory Restocked');
   };
 
   // Delivery Stage Advance Action across Sub-Statuses
@@ -958,26 +1028,40 @@ function AdminApp() {
     setCustomOrders(updated);
     saveItem('custom_orders', updated);
     setSubstitutionModalOrder(null);
-    alert('Substitution proposal sent to customer live monitor! The customer can now accept or cancel.');
+    showToast('Substitution proposal sent to customer live monitor! The customer can now review and accept.', 'success', 'Proposal Sent');
   };
 
   const handleDeleteCustomOrder = (customOrderId, customerName) => {
-    if (window.confirm(`Are you sure you want to delete custom order ${customOrderId} (${customerName || 'Bespoke Order'})? This will permanently remove the record.`)) {
-      const updated = customOrders.filter(co => co.id !== customOrderId);
-      setCustomOrders(updated);
-      saveItem('custom_orders', updated);
-      if (selectedCustomOrder && selectedCustomOrder.id === customOrderId) {
-        setSelectedCustomOrder(null);
+    requestConfirm({
+      title: 'Delete Custom Commission?',
+      message: `Are you sure you want to permanently delete bespoke order #${customOrderId} (${customerName || 'Bespoke Order'})?`,
+      confirmText: 'Delete Commission',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = customOrders.filter(co => co.id !== customOrderId);
+        setCustomOrders(updated);
+        saveItem('custom_orders', updated);
+        if (selectedCustomOrder && selectedCustomOrder.id === customOrderId) {
+          setSelectedCustomOrder(null);
+        }
+        showToast(`Custom commission #${customOrderId} removed from records.`, 'success', 'Commission Deleted');
       }
-    }
+    });
   };
 
   const handleDeleteDispatchRun = (runId, recipient) => {
-    if (window.confirm(`Delete scheduled courier dispatch run for ${recipient}?`)) {
-      const updated = deliveries.filter(d => d.id !== runId);
-      setDeliveries(updated);
-      saveItem('deliveries', updated);
-    }
+    requestConfirm({
+      title: 'Delete Scheduled Dispatch?',
+      message: `Delete scheduled courier dispatch run for ${recipient}?`,
+      confirmText: 'Delete Dispatch',
+      isDestructive: true,
+      onConfirm: () => {
+        const updated = deliveries.filter(d => d.id !== runId);
+        setDeliveries(updated);
+        saveItem('deliveries', updated);
+        showToast(`Dispatch run for ${recipient} cancelled and deleted.`, 'success', 'Dispatch Cancelled');
+      }
+    });
   };
 
   const handleExportOrdersCSV = () => {
@@ -1289,10 +1373,10 @@ function AdminApp() {
                   <p className="page-description">Apayao atelier bench & Baguio flower supply logistics. {orders.length} active orders in the studio book.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="btn-secondary" onClick={() => alert("Today's Studio Plan: Jom and Nino on dispatch; fresh Benguet highland rose delivery checked in.")}>
+                  <button className="btn-secondary" onClick={() => showToast("Today's Plan: Jom and Nino on dispatch; fresh Benguet highland rose delivery checked in.", 'info', "Today's Studio Plan")}>
                     Today's plan
                   </button>
-                  <button className="btn-secondary" onClick={() => alert('Exporting live studio summary to CSV...')}>
+                  <button className="btn-secondary" onClick={() => showToast('Exporting live studio summary to CSV...', 'success', 'Exporting CSV')}>
                     Export CSV
                   </button>
                 </div>
@@ -1451,7 +1535,7 @@ function AdminApp() {
                   <p className="page-description">Complete real-time monitoring across all 11 stages from order placement to door-to-door delivery in Northern Luzon.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-secondary" onClick={() => alert('Courier route sync updated with Jom and Nino.')}>
+                  <button className="btn-secondary" onClick={() => showToast('Courier route sync updated with Jom and Nino.', 'success', 'Route Synchronized')}>
                     <Icons.Deliveries /> Route Sync
                   </button>
                   <button className="btn-primary" onClick={() => setIsNewOrderModalOpen(true)}>
@@ -1722,7 +1806,7 @@ function AdminApp() {
                     <div className="card-title">Scheduled Dispatch Runs (Courier Fleet)</div>
                     <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>Daily transport routes connecting Apayao studio and Baguio City growers with Northern Luzon towns.</p>
                   </div>
-                  <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 14px' }} onClick={() => alert('New courier route queued for dispatch.')}>
+                  <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 14px' }} onClick={() => showToast('New courier route queued for dispatch.', 'success', 'Dispatch Queued')}>
                     + Add Dispatch Run
                   </button>
                 </div>
@@ -1808,7 +1892,7 @@ function AdminApp() {
                       const updated = [newSample, ...customOrders];
                       setCustomOrders(updated);
                       saveItem('custom_orders', updated);
-                      alert('Added new custom commission ' + newSample.id + ' for studio review!');
+                      showToast('Added new custom commission ' + newSample.id + ' for studio review!', 'success', 'Commission Logged');
                     }}
                   >
                     + Walk-in Custom Request
@@ -2287,9 +2371,11 @@ function AdminApp() {
                         {arr.isLowStock && <span className="card-low-stock-pill">Low stock</span>}
                       </div>
                       <div className="arrangement-body">
-                        <div className="arrangement-name-row">
-                          <h3 className="arrangement-name">{arr.name}</h3>
-                          <span className="arrangement-rating">★ {arr.rating}</span>
+                        <div className="arrangement-name-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                          <h3 className="arrangement-name" style={{ flex: '1 1 auto', minWidth: 0, wordBreak: 'break-word', margin: 0 }}>{arr.name}</h3>
+                          <span className="arrangement-rating" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap', flexShrink: 0, alignSelf: 'flex-start' }}>
+                            ★ <span>{arr.rating}</span>
+                          </span>
                         </div>
                         <p className="arrangement-stems">
                           {isFlowersOnly 
@@ -2325,7 +2411,7 @@ function AdminApp() {
                               onClick={() => {
                                 const addCount = isFlowersOnly ? 20 : 5;
                                 handleQuickRestockArrangement(arr.id, addCount);
-                                alert('Restocked +' + addCount + ' units of ' + arr.name + ' (Inventory synchronized)!');
+                                showToast('Restocked +' + addCount + ' units of ' + arr.name + ' (Inventory synchronized)!', 'success', 'Inventory Restocked');
                               }}
                             >
                               +{isFlowersOnly ? '20' : '5'}
@@ -2479,7 +2565,7 @@ function AdminApp() {
                   <h1 className="page-title">Customers</h1>
                   <p className="page-description">Loyal flower lovers, brides-to-be, and recurring cafe table decor accounts.</p>
                 </div>
-                <button className="btn-secondary" onClick={() => alert('Customer list exported.')}>Export CSV</button>
+                <button className="btn-secondary" onClick={() => showToast('Customer list exported successfully to CSV.', 'success', 'Export Complete')}>Export CSV</button>
               </div>
 
               {/* Segment Filter */}
@@ -2604,7 +2690,7 @@ function AdminApp() {
                   <h1 className="page-title">Customer Reviews</h1>
                   <p className="page-description">What clients and brides say after their blooms arrive from our atelier.</p>
                 </div>
-                <button className="btn-secondary" onClick={() => alert('Review request link copied for social media!')}>Copy request link</button>
+                <button className="btn-secondary" onClick={() => showToast('Review request link copied for social media!', 'success', 'Link Copied')}>Copy request link</button>
               </div>
 
               <div className="content-card">
@@ -2958,7 +3044,7 @@ function AdminApp() {
                   <h1 className="page-title">Team Roster</h1>
                   <p className="page-description">Head florist, arrangement bench apprentices, and dispatch couriers.</p>
                 </div>
-                <button className="btn-secondary" onClick={() => alert('Invite link copied for apprentice florist.')}>Invite member</button>
+                <button className="btn-secondary" onClick={() => showToast('Invite link copied for apprentice florist.', 'success', 'Invitation Link')}>Invite member</button>
               </div>
 
               <div className="content-card">
@@ -3002,7 +3088,7 @@ function AdminApp() {
                 </div>
                 <button className="btn-primary" onClick={() => {
                   saveItem('settings', settings);
-                  alert('Settings updated successfully!');
+                  showToast('Settings & shop configurations saved successfully!', 'success', 'Settings Saved');
                 }}>
                   Save changes
                 </button>
@@ -3107,10 +3193,13 @@ function AdminApp() {
       {/* ========================================================================= */}
       {isNewOrderModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsNewOrderModalOpen(false)}>
-          <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Record New Order</h3>
-              <button onClick={() => setIsNewOrderModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
+          <div className="modal-card" style={{ maxWidth: '820px', maxHeight: 'none', overflowY: 'visible', padding: '22px 28px', width: '95%' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ marginBottom: '14px', paddingBottom: '10px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontFamily: 'Fraunces, serif', fontSize: '20px' }}>Record New Order</h3>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Instant studio entry with automatic cold-room inventory sync</div>
+              </div>
+              <button onClick={() => setIsNewOrderModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
             </div>
             <form onSubmit={e => {
               e.preventDefault();
@@ -3172,66 +3261,64 @@ function AdminApp() {
               setOrders(updatedOrders);
               saveItem('orders', updatedOrders);
               setIsNewOrderModalOpen(false);
-              alert(`Order ${newOrd.id} created! Stock automatically deducted from both arrangements and cold room inventory.`);
+              showToast(`Order #${newOrd.id} created! Stock automatically deducted from arrangements and inventory.`, 'success', 'Order Recorded');
             }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Customer Full Name</label>
-                  <input type="text" name="name" className="form-control" required placeholder="e.g. Sofia Valenzuela" />
+              {/* Row 1: Customer Name, Phone, Address (3 cols) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.8fr', gap: '10px', marginBottom: '10px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Customer Name</label>
+                  <input type="text" name="name" className="form-control" required placeholder="e.g. Sofia Valenzuela" style={{ padding: '7px 10px', fontSize: '13px' }} />
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Mobile Phone</label>
-                  <input type="text" name="phone" className="form-control" required placeholder="+63 917 XXX XXXX" />
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Phone Number</label>
+                  <input type="text" name="phone" className="form-control" required placeholder="+63 917 XXX XXXX" style={{ padding: '7px 10px', fontSize: '13px' }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Delivery Address</label>
+                  <input type="text" name="address" className="form-control" required placeholder="e.g. Barangay San Pedro, Luna, Apayao" style={{ padding: '7px 10px', fontSize: '13px' }} />
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Delivery Destination (Luzon to Visayas)</label>
-                <input type="text" name="address" className="form-control" required placeholder="e.g. Barangay San Pedro, Luna, Apayao" />
-              </div>
-
-              {/* Product Selection: Arranged Bouquets vs Loose Flowers */}
-              <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Select Item (Arranged Bouquets or Fresh Cut Loose Flowers)</span>
-                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '700' }}>Auto-deducts stock</span>
-                </label>
-                <select name="selectedItemId" className="form-control" required>
-                  <optgroup label="Arranged Products (Bouquets, Vases & Hatboxes)">
-                    {arrangements.filter(a => (a.productType || 'arranged') === 'arranged').map(a => (
-                      <option key={a.id} value={a.id}>
-                        [Bouquet] {a.name} — ₱{a.price.toLocaleString()} ({a.coldRoomCount} ready in cold room)
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Fresh Flowers Only (Unarranged Cut Stems & Bunches)">
-                    {arrangements.filter(a => a.productType === 'flowers_only').map(a => (
-                      <option key={a.id} value={a.id}>
-                        [Stems] {a.name} — ₱{a.price.toLocaleString()} {a.unit ? ('/ ' + a.unit) : '/ stem'} ({a.coldRoomCount} stems in bucket)
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Quantity / Stems</label>
-                  <input type="number" name="qty" defaultValue="1" min="1" className="form-control" required />
+              {/* Row 2: Selected Item, Quantity, Payment, Channel (4 cols) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 0.7fr 1.1fr 1.1fr', gap: '10px', marginBottom: '10px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>
+                    Item (Arrangement or Cut Stems)
+                  </label>
+                  <select name="selectedItemId" className="form-control" required style={{ padding: '7px 10px', fontSize: '13px' }}>
+                    <optgroup label="Arranged Products (Bouquets, Vases & Hatboxes)">
+                      {arrangements.filter(a => (a.productType || 'arranged') === 'arranged').map(a => (
+                        <option key={a.id} value={a.id}>
+                          [Bouquet] {a.name} — ₱{a.price.toLocaleString()} ({a.coldRoomCount} ready)
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Fresh Flowers Only (Loose Cut Stems)">
+                      {arrangements.filter(a => a.productType === 'flowers_only').map(a => (
+                        <option key={a.id} value={a.id}>
+                          [Stems] {a.name} — ₱{a.price.toLocaleString()} {a.unit ? ('/ ' + a.unit) : '/ stem'} ({a.coldRoomCount} stems)
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Payment Method</label>
-                  <select name="payment" className="form-control">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Quantity</label>
+                  <input type="number" name="qty" defaultValue="1" min="1" className="form-control" required style={{ padding: '7px 10px', fontSize: '13px' }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Payment</label>
+                  <select name="payment" className="form-control" style={{ padding: '7px 10px', fontSize: '13px' }}>
                     <option value="GCash">GCash</option>
                     <option value="Maya">Maya</option>
-                    <option value="COD">Cash on Delivery (COD)</option>
+                    <option value="COD">Cash on Delivery</option>
                     <option value="Card">Credit / Debit Card</option>
                     <option value="Bank">BDO / BPI Bank</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Sales Channel</label>
-                  <select name="channel" className="form-control">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Channel</label>
+                  <select name="channel" className="form-control" style={{ padding: '7px 10px', fontSize: '13px' }}>
                     <option value="Online">Online Store</option>
                     <option value="Instagram">Instagram DM</option>
                     <option value="Phone">Phone Call</option>
@@ -3240,18 +3327,19 @@ function AdminApp() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Initial Delivery Stage</label>
-                  <select name="status" className="form-control">
+              {/* Row 3: Initial Stage, Courier, Due Time, Card Message (4 cols) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.1fr 0.8fr 1.8fr', gap: '10px', marginBottom: '14px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Delivery Stage</label>
+                  <select name="status" className="form-control" style={{ padding: '7px 10px', fontSize: '13px' }}>
                     {ALL_SUB_STATUSES.map(stage => (
                       <option key={stage} value={stage}>{stage}</option>
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Assigned Courier</label>
-                  <select name="courier" className="form-control">
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Courier</label>
+                  <select name="courier" className="form-control" style={{ padding: '7px 10px', fontSize: '13px' }}>
                     <option value="Jom">Jom (Apayao Van)</option>
                     <option value="Nino">Nino (Motorcycle Express)</option>
                     <option value="Marisol">Marisol (Baguio Logistics)</option>
@@ -3259,20 +3347,34 @@ function AdminApp() {
                     <option value="Unassigned">Unassigned</option>
                   </select>
                 </div>
-                <div className="form-group">
-                  <label style={{ fontSize: '12px', fontWeight: '600' }}>Due Time</label>
-                  <input type="text" name="dueTime" defaultValue="14:00" className="form-control" />
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Due Time</label>
+                  <input type="text" name="dueTime" defaultValue="14:00" className="form-control" style={{ padding: '7px 10px', fontSize: '13px' }} />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: 'var(--text-muted)' }}>Dedication Message (Optional)</label>
+                  <input type="text" name="cardMessage" className="form-control" placeholder="Handwritten card note..." style={{ padding: '7px 10px', fontSize: '13px' }} />
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600' }}>Dedication Card Message (Optional)</label>
-                <input type="text" name="cardMessage" className="form-control" placeholder="Complimentary handwritten note message..." />
+              {/* Action Buttons Row */}
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => setIsNewOrderModalOpen(false)}
+                  style={{ padding: '9px 18px', fontSize: '13px' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  style={{ padding: '9px 24px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <Icons.Plus /> Confirm & Record Order
+                </button>
               </div>
-
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px' }}>
-                Confirm & Record Order (11-Stage Pipeline)
-              </button>
             </form>
           </div>
         </div>
@@ -3501,7 +3603,7 @@ function AdminApp() {
                 setEditingArrangement(null);
                 setNewArrangementImage('');
                 setImageFileName('');
-                alert(`"${productName}" updated successfully in catalogue!`);
+                showToast(`"${productName}" updated successfully in floral catalogue!`, 'success', 'Catalogue Updated');
               } else {
                 const newArr = {
                   id: (modalProductType === 'flowers_only' ? 'flw-' : 'arr-') + Date.now(),
@@ -3527,7 +3629,7 @@ function AdminApp() {
                 setEditingArrangement(null);
                 setNewArrangementImage('');
                 setImageFileName('');
-                alert(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published!`);
+                showToast(`New ${modalProductType === 'flowers_only' ? 'flower variety' : 'bouquet'} "${newArr.name}" published!`, 'success', 'Published');
               }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -3756,7 +3858,7 @@ function AdminApp() {
                 } : i));
                 setIsInventoryModalOpen(false);
                 setEditingInventory(null);
-                alert('Stock line "' + nameVal + '" updated successfully in inventory!');
+                showToast('Stock line "' + nameVal + '" updated successfully in inventory!', 'success', 'Inventory Updated');
               } else {
                 const newItem = {
                   id: 'inv-' + Date.now(),
@@ -3769,7 +3871,7 @@ function AdminApp() {
                 };
                 setInventory([newItem, ...inventory]);
                 setIsInventoryModalOpen(false);
-                alert('Added "' + newItem.name + '" to cold room inventory!');
+                showToast('Added "' + newItem.name + '" to cold room inventory!', 'success', 'Inventory Added');
               }
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
@@ -3837,7 +3939,7 @@ function AdminApp() {
               };
               setPromotions([newP, ...promotions]);
               setIsPromoModalOpen(false);
-              alert('Promo code ' + newP.code + ' is now live!');
+              showToast('Promo code ' + newP.code + ' is now live!', 'success', 'Promo Activated');
             }}>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label style={{ fontSize: '12px', fontWeight: '600' }}>Voucher Code</label>
@@ -4144,6 +4246,152 @@ function AdminApp() {
                   Delete Order 🗑️
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ========================================================================= */}
+      {/* DEDICATED IN-APP TOAST NOTIFICATIONS (ZERO BROWSER DIALOGS)               */}
+      {/* ========================================================================= */}
+      {toast && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            zIndex: 99999,
+            minWidth: '320px',
+            maxWidth: '440px',
+            background: 'rgba(28, 20, 24, 0.96)',
+            backdropFilter: 'blur(16px)',
+            color: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '16px 20px',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.35), 0 0 0 1px rgba(244, 63, 94, 0.3)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px',
+            animation: 'toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            fontFamily: 'var(--font-sans)'
+          }}
+        >
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.2)' : (toast.type === 'info' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(225, 29, 72, 0.2)'),
+            color: toast.type === 'error' ? '#F87171' : (toast.type === 'info' ? '#93C5FD' : '#FDA4AF'),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            fontSize: '18px'
+          }}>
+            {toast.type === 'error' ? '⚠️' : (toast.type === 'info' ? 'ℹ️' : '🌸')}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: '700', fontSize: '14px', color: '#FFF', marginBottom: '2px', fontFamily: 'var(--font-serif)' }}>
+              {toast.title || (toast.type === 'error' ? 'Notice' : (toast.type === 'info' ? 'Information' : 'Studio Notification'))}
+            </div>
+            <div style={{ fontSize: '13px', color: '#E2E8F0', lineHeight: '1.4' }}>
+              {toast.message}
+            </div>
+          </div>
+          <button 
+            onClick={() => setToast(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94A3B8',
+              fontSize: '18px',
+              cursor: 'pointer',
+              padding: '0 4px',
+              lineHeight: '1'
+            }}
+            title="Dismiss notification"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* DEDICATED IN-APP CONFIRMATION MODAL (ZERO BROWSER DIALOGS)                */}
+      {/* ========================================================================= */}
+      {confirmModal && (
+        <div 
+          className="modal-backdrop" 
+          style={{ zIndex: 99998 }}
+          onClick={() => setConfirmModal(null)}
+        >
+          <div 
+            className="modal-card" 
+            style={{ 
+              maxWidth: '460px', 
+              padding: '28px', 
+              borderRadius: '20px', 
+              border: '1px solid #FFE4E6',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.25)',
+              textAlign: 'center'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: confirmModal.isDestructive ? '#FFF1F2' : '#FDF2F8',
+              color: confirmModal.isDestructive ? '#E11D48' : '#DB2777',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              margin: '0 auto 16px auto',
+              border: confirmModal.isDestructive ? '2px solid #FECDD3' : '2px solid #FBCFE8'
+            }}>
+              {confirmModal.isDestructive ? '🗑️' : '✨'}
+            </div>
+            <h3 style={{ 
+              fontFamily: 'var(--font-serif)', 
+              fontSize: '20px', 
+              fontWeight: '700', 
+              color: 'var(--text-main)', 
+              margin: '0 0 10px 0' 
+            }}>
+              {confirmModal.title}
+            </h3>
+            <p style={{ 
+              fontSize: '14px', 
+              color: 'var(--text-muted)', 
+              lineHeight: '1.5', 
+              margin: '0 0 24px 0' 
+            }}>
+              {confirmModal.message}
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                type="button"
+                className="btn-secondary" 
+                style={{ flex: 1, padding: '10px 18px', justifyContent: 'center', fontSize: '14px' }}
+                onClick={() => setConfirmModal(null)}
+              >
+                {confirmModal.cancelText || 'Cancel'}
+              </button>
+              <button 
+                type="button"
+                className="btn-primary" 
+                style={{ 
+                  flex: 1, 
+                  padding: '10px 18px', 
+                  justifyContent: 'center', 
+                  fontSize: '14px',
+                  background: confirmModal.isDestructive ? '#E11D48' : undefined,
+                  borderColor: confirmModal.isDestructive ? '#BE123C' : undefined
+                }}
+                onClick={confirmModal.onConfirm}
+              >
+                {confirmModal.confirmText || 'Confirm'}
+              </button>
             </div>
           </div>
         </div>

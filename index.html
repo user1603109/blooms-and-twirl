@@ -990,6 +990,18 @@ function App() {
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
   const [authNoticeMessage, setAuthNoticeMessage] = useState('');
 
+  // Dedicated In-App Toast System
+  const [toast, setToast] = useState(null);
+  const showToast = (message, type = 'success', title = '') => {
+    setToast({ message, type, title });
+  };
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4200);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   // Requirement: require sign in or registration to start shopping
   const requireAuthToShop = () => {
     if (!currentUser) {
@@ -1025,11 +1037,10 @@ function App() {
   ];
 
   const [arrangements, setArrangements] = useState(() => {
+    const deleted = getInitial('deleted_arrangements', []);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
-    const hasFlowersOnly = Array.isArray(loaded) && loaded.some(i => i.productType === 'flowers_only');
-    if (!hasFlowersOnly && Array.isArray(loaded)) {
-      const normalizedOld = loaded.map(i => ({ ...i, productType: i.productType || 'arranged' }));
-      return [...normalizedOld, ...INITIAL_ARRANGEMENTS_DATA.filter(i => i.productType === 'flowers_only')];
+    if (Array.isArray(loaded)) {
+      return loaded.filter(a => !deleted.includes(a.id));
     }
     return loaded;
   });
@@ -1284,7 +1295,7 @@ function App() {
     setLookupCustomOrderId(newCustom.id);
     setCustomerTrackerTab('custom');
     setViewMode('customer_dashboard');
-    alert('Thank you! Your custom order ' + newCustom.id + ' has been submitted to Shaira’s atelier florist review desk. We will inspect bloom availability right away.');
+    showToast('Thank you! Your custom order ' + newCustom.id + ' has been submitted to Shaira’s atelier review desk.', 'success', 'Custom Order Placed');
   };
 
   const handleAcceptSubstitution = (customOrderId) => {
@@ -1301,26 +1312,24 @@ function App() {
     setCustomOrders(updated);
     saveItem('custom_orders', updated);
     setTrackedCustomOrder(updated.find(c => c.id === customOrderId));
-    alert('Alternative flower accepted! Shaira’s atelier will begin conditioning your blooms for arranging.');
+    showToast('Alternative flower accepted! Shaira’s atelier will begin conditioning your blooms for arranging.', 'success', 'Alternative Accepted');
   };
 
   const handleCancelCustomOrder = (customOrderId) => {
-    if (window.confirm('Are you sure you want to cancel this custom order? Your pre-authorization payment will be voided/refunded in full.')) {
-      const updated = customOrders.map(co => {
-        if (co.id === customOrderId) {
-          return {
-            ...co,
-            status: 'Cancelled',
-            cancelledReason: 'Customer declined substitution or requested cancellation prior to arranging'
-          };
-        }
-        return co;
-      });
-      setCustomOrders(updated);
-      saveItem('custom_orders', updated);
-      setTrackedCustomOrder(updated.find(c => c.id === customOrderId));
-      alert('Custom order ' + customOrderId + ' has been cancelled. Any pre-authorized charges have been voided.');
-    }
+    const updated = customOrders.map(co => {
+      if (co.id === customOrderId) {
+        return {
+          ...co,
+          status: 'Cancelled',
+          cancelledReason: 'Customer declined substitution or requested cancellation prior to arranging'
+        };
+      }
+      return co;
+    });
+    setCustomOrders(updated);
+    saveItem('custom_orders', updated);
+    setTrackedCustomOrder(updated.find(c => c.id === customOrderId));
+    showToast('Custom order ' + customOrderId + ' has been cancelled. Any pre-authorized charges have been voided.', 'info', 'Order Cancelled');
   };
 
   // Cart operations
@@ -1355,13 +1364,13 @@ function App() {
       const disc = Math.round(cartSubtotal * 0.15);
       setPromoDiscount(disc);
       setActivePromoCode('ALLSAINTS15');
-      alert('Promo applied: 15% discount (₱' + disc.toLocaleString() + ')');
+      showToast('Promo applied: 15% discount (₱' + disc.toLocaleString() + ')', 'success', 'Promo Applied');
     } else if (clean === 'TWIRLFIRST') {
       setPromoDiscount(200);
       setActivePromoCode('TWIRLFIRST');
-      alert('Promo applied: ₱200 discount');
+      showToast('Promo applied: ₱200 discount', 'success', 'Promo Applied');
     } else {
-      alert('Invalid or expired promo code. Try TWIRLFIRST or ALLSAINTS15');
+      showToast('Invalid or expired promo code. Try TWIRLFIRST or ALLSAINTS15', 'error', 'Invalid Code');
     }
   };
 
@@ -1428,7 +1437,7 @@ function App() {
     setTrackedOrder(newOrd);
     setLookupOrderNumber(newOrd.id);
     setViewMode('customer_dashboard');
-    alert('Thank you, ' + checkoutData.name + '! Your order ' + newOrd.id + ' has been confirmed and submitted to Shaira’s atelier dispatch queue.');
+    showToast('Thank you, ' + checkoutData.name + '! Your order #' + newOrd.id + ' has been confirmed and submitted to Shaira’s atelier.', 'success', 'Order Confirmed');
   };
 
   // Auth Handler on Landing Page (Sign In & Register)
@@ -1454,7 +1463,7 @@ function App() {
       setCheckoutProvinceCity(authProvinceCity);
       setCheckoutBarangay(authBarangay);
       setCheckoutStreet(authStreet);
-      alert('Welcome to Blooms&Twirl by Shaira, ' + (authName || 'friend') + '! Your account is now active (' + authProvinceCity + ').');
+      showToast('Welcome to Blooms&Twirl by Shaira, ' + (authName || 'friend') + '! Your account is now active (' + authProvinceCity + ').', 'success', 'Account Created');
       setViewMode('store');
     } else {
       const cleaned = (authEmail || '').toLowerCase().trim();
@@ -1474,10 +1483,10 @@ function App() {
             localStorage.setItem('bt_currentUser_v2', JSON.stringify(adminUser));
             localStorage.setItem('bt_admin_auth', 'true');
           } catch(err) {}
-          alert('Welcome back, Shaira! Redirecting to Blooms&Twirl Admin Studio Console...');
-          window.location.href = './admin/index.html';
+          showToast('Welcome back, Shaira! Redirecting to Blooms&Twirl Admin Studio Console...', 'success', 'Admin Access');
+          setTimeout(() => { window.location.href = './admin/index.html'; }, 600);
         } else {
-          alert('Incorrect password for admin account "' + authEmail + '". Please enter the correct password (blooms&twirl.admin).');
+          showToast('Incorrect password for admin account "' + authEmail + '". Please enter the correct password (blooms&twirl.admin).', 'error', 'Auth Failed');
         }
       } else {
         const clientName = authEmail.includes('@') ? authEmail.split('@')[0] : (authEmail || 'Valued Client');
@@ -1490,7 +1499,7 @@ function App() {
         try {
           localStorage.setItem('bt_currentUser_v2', JSON.stringify(clientUser));
         } catch(err) {}
-        alert('Signed in successfully as ' + authEmail);
+        showToast('Signed in successfully as ' + authEmail, 'success', 'Signed In');
         setViewMode('customer_dashboard');
       }
     }
@@ -1927,10 +1936,10 @@ function App() {
                       )}
                     </div>
                     <div className="arrangement-body">
-                      <div className="arrangement-name-row">
-                        <span className="arrangement-name">{arr.name}</span>
-                        <span className="arrangement-rating">
-                          <Icons.Star /> {arr.rating}
+                      <div className="arrangement-name-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                        <span className="arrangement-name" style={{ flex: '1 1 auto', minWidth: 0, wordBreak: 'break-word' }}>{arr.name}</span>
+                        <span className="arrangement-rating" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                          <Icons.Star /> <span>{arr.rating}</span>
                         </span>
                       </div>
                       <p className="arrangement-stems">{arr.stems.join(' · ')}</p>
@@ -2337,7 +2346,7 @@ function App() {
                       if (found) {
                         setTrackedCustomOrder(found);
                       } else {
-                        alert('Custom commission ' + lookupCustomOrderId + ' not found. Try ' + customOrders.map(c=>c.id).join(', ') + '.');
+                        showToast('Custom commission #' + lookupCustomOrderId + ' not found. Try ' + customOrders.map(c=>c.id).join(', '), 'error', 'Commission Not Found');
                       }
                     }}
                   >
@@ -2632,7 +2641,7 @@ function App() {
                     if (found) {
                       setTrackedOrder(found);
                     } else {
-                      alert('Order ' + lookupOrderNumber + ' not found in the studio registry. Try ' + orders.slice(0, 3).map(o=>o.id).join(', ') + '.');
+                      showToast('Order #' + lookupOrderNumber + ' not found in the studio registry. Try ' + orders.slice(0, 3).map(o=>o.id).join(', '), 'error', 'Order Not Found');
                     }
                   }}>
                     Look Up Order
@@ -3785,6 +3794,69 @@ function App() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Dedicated In-App Toast Notification */}
+      {toast && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            zIndex: 99999,
+            minWidth: '320px',
+            maxWidth: '440px',
+            background: 'rgba(28, 20, 24, 0.96)',
+            backdropFilter: 'blur(16px)',
+            color: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '16px 20px',
+            boxShadow: '0 20px 45px rgba(0,0,0,0.35), 0 0 0 1px rgba(244, 63, 94, 0.3)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '14px',
+            animation: 'toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            fontFamily: 'var(--font-sans)'
+          }}
+        >
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            background: toast.type === 'error' ? 'rgba(239, 68, 68, 0.2)' : (toast.type === 'info' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(225, 29, 72, 0.2)'),
+            color: toast.type === 'error' ? '#F87171' : (toast.type === 'info' ? '#93C5FD' : '#FDA4AF'),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            fontSize: '18px'
+          }}>
+            {toast.type === 'error' ? '⚠️' : (toast.type === 'info' ? 'ℹ️' : '🌸')}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: '700', fontSize: '14px', color: '#FFF', marginBottom: '2px', fontFamily: 'var(--font-serif)' }}>
+              {toast.title || (toast.type === 'error' ? 'Notice' : 'Blooms&Twirl Notification')}
+            </div>
+            <div style={{ fontSize: '13px', color: '#E2E8F0', lineHeight: '1.4' }}>
+              {toast.message}
+            </div>
+          </div>
+          <button 
+            onClick={() => setToast(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94A3B8',
+              fontSize: '18px',
+              cursor: 'pointer',
+              padding: '0 4px',
+              lineHeight: '1'
+            }}
+            title="Dismiss notification"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>
