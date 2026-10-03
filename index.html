@@ -1218,12 +1218,22 @@ const BT_IDB = {
 };
 
 // Storage Helpers & Automatic Client-Side Version Updater
-const BT_BUILD_STAMP = '20261003_build_v6';
+const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
+const BT_BUILD_STAMP = '20261003_build_v10_gas_live';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
     if (prevStamp !== BT_BUILD_STAMP) {
       localStorage.setItem('bt_build_stamp', BT_BUILD_STAMP);
+      try {
+        const curSettings = JSON.parse(localStorage.getItem('bt_settings_v2') || '{}');
+        curSettings.googleAppsScriptUrl = DEFAULT_GAS_URL;
+        localStorage.setItem('bt_settings_v2', JSON.stringify(curSettings));
+      } catch(e) {}
+      // Clear stale mock arrangements so fresh Google Sheets creations take over
+      localStorage.removeItem('bt_arrangements_v2');
+      localStorage.removeItem('bt_featured_arrangement_ids_v2');
+      localStorage.removeItem('bt_deleted_arrangements_v2');
     }
   }
 } catch(e) {}
@@ -1524,9 +1534,9 @@ function App() {
       }
     });
 
-    // 2. Cross-device cloud sync via Google Apps Script (if configured)
+    // 2. Cross-device cloud sync via Google Apps Script (Automatic live sync across all devices)
     const settings = getInitial('settings', {});
-    const gasUrl = (settings && settings.googleAppsScriptUrl) || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('gas'));
+    const gasUrl = (settings && settings.googleAppsScriptUrl) || (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('gas')) || DEFAULT_GAS_URL;
     if (gasUrl) {
       fetch(gasUrl)
         .then(res => res.json())
@@ -1553,13 +1563,19 @@ function App() {
             if (valid.length > 0) {
               setArrangements(valid);
               saveItem('arrangements', valid);
-              const featIds = valid.filter(a => a.isFeatured).map(a => a.id);
+              let featIds = valid.filter(a => a.isFeatured).map(a => a.id);
+              if (featIds.length === 0) {
+                // If no products in the sheet have isFeatured explicitly set, feature top creations
+                featIds = valid.slice(0, 4).map(a => a.id);
+              }
               saveItem('featured_arrangement_ids', featIds);
               setFeaturedArrangementIds(featIds);
             }
           }
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn('Google Apps Script sync failed:', err);
+        });
     }
 
     return () => {

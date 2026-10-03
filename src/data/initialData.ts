@@ -481,9 +481,9 @@ export const INITIAL_SETTINGS: ShopSettings = {
   coldRoomTemp: '4°C',
   coldRoomAlert: '24 garden roses left. Two bridal consults before noon.',
   googleSheetId: '',
-  googleAppsScriptUrl: '',
+  googleAppsScriptUrl: 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec',
   googleDriveFolderId: '',
-  isGoogleConnected: false
+  isGoogleConnected: true
 };
 
 export const INITIAL_DIARY: StudioDiaryEntry[] = [
