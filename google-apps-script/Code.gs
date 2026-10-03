@@ -101,6 +101,37 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({ status: "success", orderId: o.id })).setMimeType(ContentService.MimeType.JSON);
     }
     
+    if (action === "delete_product") {
+      var targetId = String(contents.id || "");
+      var pSheet = ss.getSheetByName("Products");
+      if (pSheet && pSheet.getLastRow() > 1) {
+        var data = pSheet.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (String(data[i][0]) === targetId) {
+            pSheet.deleteRow(i + 1);
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", deletedId: targetId })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === "toggle_featured") {
+      var targetId = String(contents.id || "");
+      var isFeat = contents.isFeatured ? "TRUE" : "FALSE";
+      var pSheet = ss.getSheetByName("Products");
+      if (pSheet && pSheet.getLastRow() > 1) {
+        var data = pSheet.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (String(data[i][0]) === targetId) {
+            pSheet.getRange(i + 1, 12).setValue(isFeat);
+            break;
+          }
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", id: targetId, isFeatured: isFeat })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     if (action === "sync_products") {
       var products = contents.products || [];
       var pSheet = ss.getSheetByName("Products");
