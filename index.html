@@ -2062,6 +2062,17 @@ function App() {
     }
   };
 
+  // Sign out handler: clears active customer session and resets to guest landing page
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('bt_currentUser_v2');
+      localStorage.removeItem('bt_admin_auth');
+    } catch(err) {}
+    setViewMode('landing');
+    showToast('You have signed out. Welcome back to the Blooms&Twirl main landing page.', 'success', 'Signed Out');
+  };
+
   // Catalogue Filtering (Strictly deduplicated)
   const filteredArrangements = useMemo(() => {
     let list = deduplicateArrangements(arrangements);
@@ -2138,9 +2149,20 @@ function App() {
                 Featured Blooms
               </button>
               {currentUser ? (
-                <button className="switcher-btn" style={{ color: 'var(--primary)', fontWeight: '700' }} onClick={() => setViewMode('customer_dashboard')}>
-                  Hi, {currentUser.name ? currentUser.name.split(' ')[0] : 'Client'}
-                </button>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <button className="switcher-btn" style={{ color: 'var(--primary)', fontWeight: '700' }} onClick={() => setViewMode('customer_dashboard')} title="View Customer Dashboard & Orders">
+                    Hi, {currentUser.name ? currentUser.name.split(' ')[0] : 'Client'}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    style={{ padding: '6px 12px', fontSize: '12px', fontWeight: '700', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }} 
+                    onClick={handleSignOut}
+                    title="Sign Out from this browser session"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               ) : (
                 <button className="switcher-btn" style={{ color: 'var(--text-main)', background: 'transparent' }} onClick={() => {
                   document.getElementById('auth-panel-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -2262,256 +2284,291 @@ function App() {
 
               {/* Responsive Fluid Auth Card */}
               <div style={{ maxWidth: '480px', margin: '0 auto', background: '#FFFFFF', borderRadius: 'var(--radius-card)', padding: '28px 24px', border: '1px solid var(--border-light)', boxShadow: 'var(--shadow-card)' }}>
-                {/* Segmented Switcher Tabs */}
-                <div style={{ display: 'flex', background: '#F8F3EE', padding: '4px', borderRadius: '12px', marginBottom: '22px' }}>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsAuthFlipped(false)}
-                    style={{ 
-                      flex: 1, 
-                      padding: '10px 14px', 
-                      borderRadius: '8px', 
-                      border: 'none', 
-                      background: !isAuthFlipped ? '#FFFFFF' : 'transparent', 
-                      color: !isAuthFlipped ? 'var(--text-main)' : 'var(--text-muted)', 
-                      fontWeight: !isAuthFlipped ? '700' : '600', 
-                      fontSize: '13px', 
-                      cursor: 'pointer', 
-                      boxShadow: !isAuthFlipped ? '0 2px 6px rgba(0,0,0,0.06)' : 'none', 
-                      transition: 'all 0.2s ease' 
-                    }}
-                  >
-                    Sign In
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsAuthFlipped(true)}
-                    style={{ 
-                      flex: 1, 
-                      padding: '10px 14px', 
-                      borderRadius: '8px', 
-                      border: 'none', 
-                      background: isAuthFlipped ? '#FFFFFF' : 'transparent', 
-                      color: isAuthFlipped ? 'var(--text-main)' : 'var(--text-muted)', 
-                      fontWeight: isAuthFlipped ? '700' : '600', 
-                      fontSize: '13px', 
-                      cursor: 'pointer', 
-                      boxShadow: isAuthFlipped ? '0 2px 6px rgba(0,0,0,0.06)' : 'none', 
-                      transition: 'all 0.2s ease' 
-                    }}
-                  >
-                    Register Account
-                  </button>
-                </div>
-
-                {!isAuthFlipped ? (
-                  /* SIGN IN VIEW */
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                      <div>
-                        <span className="card-subtitle">WELCOME BACK</span>
-                        <h3 className="card-title font-serif" style={{ fontSize: '22px', margin: 0 }}>Sign In</h3>
-                      </div>
-                      <div style={{ color: 'var(--primary)' }}><Icons.Flower /></div>
+                {currentUser ? (
+                  <div style={{ textAlign: 'center', padding: '12px 6px' }}>
+                    <div style={{ width: '54px', height: '54px', borderRadius: '18px', background: '#FFF0F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', margin: '0 auto 14px auto', border: '1px solid var(--primary-border)' }}>
+                      <Icons.User />
                     </div>
-
-                    <form onSubmit={(e) => handleAuthSubmit(e, false)}>
-                      <div className="form-group" style={{ marginBottom: '14px' }}>
-                        <label style={{ fontSize: '12px' }}>Username</label>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          required 
-                          placeholder="Your Username"
-                          value={authEmail}
-                          onChange={(e) => setAuthEmail(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: '14px' }}>
-                        <label style={{ fontSize: '12px' }}>Password</label>
-                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                          <input 
-                            type={showAuthPassword ? "text" : "password"} 
-                            className="form-control" 
-                            required 
-                            placeholder="Your Password"
-                            value={authPassword}
-                            onChange={(e) => setAuthPassword(e.target.value)}
-                            style={{ paddingRight: '46px' }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowAuthPassword(!showAuthPassword)}
-                            style={{
-                              position: 'absolute',
-                              right: '10px',
-                              background: 'transparent',
-                              border: 'none',
-                              color: showAuthPassword ? 'var(--primary)' : 'var(--text-muted)',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '6px',
-                              borderRadius: '8px',
-                              transition: 'color 0.2s'
-                            }}
-                            title={showAuthPassword ? "Hide password" : "Show password"}
-                          >
-                            {showAuthPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', marginTop: '6px' }}>
-                        Sign In
+                    <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--primary)' }}>
+                      ACTIVE MEMBER SESSION
+                    </span>
+                    <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', margin: '6px 0 4px', color: '#1C1917' }}>
+                      {currentUser.name}
+                    </h3>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 20px', lineHeight: '1.5' }}>
+                      {currentUser.email} {currentUser.city ? '· ' + currentUser.city : ''}
+                    </p>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button className="btn-primary" style={{ padding: '11px 22px' }} onClick={() => setViewMode('store')}>
+                        <Icons.ShoppingBag /> Open Storefront
                       </button>
-                    </form>
-
-                    <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      New to Blooms&Twirl?{' '}
+                      <button className="btn-secondary" style={{ padding: '11px 18px' }} onClick={() => setViewMode('customer_dashboard')}>
+                        <Icons.Orders /> My Orders
+                      </button>
                       <button 
                         type="button" 
-                        style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => setIsAuthFlipped(true)}
+                        className="btn-secondary" 
+                        style={{ padding: '11px 18px', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2', fontWeight: '700' }} 
+                        onClick={handleSignOut}
                       >
-                        Create Member Account
+                        Sign Out
                       </button>
                     </div>
                   </div>
                 ) : (
-                  /* REGISTER VIEW */
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                      <div>
-                        <span className="card-subtitle">JOIN THE FLORAL FAMILY</span>
-                        <h3 className="card-title font-serif" style={{ fontSize: '22px', margin: 0 }}>Register Account</h3>
-                      </div>
-                      <div style={{ color: 'var(--primary)' }}><Icons.Sparkles /></div>
-                    </div>
-
-                    <form onSubmit={(e) => handleAuthSubmit(e, true)}>
-                      <div className="form-group" style={{ marginBottom: '10px' }}>
-                        <label style={{ fontSize: '12px' }}>Full Name</label>
-                        <input 
-                          type="text" 
-                          className="form-control" 
-                          required 
-                          placeholder="e.g. Maria Santos"
-                          value={authName}
-                          onChange={(e) => setAuthName(e.target.value)}
-                        />
-                      </div>
-
-                      <div className="auth-grid-2col" style={{ marginBottom: '10px' }}>
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label style={{ fontSize: '12px' }}>Email</label>
-                          <input 
-                            type="email" 
-                            className="form-control" 
-                            required 
-                            placeholder="maria@domain.ph"
-                            value={authEmail}
-                            onChange={(e) => setAuthEmail(e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label style={{ fontSize: '12px' }}>Mobile No.</label>
-                          <input 
-                            type="tel" 
-                            className="form-control" 
-                            required 
-                            placeholder="0917 XXX XXXX"
-                            value={authPhone}
-                            onChange={(e) => setAuthPhone(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Shopee-style Smart Address Selector (Nationwide Philippines) */}
-                      <div style={{ background: '#FFF5F8', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-light)', marginBottom: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                            <Icons.MapPin /> Delivery Address (Whole Philippines)
-                          </div>
-                          <span style={{ fontSize: '10px', background: '#FFE0EB', color: 'var(--primary)', padding: '2px 7px', borderRadius: '9999px', fontWeight: '700' }}>
-                            Shopee Address Picker
-                          </span>
-                        </div>
-
-                        {/* Interactive Shopee Trigger Card */}
-                        <div className="form-group" style={{ marginBottom: '6px' }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Region, Province / City, Barangay</label>
-                          <div 
-                            className="shopee-addr-trigger"
-                            onClick={() => openAddressModal('auth')}
-                            role="button"
-                            tabIndex={0}
-                            title="Click to select Region, Province / City, and Barangay"
-                            style={{ padding: '8px 10px' }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: 0 }}>
-                              <div style={{ color: 'var(--primary)', marginTop: '2px', flexShrink: 0 }}>
-                                <Icons.MapPin />
-                              </div>
-                              <div style={{ minWidth: 0, flex: 1 }}>
-                                <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', lineHeight: '1.3', wordBreak: 'break-word' }}>
-                                  {authBarangay}, {authProvinceCity}
-                                </div>
-                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                                  {authRegion}
-                                </div>
-                              </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--primary)', fontSize: '11px', fontWeight: '700', flexShrink: 0, marginLeft: '6px' }}>
-                              <span>Select</span>
-                              <Icons.ChevronRight />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Street Address / House / Landmark</label>
-                          <input 
-                            type="text" 
-                            className="form-control" 
-                            style={{ fontSize: '12px', padding: '8px 10px' }}
-                            placeholder="e.g. Purok 4, near Luna Municipal Hall"
-                            value={authStreet}
-                            onChange={(e) => setAuthStreet(e.target.value)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group" style={{ marginBottom: '12px' }}>
-                        <label style={{ fontSize: '12px' }}>Password</label>
-                        <input 
-                          type="password" 
-                          className="form-control" 
-                          required 
-                          placeholder="Create secure password"
-                          value={authPassword}
-                          onChange={(e) => setAuthPassword(e.target.value)}
-                        />
-                      </div>
-
-                      <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px' }}>
-                        Register & Start Shopping
-                      </button>
-                    </form>
-
-                    <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                      Already have an account?{' '}
+                  <>
+                    {/* Segmented Switcher Tabs */}
+                    <div style={{ display: 'flex', background: '#F8F3EE', padding: '4px', borderRadius: '12px', marginBottom: '22px' }}>
                       <button 
                         type="button" 
-                        style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => setIsAuthFlipped(false)}
+                        style={{ 
+                          flex: 1, 
+                          padding: '10px 14px', 
+                          borderRadius: '8px', 
+                          border: 'none', 
+                          background: !isAuthFlipped ? '#FFFFFF' : 'transparent', 
+                          color: !isAuthFlipped ? 'var(--text-main)' : 'var(--text-muted)', 
+                          fontWeight: !isAuthFlipped ? '700' : '600', 
+                          fontSize: '13px', 
+                          cursor: 'pointer', 
+                          boxShadow: !isAuthFlipped ? '0 2px 6px rgba(0,0,0,0.06)' : 'none', 
+                          transition: 'all 0.2s ease' 
+                        }}
                       >
                         Sign In
                       </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsAuthFlipped(true)}
+                        style={{ 
+                          flex: 1, 
+                          padding: '10px 14px', 
+                          borderRadius: '8px', 
+                          border: 'none', 
+                          background: isAuthFlipped ? '#FFFFFF' : 'transparent', 
+                          color: isAuthFlipped ? 'var(--text-main)' : 'var(--text-muted)', 
+                          fontWeight: isAuthFlipped ? '700' : '600', 
+                          fontSize: '13px', 
+                          cursor: 'pointer', 
+                          boxShadow: isAuthFlipped ? '0 2px 6px rgba(0,0,0,0.06)' : 'none', 
+                          transition: 'all 0.2s ease' 
+                        }}
+                      >
+                        Register Account
+                      </button>
                     </div>
-                  </div>
+
+                    {!isAuthFlipped ? (
+                      /* SIGN IN VIEW */
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                          <div>
+                            <span className="card-subtitle">WELCOME BACK</span>
+                            <h3 className="card-title font-serif" style={{ fontSize: '22px', margin: 0 }}>Sign In</h3>
+                          </div>
+                          <div style={{ color: 'var(--primary)' }}><Icons.Flower /></div>
+                        </div>
+
+                        <form onSubmit={(e) => handleAuthSubmit(e, false)}>
+                          <div className="form-group" style={{ marginBottom: '14px' }}>
+                            <label style={{ fontSize: '12px' }}>Username</label>
+                            <input 
+                              type="text" 
+                              className="form-control" 
+                              required 
+                              placeholder="Your Username"
+                              value={authEmail}
+                              onChange={(e) => setAuthEmail(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="form-group" style={{ marginBottom: '14px' }}>
+                            <label style={{ fontSize: '12px' }}>Password</label>
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                              <input 
+                                type={showAuthPassword ? "text" : "password"} 
+                                className="form-control" 
+                                required 
+                                placeholder="Your Password"
+                                value={authPassword}
+                                onChange={(e) => setAuthPassword(e.target.value)}
+                                style={{ paddingRight: '46px' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowAuthPassword(!showAuthPassword)}
+                                style={{
+                                  position: 'absolute',
+                                  right: '10px',
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: showAuthPassword ? 'var(--primary)' : 'var(--text-muted)',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '6px',
+                                  borderRadius: '8px',
+                                  transition: 'color 0.2s'
+                                }}
+                                title={showAuthPassword ? "Hide password" : "Show password"}
+                              >
+                                {showAuthPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                              </button>
+                            </div>
+                          </div>
+
+                          <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', marginTop: '6px' }}>
+                            Sign In
+                          </button>
+                        </form>
+
+                        <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)', fontSize: '13px', color: 'var(--text-muted)' }}>
+                          New to Blooms&Twirl?{' '}
+                          <button 
+                            type="button" 
+                            style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
+                            onClick={() => setIsAuthFlipped(true)}
+                          >
+                            Create Member Account
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* REGISTER VIEW */
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                          <div>
+                            <span className="card-subtitle">JOIN THE FLORAL FAMILY</span>
+                            <h3 className="card-title font-serif" style={{ fontSize: '22px', margin: 0 }}>Register Account</h3>
+                          </div>
+                          <div style={{ color: 'var(--primary)' }}><Icons.Sparkles /></div>
+                        </div>
+
+                        <form onSubmit={(e) => handleAuthSubmit(e, true)}>
+                          <div className="form-group" style={{ marginBottom: '10px' }}>
+                            <label style={{ fontSize: '12px' }}>Full Name</label>
+                            <input 
+                              type="text" 
+                              className="form-control" 
+                              required 
+                              placeholder="e.g. Maria Santos"
+                              value={authName}
+                              onChange={(e) => setAuthName(e.target.value)}
+                            />
+                          </div>
+
+                          <div className="auth-grid-2col" style={{ marginBottom: '10px' }}>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: '12px' }}>Email</label>
+                              <input 
+                                type="email" 
+                                className="form-control" 
+                                required 
+                                placeholder="maria@domain.ph"
+                                value={authEmail}
+                                onChange={(e) => setAuthEmail(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: '12px' }}>Mobile No.</label>
+                              <input 
+                                type="tel" 
+                                className="form-control" 
+                                required 
+                                placeholder="0917 XXX XXXX"
+                                value={authPhone}
+                                onChange={(e) => setAuthPhone(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Shopee-style Smart Address Selector (Nationwide Philippines) */}
+                          <div style={{ background: '#FFF5F8', padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--border-light)', marginBottom: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: '800', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                                <Icons.MapPin /> Delivery Address (Whole Philippines)
+                              </div>
+                              <span style={{ fontSize: '10px', background: '#FFE0EB', color: 'var(--primary)', padding: '2px 7px', borderRadius: '9999px', fontWeight: '700' }}>
+                                Shopee Address Picker
+                              </span>
+                            </div>
+
+                            {/* Interactive Shopee Trigger Card */}
+                            <div className="form-group" style={{ marginBottom: '6px' }}>
+                              <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Region, Province / City, Barangay</label>
+                              <div 
+                                className="shopee-addr-trigger"
+                                onClick={() => openAddressModal('auth')}
+                                role="button"
+                                tabIndex={0}
+                                title="Click to select Region, Province / City, and Barangay"
+                                style={{ padding: '8px 10px' }}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1, minWidth: 0 }}>
+                                  <div style={{ color: 'var(--primary)', marginTop: '2px', flexShrink: 0 }}>
+                                    <Icons.MapPin />
+                                  </div>
+                                  <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', lineHeight: '1.3', wordBreak: 'break-word' }}>
+                                      {authBarangay}, {authProvinceCity}
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                      {authRegion}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--primary)', fontSize: '11px', fontWeight: '700', flexShrink: 0, marginLeft: '6px' }}>
+                                  <span>Select</span>
+                                  <Icons.ChevronRight />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Street Address / House / Landmark</label>
+                              <input 
+                                type="text" 
+                                className="form-control" 
+                                style={{ fontSize: '12px', padding: '8px 10px' }}
+                                placeholder="e.g. Purok 4, near Luna Municipal Hall"
+                                value={authStreet}
+                                onChange={(e) => setAuthStreet(e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="form-group" style={{ marginBottom: '12px' }}>
+                            <label style={{ fontSize: '12px' }}>Password</label>
+                            <input 
+                              type="password" 
+                              className="form-control" 
+                              required 
+                              placeholder="Create secure password"
+                              value={authPassword}
+                              onChange={(e) => setAuthPassword(e.target.value)}
+                            />
+                          </div>
+
+                          <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px' }}>
+                            Register & Start Shopping
+                          </button>
+                        </form>
+
+                        <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: 'var(--text-muted)' }}>
+                          Already have an account?{' '}
+                          <button 
+                            type="button" 
+                            style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: '700', cursor: 'pointer', textDecoration: 'underline' }}
+                            onClick={() => setIsAuthFlipped(false)}
+                          >
+                            Sign In
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </section>
@@ -2663,6 +2720,15 @@ function App() {
 
             <div className="landing-nav">
               <button 
+                type="button" 
+                className="btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => setViewMode('landing')}
+                title="Return to Blooms&Twirl Main Landing Page"
+              >
+                <Icons.Home /> Main Landing Page
+              </button>
+              <button 
                 type="button"
                 className="btn-secondary" 
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FFF0F5', borderColor: '#FBCFE8', color: 'var(--primary)', fontWeight: '700' }}
@@ -2680,6 +2746,17 @@ function App() {
               <button className="btn-secondary" onClick={() => setViewMode('customer_dashboard')}>
                 Track Order
               </button>
+              {currentUser && (
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  style={{ padding: '8px 14px', fontSize: '12px', fontWeight: '700', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }} 
+                  onClick={handleSignOut}
+                  title="Sign Out from this session"
+                >
+                  Sign Out
+                </button>
+              )}
               <button className="btn-primary" onClick={() => setIsCartOpen(true)}>
                 <Icons.ShoppingBag /> Cart ({cart.reduce((a,c)=>a+c.qty, 0)}) · ₱{cartSubtotal.toLocaleString()}
               </button>
@@ -2872,6 +2949,15 @@ function App() {
 
             <div className="landing-nav">
               <button 
+                type="button" 
+                className="btn-secondary" 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => setViewMode('landing')}
+                title="Return to Blooms&Twirl Main Landing Page"
+              >
+                <Icons.Home /> Main Landing Page
+              </button>
+              <button 
                 type="button"
                 className="btn-secondary" 
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FFF0F5', borderColor: '#FBCFE8', color: 'var(--primary)', fontWeight: '700' }}
@@ -2889,6 +2975,17 @@ function App() {
               <button className="btn-primary" onClick={() => setViewMode('store')}>
                 <Icons.ShoppingBag /> Shop Studio
               </button>
+              {currentUser && (
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  style={{ padding: '8px 14px', fontSize: '12px', fontWeight: '700', color: '#E11D48', borderColor: '#FECDD3', background: '#FFF1F2' }} 
+                  onClick={handleSignOut}
+                  title="Sign Out from this session"
+                >
+                  Sign Out
+                </button>
+              )}
             </div>
           </header>
 
