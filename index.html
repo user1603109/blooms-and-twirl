@@ -1488,7 +1488,6 @@ function App() {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
-  }, []);
 
   const [orders, setOrders] = useState(() => {
     const rawOrders = getInitial('orders', [
