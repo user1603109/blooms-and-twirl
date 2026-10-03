@@ -21,7 +21,7 @@ export const INITIAL_ARRANGEMENTS: Arrangement[] = [
     price: 2450,
     coldRoomCount: 14,
     sold30d: 96,
-    image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80',
     description: 'Our iconic signature bouquet featuring garden roses in blushing peach and porcelain cream, accented with white astilbe and sweet Italian ruscus.',
     stems: ['Garden roses', 'Peach ranunculus', 'Cream astilbe', 'Italian ruscus'],
     rating: 4.9,

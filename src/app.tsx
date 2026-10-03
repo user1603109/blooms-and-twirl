@@ -139,7 +139,7 @@ function App() {
 
   // Primary Data Collections
   const [arrangements, setArrangements] = useState(() => getInitial('arrangements', [
-    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring garden roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Garden roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-1', name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring garden roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Garden roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
     { id: 'arr-2', name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
     { id: 'arr-3', name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
     { id: 'arr-4', name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
@@ -2205,7 +2205,7 @@ function App() {
                 price: parseFloat(fd.get('price')) || 2000,
                 coldRoomCount: parseInt(fd.get('coldRoomCount')) || 10,
                 sold30d: 0,
-                image: fd.get('image') || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+                image: fd.get('image') || 'https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80',
                 description: fd.get('description'),
                 stems: fd.get('stems').split(',').map(s=>s.trim()),
                 rating: 5.0,
@@ -2257,7 +2257,7 @@ function App() {
 
               <div className="form-group">
                 <label>Image URL (or Google Drive Asset link)</label>
-                <input name="image" type="url" className="form-control" placeholder="https://lh3.googleusercontent.com/d/..." defaultValue="https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80" />
+                <input name="image" type="url" className="form-control" placeholder="https://lh3.googleusercontent.com/d/..." defaultValue="https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80" />
               </div>
 
               <div className="form-group">

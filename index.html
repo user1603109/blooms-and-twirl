@@ -1237,12 +1237,18 @@ const BT_IDB = {
 
 // Storage Helpers & Automatic Client-Side Version Updater
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
-const BT_BUILD_STAMP = '20261003_build_v12_seamless';
+const BT_BUILD_STAMP = '20261003_build_v14_fix_featured_photos';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
     if (prevStamp !== BT_BUILD_STAMP) {
       localStorage.setItem('bt_build_stamp', BT_BUILD_STAMP);
+      try {
+        const rawArr = localStorage.getItem('bt_arrangements_v2');
+        if (rawArr && rawArr.includes('photo-1561181286-d3fee7d55364')) {
+          localStorage.removeItem('bt_arrangements_v2');
+        }
+      } catch(e) {}
       try {
         const curSettings = JSON.parse(localStorage.getItem('bt_settings_v2') || '{}');
         curSettings.googleAppsScriptUrl = DEFAULT_GAS_URL;
@@ -1284,7 +1290,7 @@ const saveItem = (key, data) => {
         });
         const lightweightData = data.map(item => {
           if (item.image && item.image.startsWith('data:image') && item.image.length > 50000) {
-            return { ...item, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80' };
+            return { ...item, image: 'idb:' + item.id };
           }
           return item;
         });
@@ -1459,14 +1465,14 @@ function App() {
       price: 12335, 
       coldRoomCount: 7, 
       sold30d: 0, 
-      image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', 
+      image: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80', 
       description: 'Handcrafted bespoke bouquet with highland blooms. White hydrangeas, white standard roses, white ranunculus, white lisianthus (Eustoma), miniature white spray roses, baby’s breath (Gypsophila), white waxflower, silver dollar eucalyptus, and dusty miller.', 
       stems: ['White hydrangeas', 'White standard roses', 'White ranunculus', 'White lisianthus', 'Miniature spray roses', 'Baby’s breath', 'Silver dollar eucalyptus'], 
       rating: 5.0, 
       isLowStock: false 
     },
     // Arranged Products (Curated Studio Signature Highlights - Sourced from Baguio City)
-    { id: 'arr-1', productType: 'arranged', isFeatured: true, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
+    { id: 'arr-1', productType: 'arranged', isFeatured: true, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
     { id: 'arr-2', productType: 'arranged', isFeatured: true, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
     { id: 'arr-3', productType: 'arranged', isFeatured: false, name: 'Dusk & Dried', tag: 'Dried', category: 'Dried', price: 1640, coldRoomCount: 3, sold30d: 51, image: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80', description: 'Everlasting artisanal arrangement with dusty rose, pampas grass, lavender, and terracotta accents in ceramic vase.', stems: ['Dusty rose', 'Pampas grass', 'Terracotta blooms'], rating: 4.7, isLowStock: true },
     { id: 'arr-4', productType: 'arranged', isFeatured: false, name: 'Twirl Orchid', tag: 'Houseplant', category: 'Houseplant', price: 3290, coldRoomCount: 8, sold30d: 34, image: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?auto=format&fit=crop&w=800&q=80', description: 'Cascading spikes of pure white and blush Phalaenopsis orchids in handcrafted rose ceramic.', stems: ['Phalaenopsis orchid', 'Sphagnum moss'], rating: 5.0, isLowStock: false },
@@ -1528,9 +1534,11 @@ function App() {
       try {
         const updated = await Promise.all(
           arrangements.map(async (arr) => {
-            const hdImg = await BT_IDB.getImage(arr.id);
-            if (hdImg && hdImg !== arr.image) {
-              return { ...arr, image: hdImg };
+            if (!arr.image || arr.image.startsWith('idb:') || arr.image.includes('photo-1561181286-d3fee7d55364')) {
+              const hdImg = await BT_IDB.getImage(arr.id);
+              if (hdImg) {
+                return { ...arr, image: hdImg };
+              }
             }
             return arr;
           })
@@ -1542,7 +1550,7 @@ function App() {
       } catch(err) {}
     })();
     return () => { isMounted = false; };
-  }, []);
+  }, [arrangements.length]);
 
   // Real-time synchronization across browser tabs and Google Apps Script cloud
   useEffect(() => {
@@ -1552,13 +1560,33 @@ function App() {
         const deleted = getInitial('deleted_arrangements', []);
         const featIds = getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
         setFeaturedArrangementIds(featIds);
-        const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
-        if (Array.isArray(loaded)) {
-          const synchronized = loaded.map(item => ({
+
+        // If event is ONLY for featured ids (focus, visibility, or toggle), DO NOT reload arrangements from localStorage!
+        if (e && e.key === 'bt_featured_arrangement_ids_v2') {
+          setArrangements(prev => prev.map(item => ({
             ...item,
-            isFeatured: Boolean(item.isFeatured) || (Array.isArray(featIds) && featIds.includes(item.id))
-          }));
-          setArrangements(deduplicateArrangements(synchronized.filter(a => !deleted.includes(a.id))));
+            isFeatured: Array.isArray(featIds) && featIds.includes(item.id)
+          })));
+          return;
+        }
+
+        const loaded = getInitial('arrangements', null);
+        if (Array.isArray(loaded)) {
+          setArrangements(prev => {
+            const synchronized = loaded.map(item => {
+              const existing = prev.find(p => p.id === item.id);
+              let bestImg = item.image;
+              if ((!bestImg || bestImg.startsWith('idb:') || bestImg.includes('photo-1561181286-d3fee7d55364')) && existing && existing.image && !existing.image.includes('photo-1561181286-d3fee7d55364')) {
+                bestImg = existing.image;
+              }
+              return {
+                ...item,
+                image: bestImg || (existing ? existing.image : ''),
+                isFeatured: Boolean(item.isFeatured) || (Array.isArray(featIds) && featIds.includes(item.id))
+              };
+            });
+            return deduplicateArrangements(synchronized.filter(a => !deleted.includes(a.id)));
+          });
         }
       }
     };
