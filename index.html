@@ -1237,7 +1237,7 @@ const BT_IDB = {
 
 // Storage Helpers & Automatic Client-Side Version Updater
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
-const BT_BUILD_STAMP = '20261003_build_v15_sync_deletions';
+const BT_BUILD_STAMP = '20261003_build_v16_unified_sync';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
@@ -1604,22 +1604,24 @@ function App() {
         .then(res => res.json())
         .then(res => {
           if (res && res.status === 'success' && res.data && Array.isArray(res.data.Products) && res.data.Products.length > 0) {
-            const mapped = res.data.Products.map(p => ({
-              id: String(p.ID || p.id || 'arr-' + Math.random()),
-              productType: String(p.ID || '').startsWith('flw-') ? 'flowers_only' : 'arranged',
-              name: p.Name || p.name || 'Floral Arrangement',
-              tag: p.Tag || p.tag || 'Signature',
-              category: p.Category || p.category || 'Signature',
-              price: Number(p.Price || p.price) || 2000,
-              coldRoomCount: Number(p["Cold Room Stock"] || p.coldRoomCount) || 10,
-              sold30d: Number(p["Sold 30d"] || p.sold30d) || 0,
-              rating: Number(p.Rating || p.rating) || 5.0,
-              image: p["Image URL"] || p.image || '',
-              description: p.Description || p.description || '',
-              stems: typeof p.Stems === 'string' ? p.Stems.split(',').map(s => s.trim()) : (Array.isArray(p.Stems) ? p.Stems : []),
-              isFeatured: p["Is Featured"] === true || p["Is Featured"] === 'TRUE' || p["Is Featured"] === 'true' || p.isFeatured === true,
-              isLowStock: Number(p["Cold Room Stock"] || p.coldRoomCount) <= 5
-            }));
+            const mapped = res.data.Products
+              .filter(p => p && (String(p.ID || '').trim() !== '' || String(p.Name || '').trim() !== ''))
+              .map(p => ({
+                id: String(p.ID || p.id || 'arr-' + Math.random()),
+                productType: String(p.ID || '').startsWith('flw-') ? 'flowers_only' : 'arranged',
+                name: p.Name || p.name || 'Floral Arrangement',
+                tag: p.Tag || p.tag || 'Signature',
+                category: p.Category || p.category || 'Signature',
+                price: Number(p.Price || p.price) || 2000,
+                coldRoomCount: Number(p["Cold Room Stock"] || p.coldRoomCount) || 10,
+                sold30d: Number(p["Sold 30d"] || p.sold30d) || 0,
+                rating: Number(p.Rating || p.rating) || 5.0,
+                image: p["Image URL"] || p.image || '',
+                description: p.Description || p.description || '',
+                stems: typeof p.Stems === 'string' ? p.Stems.split(',').map(s => s.trim()) : (Array.isArray(p.Stems) ? p.Stems : []),
+                isFeatured: p["Is Featured"] === true || p["Is Featured"] === 'TRUE' || p["Is Featured"] === 'true' || p.isFeatured === true,
+                isLowStock: Number(p["Cold Room Stock"] || p.coldRoomCount) <= 5
+              }));
             const deleted = getInitial('deleted_arrangements', []);
             const valid = mapped.filter(a => !deleted.includes(a.id));
             if (valid.length > 0) {
@@ -1644,10 +1646,11 @@ function App() {
               });
 
               let featIds = valid.filter(a => a.isFeatured).map(a => a.id);
-              if (featIds.length > 0) {
-                saveItem('featured_arrangement_ids', featIds);
-                setFeaturedArrangementIds(featIds);
+              if (featIds.length === 0) {
+                featIds = valid.slice(0, 4).map(a => a.id);
               }
+              saveItem('featured_arrangement_ids', featIds);
+              setFeaturedArrangementIds(featIds);
             }
           }
         })

@@ -54,11 +54,18 @@ function doGet(e) {
       var headers = data[0];
       var rows = [];
       for (var i = 1; i < data.length; i++) {
+        var hasContent = false;
         var rowObj = {};
         for (var j = 0; j < headers.length; j++) {
-          rowObj[headers[j]] = data[i][j];
+          var val = data[i][j];
+          rowObj[headers[j]] = val;
+          if (val !== "" && val !== null && val !== undefined) {
+            hasContent = true;
+          }
         }
-        rows.push(rowObj);
+        if (hasContent) {
+          rows.push(rowObj);
+        }
       }
       result[sheetName] = rows;
     } else {
