@@ -18,10 +18,21 @@
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="./src/styles/main.css">
   
-  <!-- React 18 & Babel Standalone -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- React 18 & Babel Standalone with High-Speed CDN & Failover Mirrors -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.12/babel.min.js"></script>
+  <script>
+    if (!window.React) {
+      document.write('<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>');
+    }
+    if (!window.ReactDOM) {
+      document.write('<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>');
+    }
+    if (!window.Babel) {
+      document.write('<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>');
+    }
+  </script>
 
   <style>
     /* Storefront and Customer Portal enhancements */
@@ -646,19 +657,86 @@
     </div>
   </div>
 
-  <!-- Error listener to catch and report any script or compilation errors -->
+  <!-- Error listener & Watchdog to catch and report any script or compilation errors -->
   <script>
-    window.addEventListener('error', function(e) {
-      console.error('Captured window error:', e);
-      var root = document.getElementById('root');
-      if (root && root.innerHTML.indexOf('Opening Blooms&Twirl by Shaira') !== -1) {
-        root.innerHTML = '<div style="padding:40px;text-align:center;font-family:\'Plus Jakarta Sans\',sans-serif;color:#F70077;background:#FFF5F8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="width:48px;height:48px;border-radius:50%;background:#FFE0EB;display:flex;align-items:center;justify-content:center;color:#F70077;margin-bottom:16px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><h2 style="margin-bottom:8px;font-family:\'Fraunces\',serif;">Blooms&Twirl Notice</h2><p style="color:#666;max-width:540px;margin-bottom:20px;line-height:1.6;font-size:14px;">' + (e.message || 'Please refresh to launch the floral studio.') + '</p><button onclick="localStorage.clear();location.reload()" style="padding:12px 28px;background:#F70077;color:#fff;border:none;border-radius:9999px;cursor:pointer;font-weight:700;font-size:14px;">Reset Storage & Reload</button></div>';
+    (function() {
+      var lastErrors = [];
+      function renderDiagnosticError(msg, detail) {
+        var splash = document.getElementById('loading-splash');
+        var root = document.getElementById('root');
+        if (!splash && !root) return;
+        
+        var displayDetail = detail || (lastErrors.length > 0 ? lastErrors.join('<br>') : '');
+        var cardHtml = '<div style="padding:32px 24px;text-align:center;font-family:\'Plus Jakarta Sans\',-apple-system,sans-serif;color:#1C1917;background:#FFF5F8;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;">' +
+          '<div style="max-width:520px;width:100%;background:#ffffff;border:1px solid #FFD0E0;border-radius:24px;padding:36px 28px;box-shadow:0 12px 36px rgba(247,0,119,0.08);">' +
+            '<div style="width:54px;height:54px;border-radius:18px;background:#FFE0EB;display:flex;align-items:center;justify-content:center;color:#F70077;margin:0 auto 18px auto;">' +
+              '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+            '</div>' +
+            '<h2 style="font-family:\'Fraunces\',serif;font-size:24px;color:#1C1917;margin:0 0 10px 0;">Blooms&Twirl Notice</h2>' +
+            '<p style="color:#6B5E62;font-size:14px;line-height:1.6;margin:0 0 20px 0;">' + (msg || 'The studio interface encountered a loading delay.') + '</p>' +
+            (displayDetail ? '<div style="text-align:left;background:#FFF0F5;border:1px solid #FFD5E5;border-radius:12px;padding:12px 14px;font-family:monospace;font-size:12px;color:#C2005A;overflow-x:auto;margin-bottom:24px;max-height:140px;line-height:1.4;">' + displayDetail + '</div>' : '') +
+            '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">' +
+              '<button onclick="location.reload()" style="padding:12px 24px;background:#F70077;color:#fff;border:none;border-radius:9999px;cursor:pointer;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(247,0,119,0.35);">Reload Studio</button>' +
+              '<button onclick="localStorage.clear();sessionStorage.clear();location.reload();" style="padding:12px 20px;background:#FFF0F5;color:#F70077;border:1px solid #FFC2D6;border-radius:9999px;cursor:pointer;font-weight:700;font-size:14px;">Clear Cache & Reload</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+        
+        if (root) {
+          root.innerHTML = cardHtml;
+        }
       }
-    });
+
+      // 1. Capture uncaught script errors (including Babel compilation errors)
+      window.addEventListener('error', function(e) {
+        var errorMsg = e.message || (e.error && e.error.message) || 'Script execution error';
+        lastErrors.push(errorMsg);
+        console.error('Captured window error:', e);
+        var splash = document.getElementById('loading-splash');
+        if (splash) {
+          renderDiagnosticError('Could not start studio client: ' + errorMsg);
+        }
+      });
+
+      // 2. Capture unhandled Promise rejections
+      window.addEventListener('unhandledrejection', function(e) {
+        var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Async rejection';
+        lastErrors.push(reason);
+        console.error('Captured unhandled rejection:', e);
+        var splash = document.getElementById('loading-splash');
+        if (splash) {
+          renderDiagnosticError('Initialization promise failed: ' + reason);
+        }
+      });
+
+      // 3. Intercept console.error to catch Babel Standalone compilation logs
+      var origConsoleError = console.error;
+      console.error = function() {
+        origConsoleError.apply(console, arguments);
+        try {
+          var firstArg = arguments[0];
+          var msg = (typeof firstArg === 'string') ? firstArg : (firstArg && firstArg.message ? firstArg.message : JSON.stringify(firstArg));
+          if (msg && (msg.indexOf('Babel') !== -1 || msg.indexOf('Error') !== -1 || msg.indexOf('Syntax') !== -1)) {
+            lastErrors.push(msg);
+          }
+        } catch(ex) {}
+      };
+
+      // 4. Watchdog timer: If loading splash is still up after 4.5 seconds, display diagnostics
+      setTimeout(function() {
+        var splash = document.getElementById('loading-splash');
+        if (splash) {
+          renderDiagnosticError(
+            'The studio took longer than expected to launch. This may be due to a slow network connection or script initialization delay.',
+            lastErrors.length > 0 ? lastErrors.join('<br>') : 'Babel / React mount timeout after 4.5s'
+          );
+        }
+      }, 4500);
+    })();
   </script>
 
-  <!-- Inline Babel script to bypass file:/// protocol CORS restrictions -->
-  <script type="text/babel">
+  <!-- Inline Babel script configured with data-presets="react" for rapid transpilation -->
+  <script type="text/babel" data-presets="react">
 const { useState, useEffect, useMemo } = React;
 
 // --- Philippines Smart Address Lookup Database (Luzon to Visayas) ---
