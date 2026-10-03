@@ -621,6 +621,23 @@ function AdminApp() {
 
   // Primary Collections (Initial Studio Arranged Flagships Sourced from Baguio City)
   const INITIAL_ARRANGEMENTS_DATA = [
+    // Live Creation from Google Sheet Database
+    { 
+      id: 'arr-1790941009937', 
+      productType: 'arranged', 
+      isFeatured: true, 
+      name: 'Cerulean Shoreline Luxe', 
+      tag: 'Signature', 
+      category: 'Signature', 
+      price: 12335, 
+      coldRoomCount: 7, 
+      sold30d: 0, 
+      image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', 
+      description: 'Handcrafted bespoke bouquet with highland blooms. White hydrangeas, white standard roses, white ranunculus, white lisianthus (Eustoma), miniature white spray roses, baby’s breath (Gypsophila), white waxflower, silver dollar eucalyptus, and dusty miller.', 
+      stems: ['White hydrangeas', 'White standard roses', 'White ranunculus', 'White lisianthus', 'Miniature spray roses', 'Baby’s breath', 'Silver dollar eucalyptus'], 
+      rating: 5.0, 
+      isLowStock: false 
+    },
     // Arranged Products (Bouquets, Vases, Boxes, Bridal)
     { id: 'arr-1', productType: 'arranged', isFeatured: true, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
     { id: 'arr-2', productType: 'arranged', isFeatured: true, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
@@ -687,7 +704,7 @@ function AdminApp() {
 
   const [arrangements, setArrangements] = useState(() => {
     const deleted = getInitial('deleted_arrangements', []);
-    const featIds = getInitial('featured_arrangement_ids', ['arr-1', 'arr-2', 'arr-5', 'arr-8']);
+    const featIds = getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
     let rawList = (Array.isArray(loaded) && loaded.length > 0) ? loaded : INITIAL_ARRANGEMENTS_DATA;
     
@@ -708,7 +725,7 @@ function AdminApp() {
     const handleStorage = (e) => {
       if (!e || !e.key || e.key === 'bt_arrangements_v2' || e.key === 'bt_featured_arrangement_ids_v2' || e.key === 'bt_deleted_arrangements_v2') {
         const deleted = getInitial('deleted_arrangements', []);
-        const featIds = getInitial('featured_arrangement_ids', ['arr-1', 'arr-2', 'arr-5', 'arr-8']);
+        const featIds = getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
         const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
         if (Array.isArray(loaded)) {
           const synchronized = loaded.map(item => ({
@@ -865,10 +882,18 @@ function AdminApp() {
             const deleted = getInitial('deleted_arrangements', []);
             const valid = mapped.filter(a => !deleted.includes(a.id));
             if (valid.length > 0) {
-              setArrangements(valid);
-              saveItem('arrangements', valid);
+              valid.forEach(p => {
+                if (p.image && p.image.startsWith('data:image')) {
+                  BT_IDB.saveImage(p.id, p.image);
+                }
+              });
+              setArrangements(prev => {
+                const combined = deduplicateArrangements([...valid, ...prev]);
+                saveItem('arrangements', combined);
+                return combined;
+              });
               let featIds = valid.filter(a => a.isFeatured).map(a => a.id);
-              if (featIds.length === 0) featIds = valid.slice(0, 4).map(a => a.id);
+              if (featIds.length === 0) featIds = deduplicateArrangements([...valid, ...INITIAL_ARRANGEMENTS_DATA]).slice(0, 4).map(a => a.id);
               saveItem('featured_arrangement_ids', featIds);
             }
           }

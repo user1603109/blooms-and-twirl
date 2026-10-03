@@ -1214,12 +1214,30 @@ const BT_IDB = {
     } catch(e) {
       return null;
     }
+  },
+  async saveImage(id, dataUrl) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id || !dataUrl) return;
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      tx.objectStore(this.STORE_NAME).put({ id, dataUrl, timestamp: Date.now() });
+    } catch(e) {
+      console.warn('IDB saveImage error:', e);
+    }
+  },
+  async deleteImage(id) {
+    try {
+      const db = await this.getDB();
+      if (!db || !id) return;
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      tx.objectStore(this.STORE_NAME).delete(id);
+    } catch(e) {}
   }
 };
 
 // Storage Helpers & Automatic Client-Side Version Updater
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
-const BT_BUILD_STAMP = '20261003_build_v10_gas_live';
+const BT_BUILD_STAMP = '20261003_build_v12_seamless';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
@@ -1230,10 +1248,6 @@ try {
         curSettings.googleAppsScriptUrl = DEFAULT_GAS_URL;
         localStorage.setItem('bt_settings_v2', JSON.stringify(curSettings));
       } catch(e) {}
-      // Clear stale mock arrangements so fresh Google Sheets creations take over
-      localStorage.removeItem('bt_arrangements_v2');
-      localStorage.removeItem('bt_featured_arrangement_ids_v2');
-      localStorage.removeItem('bt_deleted_arrangements_v2');
     }
   }
 } catch(e) {}
@@ -1260,9 +1274,14 @@ const saveItem = (key, data) => {
   try {
     localStorage.setItem('bt_' + key + '_v2', JSON.stringify(data));
   } catch(e) {
-    console.warn('localStorage.setItem failed for key:', key, e);
+    console.warn('localStorage.setItem quota reached for key:', key, e);
     if (key === 'arrangements' && Array.isArray(data)) {
       try {
+        data.forEach(item => {
+          if (item.image && item.image.startsWith('data:image')) {
+            BT_IDB.saveImage(item.id, item.image);
+          }
+        });
         const lightweightData = data.map(item => {
           if (item.image && item.image.startsWith('data:image') && item.image.length > 50000) {
             return { ...item, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80' };
@@ -1429,6 +1448,23 @@ function App() {
 
   // Core Floral Collection (Arranged Products & Studio Creations)
   const INITIAL_ARRANGEMENTS_DATA = [
+    // Live Creation from Google Sheet Database
+    { 
+      id: 'arr-1790941009937', 
+      productType: 'arranged', 
+      isFeatured: true, 
+      name: 'Cerulean Shoreline Luxe', 
+      tag: 'Signature', 
+      category: 'Signature', 
+      price: 12335, 
+      coldRoomCount: 7, 
+      sold30d: 0, 
+      image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', 
+      description: 'Handcrafted bespoke bouquet with highland blooms. White hydrangeas, white standard roses, white ranunculus, white lisianthus (Eustoma), miniature white spray roses, baby’s breath (Gypsophila), white waxflower, silver dollar eucalyptus, and dusty miller.', 
+      stems: ['White hydrangeas', 'White standard roses', 'White ranunculus', 'White lisianthus', 'Miniature spray roses', 'Baby’s breath', 'Silver dollar eucalyptus'], 
+      rating: 5.0, 
+      isLowStock: false 
+    },
     // Arranged Products (Curated Studio Signature Highlights - Sourced from Baguio City)
     { id: 'arr-1', productType: 'arranged', isFeatured: true, name: 'Petal Parade', tag: 'Signature', category: 'Signature', price: 2450, coldRoomCount: 14, sold30d: 96, image: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80', description: 'Our signature bouquet featuring Benguet highland roses in peach and cream, accented with white astilbe and sweet Italian ruscus.', stems: ['Highland roses', 'Peach ranunculus', 'Cream astilbe'], rating: 4.9, isLowStock: false },
     { id: 'arr-2', productType: 'arranged', isFeatured: true, name: 'Fuchsia Fable', tag: 'Statement', category: 'Statement', price: 1990, coldRoomCount: 5, sold30d: 78, image: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80', description: 'Vibrant burst of lush deep magenta peonies, ruby ranunculus, and silvery seeded eucalyptus in satin wrapping.', stems: ['Peonies', 'Ranunculus', 'Eucalyptus'], rating: 4.8, isLowStock: true },
@@ -1442,7 +1478,7 @@ function App() {
 
   // Dedicated Featured Arrangements state directly linked to admin#arrangements
   const [featuredArrangementIds, setFeaturedArrangementIds] = useState(() => {
-    return getInitial('featured_arrangement_ids', ['arr-1', 'arr-2', 'arr-5', 'arr-8']);
+    return getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
   });
 
   // Strict Deduplication Helper to guarantee zero duplicate creations on storefront
@@ -1470,7 +1506,7 @@ function App() {
 
   const [arrangements, setArrangements] = useState(() => {
     const deleted = getInitial('deleted_arrangements', []);
-    const featIds = getInitial('featured_arrangement_ids', ['arr-1', 'arr-2', 'arr-5', 'arr-8']);
+    const featIds = getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
     const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
     let rawList = (Array.isArray(loaded) && loaded.length > 0) ? loaded : INITIAL_ARRANGEMENTS_DATA;
     
@@ -1514,7 +1550,7 @@ function App() {
     const handleStorageChange = (e) => {
       if (!e || !e.key || e.key === 'bt_arrangements_v2' || e.key === 'bt_featured_arrangement_ids_v2' || e.key === 'bt_deleted_arrangements_v2') {
         const deleted = getInitial('deleted_arrangements', []);
-        const featIds = getInitial('featured_arrangement_ids', ['arr-1', 'arr-2', 'arr-5', 'arr-8']);
+        const featIds = getInitial('featured_arrangement_ids', ['arr-1790941009937', 'arr-1', 'arr-2', 'arr-5']);
         setFeaturedArrangementIds(featIds);
         const loaded = getInitial('arrangements', INITIAL_ARRANGEMENTS_DATA);
         if (Array.isArray(loaded)) {
@@ -1561,12 +1597,23 @@ function App() {
             const deleted = getInitial('deleted_arrangements', []);
             const valid = mapped.filter(a => !deleted.includes(a.id));
             if (valid.length > 0) {
-              setArrangements(valid);
-              saveItem('arrangements', valid);
+              // Cache large high-res photos into IndexedDB immediately
+              valid.forEach(p => {
+                if (p.image && p.image.startsWith('data:image')) {
+                  BT_IDB.saveImage(p.id, p.image);
+                }
+              });
+
+              // Merge Google Sheets creations with catalog without dropping catalogue
+              setArrangements(prev => {
+                const combined = deduplicateArrangements([...valid, ...prev]);
+                saveItem('arrangements', combined);
+                return combined;
+              });
+
               let featIds = valid.filter(a => a.isFeatured).map(a => a.id);
               if (featIds.length === 0) {
-                // If no products in the sheet have isFeatured explicitly set, feature top creations
-                featIds = valid.slice(0, 4).map(a => a.id);
+                featIds = deduplicateArrangements([...valid, ...INITIAL_ARRANGEMENTS_DATA]).slice(0, 4).map(a => a.id);
               }
               saveItem('featured_arrangement_ids', featIds);
               setFeaturedArrangementIds(featIds);
