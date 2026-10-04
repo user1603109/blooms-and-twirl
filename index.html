@@ -2167,13 +2167,11 @@ function App() {
             email: 'shaira@bloomtwirl.com', 
             role: 'admin' 
           };
-          setCurrentUser(adminUser);
           try {
             localStorage.setItem('bt_currentUser_v2', JSON.stringify(adminUser));
             localStorage.setItem('bt_admin_auth', 'true');
           } catch(err) {}
-          showToast('Welcome back, Shaira! Redirecting to Blooms&Twirl Admin Studio Console...', 'success', 'Admin Access');
-          setTimeout(() => { window.location.href = './admin/index.html'; }, 600);
+          window.location.replace('./admin/index.html');
         } else {
           showToast('Incorrect password for admin account "' + authEmail + '". Please enter the correct password (blooms&twirl.admin).', 'error', 'Auth Failed');
         }

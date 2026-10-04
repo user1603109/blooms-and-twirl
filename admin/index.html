@@ -396,8 +396,7 @@ function AdminApp() {
       const u = JSON.parse(localStorage.getItem('bt_currentUser_v2') || '{}');
       if (u.role === 'admin') localStorage.removeItem('bt_currentUser_v2');
     } catch(e) {}
-    setIsAdminAuthenticated(false);
-    window.location.href = '../index.html';
+    window.location.replace('../index.html');
   };
 
   // Support direct hash routing: e.g. #orders, #custom_orders, #inventory, #arrangements, #deliveries, #customers, #settings
