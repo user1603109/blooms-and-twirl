@@ -192,6 +192,50 @@ for insert with check (bucket_id = 'bouquet-images');
 create policy "Allow public bouquet image updates" on storage.objects 
 for update using (bucket_id = 'bouquet-images');
 
+create policy "Allow public bouquet image deletes" on storage.objects 
+for delete using (bucket_id = 'bouquet-images');
+
+-- ==============================================================================
+-- AUTOMATIC STORAGE GARBAGE COLLECTION TRIGGERS (PREVENTS DATABASE FLOODING)
+-- ==============================================================================
+-- 1. Automatically delete image from storage bucket when an arrangement is deleted
+create or replace function public.handle_deleted_arrangement_image()
+returns trigger as $$
+begin
+  if old.image is not null and old.image like '%/bouquet-images/%' then
+    delete from storage.objects
+    where bucket_id = 'bouquet-images'
+      and name = split_part(split_part(old.image, '/bouquet-images/', 2), '?', 1);
+  end if;
+  return old;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_arrangement_deleted on public.arrangements;
+create trigger on_arrangement_deleted
+  after delete on public.arrangements
+  for each row execute function public.handle_deleted_arrangement_image();
+
+-- 2. Automatically delete old image from storage bucket when arrangement photo is replaced
+create or replace function public.handle_updated_arrangement_image()
+returns trigger as $$
+begin
+  if old.image is not null 
+     and old.image like '%/bouquet-images/%' 
+     and (new.image is null or new.image <> old.image) then
+    delete from storage.objects
+    where bucket_id = 'bouquet-images'
+      and name = split_part(split_part(old.image, '/bouquet-images/', 2), '?', 1);
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists on_arrangement_image_updated on public.arrangements;
+create trigger on_arrangement_image_updated
+  after update of image on public.arrangements
+  for each row execute function public.handle_updated_arrangement_image();
+
 -- ==============================================================================
 -- 13. SEED INITIAL PRODUCTS (Curated Artisanal Benguet & Baguio Collections)
 -- ==============================================================================

@@ -18,6 +18,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Supabase Cloud Sync Engine -->
+  <script src="../src/services/supabase.js"></script>
 
   <style>
     body {
@@ -199,7 +201,27 @@ function CustomerApp() {
     { id: 'BT-2038', customerName: 'Andrea Villanueva', arrangementName: 'Dusk & Dried bespoke', address: 'Strawberry Valley, La Trinidad', total: 2740, status: 'Delivered', dueTime: '5:30 PM', courier: 'Nino', cardMessage: 'Thinking of you always.' }
   ];
 
-  const [trackedOrder, setTrackedOrder] = useState(sampleOrders[0]);
+  const [allOrders, setAllOrders] = useState(() => {
+    try {
+      const raw = localStorage.getItem('bt_orders_v2');
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return sampleOrders;
+  });
+
+  const [trackedOrder, setTrackedOrder] = useState(() => allOrders[0] || sampleOrders[0]);
+
+  useEffect(() => {
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.getOrders().then(ords => {
+        if (Array.isArray(ords) && ords.length > 0) {
+          setAllOrders(ords);
+          const found = ords.find(o => o.id === lookupOrderNumber);
+          if (found) setTrackedOrder(found);
+        }
+      });
+    }
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
@@ -283,11 +305,12 @@ function CustomerApp() {
                 onChange={(e) => setLookupOrderNumber(e.target.value)}
               />
               <button className="btn-primary" onClick={() => {
-                const found = sampleOrders.find(o => o.id.toUpperCase() === lookupOrderNumber.trim().toUpperCase());
+                const target = lookupOrderNumber.trim().toUpperCase();
+                const found = allOrders.find(o => (o.id || '').toUpperCase() === target) || sampleOrders.find(o => (o.id || '').toUpperCase() === target);
                 if (found) {
                   setTrackedOrder(found);
                 } else {
-                  alert('Order ' + lookupOrderNumber + ' not found. Try BT-2041, BT-2040, BT-2039, or BT-2038.');
+                  alert('Order ' + lookupOrderNumber + ' not found. Please verify your order number.');
                 }
               }}>
                 Track Order

@@ -1664,6 +1664,11 @@ function App() {
         if (Array.isArray(cloudArr) && cloudArr.length > 0) {
           setArrangements(function(prev) { return deduplicateArrangements(cloudArr); });
           saveItem('arrangements', cloudArr);
+          var featIds = cloudArr.filter(function(a) { return a.isFeatured; }).map(function(a) { return a.id; });
+          if (featIds.length > 0) {
+            setFeaturedArrangementIds(featIds);
+            saveItem('featured_arrangement_ids', featIds);
+          }
         }
       });
       window.SupabaseService.getOrders().then(function(cloudOrd) {
@@ -1675,7 +1680,15 @@ function App() {
       window.SupabaseService.subscribe(function(table, data) {
         if (table === 'arrangements') {
           window.SupabaseService.getArrangements().then(function(cArr) {
-            if (cArr) { setArrangements(cArr); saveItem('arrangements', cArr); }
+            if (Array.isArray(cArr) && cArr.length > 0) {
+              setArrangements(function() { return deduplicateArrangements(cArr); });
+              saveItem('arrangements', cArr);
+              var featIds = cArr.filter(function(a) { return a.isFeatured; }).map(function(a) { return a.id; });
+              if (featIds.length > 0) {
+                setFeaturedArrangementIds(featIds);
+                saveItem('featured_arrangement_ids', featIds);
+              }
+            }
           });
         } else if (table === 'orders') {
           window.SupabaseService.getOrders().then(function(cOrd) {

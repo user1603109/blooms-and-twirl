@@ -44,11 +44,11 @@ export class SupabaseService {
       console.warn('Could not read Supabase config from storage:', e);
     }
 
-    // Default configuration (placeholder until Shaira enters her project keys)
+    // Default configuration (connected to Blooms-and-Twirl Supabase Cloud)
     this.cachedConfig = {
       url: 'https://hflykqdooymfgtkbnsra.supabase.co',
-      anonKey: '',
-      enabled: false
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmbHlrcWRvb3ltZmd0a2Juc3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDczNDAsImV4cCI6MjEwNjYyMzM0MH0.qeo7AB8mSav70EMY3FKI7y4a7kPio8jcgepbZMssegQ',
+      enabled: true
     };
     return this.cachedConfig;
   }
@@ -319,7 +319,7 @@ export class SupabaseService {
    * Uploads an image to Supabase Storage bucket 'bouquet-images'
    * Returns permanent global CDN URL accessible from both phone and laptop!
    */
-  static async uploadBouquetImage(dataUrlOrBlob: string | Blob, fileName: string): Promise<string | null> {
+  static async uploadBouquetImage(dataUrlOrBlob: string | Blob, fileName: string, customId?: string): Promise<string | null> {
     const config = this.getConfig();
     if (!this.isConfigured()) return null;
 
@@ -350,7 +350,11 @@ export class SupabaseService {
       }
 
       const cleanUrl = config.url.replace(/\/+$/, '');
-      const cleanPath = `bouquets/${Date.now()}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      // Deterministic path: In-place update to prevent duplicate files
+      const cleanPath = customId
+        ? `bouquets/${String(customId).replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`
+        : `bouquets/${Date.now()}_${fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+
       const uploadUrl = `${cleanUrl}/storage/v1/object/bouquet-images/${cleanPath}`;
 
       const res = await fetch(uploadUrl, {
@@ -369,11 +373,38 @@ export class SupabaseService {
         throw new Error(`Upload error [${res.status}]: ${txt}`);
       }
 
-      // Return public permanent URL
-      return `${cleanUrl}/storage/v1/object/public/bouquet-images/${cleanPath}`;
+      // Return public permanent URL with cache buster
+      return `${cleanUrl}/storage/v1/object/public/bouquet-images/${cleanPath}?t=${Date.now()}`;
     } catch (e) {
       console.error('Supabase uploadBouquetImage error:', e);
       return null;
+    }
+  }
+
+  static async deleteBouquetImage(imageUrl: string): Promise<boolean> {
+    const config = this.getConfig();
+    if (!this.isConfigured() || !imageUrl) return false;
+    try {
+      const marker = '/bouquet-images/';
+      const idx = imageUrl.indexOf(marker);
+      if (idx === -1) return false;
+      const relativePath = imageUrl.substring(idx + marker.length).split('?')[0];
+      if (!relativePath) return false;
+
+      const cleanUrl = config.url.replace(/\/+$/, '');
+      const deleteUrl = `${cleanUrl}/storage/v1/object/bouquet-images/${relativePath}`;
+
+      const res = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'apikey': config.anonKey,
+          'Authorization': `Bearer ${config.anonKey}`
+        }
+      });
+      return res.ok;
+    } catch (e) {
+      console.warn('Could not delete old storage image:', e);
+      return false;
     }
   }
 

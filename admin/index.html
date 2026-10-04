@@ -933,6 +933,48 @@ function AdminApp() {
     }
   }, []);
 
+  // Auto-sync arrangements and orders from Supabase Cloud on mount & realtime
+  useEffect(() => {
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.getArrangements().then(function(items) {
+        if (Array.isArray(items) && items.length > 0) {
+          setArrangements(function() { return deduplicateArrangements(items); });
+          saveItem('arrangements', items);
+          var featIds = items.filter(function(a) { return a.isFeatured; }).map(function(a) { return a.id; });
+          if (featIds.length > 0) {
+            saveItem('featured_arrangement_ids', featIds);
+          }
+        }
+      });
+      window.SupabaseService.getOrders().then(function(ords) {
+        if (Array.isArray(ords) && ords.length > 0) {
+          setOrders(ords);
+          saveItem('orders', ords);
+        }
+      });
+      if (typeof window.SupabaseService.subscribe === 'function') {
+        var unsub = window.SupabaseService.subscribe(function(table) {
+          if (table === 'arrangements') {
+            window.SupabaseService.getArrangements().then(function(items) {
+              if (Array.isArray(items) && items.length > 0) {
+                setArrangements(function() { return deduplicateArrangements(items); });
+                saveItem('arrangements', items);
+              }
+            });
+          } else if (table === 'orders') {
+            window.SupabaseService.getOrders().then(function(ords) {
+              if (Array.isArray(ords) && ords.length > 0) {
+                setOrders(ords);
+                saveItem('orders', ords);
+              }
+            });
+          }
+        });
+        return unsub;
+      }
+    }
+  }, []);
+
   // Modals
   const [isNewOrderModalOpen, setIsNewOrderModalOpen] = useState(false);
   const [isArrangementModalOpen, setIsArrangementModalOpen] = useState(false);
@@ -1054,6 +1096,15 @@ function AdminApp() {
         const featuredIds = updated.filter(a => a.isFeatured).map(a => a.id);
         saveItem('featured_arrangement_ids', featuredIds);
         BT_IDB.deleteImage(arrId);
+
+        // Auto-delete from Supabase Cloud Database & Storage Bucket
+        if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+          const itemToDelete = arrangements.find(a => a.id === arrId);
+          if (itemToDelete && itemToDelete.image) {
+            window.SupabaseService.deleteBouquetImage(itemToDelete.image);
+          }
+          window.SupabaseService.deleteArrangement(arrId);
+        }
 
         if (settings.googleAppsScriptUrl) {
           try {
@@ -4136,7 +4187,17 @@ function AdminApp() {
                 const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
                 const isFeaturedVal = fd.get('isFeatured') === 'on' || fd.get('isFeatured') === 'true';
 
-                let targetId = editingArrangement ? editingArrangement.id : null;
+                let targetId = editingArrangement ? editingArrangement.id : ((modalProductType === 'flowers_only' ? 'flw-' : 'arr-') + Date.now());
+
+                // Auto-cleanup and deterministic upload to Supabase Storage:
+                // Replaces in-place to prevent database flooding and purges previous custom photo if replaced
+                if (newArrangementImage && window.SupabaseService && window.SupabaseService.isConfigured()) {
+                  if (editingArrangement && editingArrangement.image && editingArrangement.image.includes('/bouquet-images/')) {
+                    await window.SupabaseService.deleteBouquetImage(editingArrangement.image);
+                  }
+                  const cdnUrl = await window.SupabaseService.uploadBouquetImage(newArrangementImage, productName, targetId);
+                  if (cdnUrl) finalImageUrl = cdnUrl;
+                }
 
                 if (editingArrangement) {
                   const updated = deduplicateArrangements(arrangements.map(a => a.id === editingArrangement.id ? {
@@ -4242,6 +4303,14 @@ function AdminApp() {
                   const featuredIds = updated.filter(a => Boolean(a.isFeatured)).map(a => a.id);
                   saveItem('featured_arrangement_ids', featuredIds);
                   if (finalImageUrl) BT_IDB.saveImage(targetId, finalImageUrl);
+
+                  // Sync to Supabase Cloud Database in real time
+                  if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+                    const savedItem = updated.find(a => a.id === targetId);
+                    if (savedItem) {
+                      window.SupabaseService.upsertArrangement(savedItem);
+                    }
+                  }
 
                   if (settings.googleAppsScriptUrl) {
                     try {

@@ -10,39 +10,49 @@
 (function (window) {
   var CONFIG_STORAGE_KEY = 'bt_supabase_config_v1';
 
+  var DEFAULT_CONFIG = {
+    url: 'https://hflykqdooymfgtkbnsra.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmbHlrcWRvb3ltZmd0a2Juc3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNDczNDAsImV4cCI6MjEwNjYyMzM0MH0.qeo7AB8mSav70EMY3FKI7y4a7kPio8jcgepbZMssegQ',
+    enabled: true
+  };
+
   var SupabaseService = {
     cachedConfig: null,
     realtimeSocket: null,
     listeners: [],
     reconnectTimer: null,
+    heartbeatInterval: null,
 
     getConfig: function () {
       if (this.cachedConfig) return this.cachedConfig;
       try {
         if (window.BT_SUPABASE_CONFIG) {
-          this.cachedConfig = window.BT_SUPABASE_CONFIG;
+          this.cachedConfig = Object.assign({}, DEFAULT_CONFIG, window.BT_SUPABASE_CONFIG);
           return this.cachedConfig;
         }
         var raw = localStorage.getItem(CONFIG_STORAGE_KEY);
         if (raw) {
-          this.cachedConfig = JSON.parse(raw);
-          return this.cachedConfig;
+          var parsed = JSON.parse(raw);
+          if (parsed && (parsed.anonKey || parsed.url)) {
+            this.cachedConfig = Object.assign({}, DEFAULT_CONFIG, parsed);
+            return this.cachedConfig;
+          }
         }
       } catch (e) {
         console.warn('Error reading Supabase config:', e);
       }
-      this.cachedConfig = { url: 'https://hflykqdooymfgtkbnsra.supabase.co', anonKey: '', enabled: false };
+      this.cachedConfig = Object.assign({}, DEFAULT_CONFIG);
       return this.cachedConfig;
     },
 
     saveConfig: function (config) {
-      this.cachedConfig = Object.assign({}, config);
+      this.cachedConfig = Object.assign({}, DEFAULT_CONFIG, config);
       try {
         localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(this.cachedConfig));
       } catch (e) {
         console.warn('Could not save Supabase config to storage:', e);
       }
-      if (config.enabled && config.url && config.anonKey) {
+      if (this.cachedConfig.enabled && this.cachedConfig.url && this.cachedConfig.anonKey) {
         this.initRealtime();
       } else if (this.realtimeSocket) {
         this.realtimeSocket.close();
@@ -53,6 +63,79 @@
     isConfigured: function () {
       var cfg = this.getConfig();
       return Boolean(cfg.enabled && cfg.url && cfg.anonKey && cfg.url.indexOf('https://') === 0);
+    },
+
+    subscribe: function (callback) {
+      if (typeof callback === 'function') {
+        this.listeners.push(callback);
+        this.initRealtime();
+      }
+      var self = this;
+      return function () {
+        var idx = self.listeners.indexOf(callback);
+        if (idx !== -1) self.listeners.splice(idx, 1);
+      };
+    },
+
+    notifyListeners: function (table, payload) {
+      for (var i = 0; i < this.listeners.length; i++) {
+        try {
+          this.listeners[i](table, payload);
+        } catch (e) {
+          console.warn('Realtime listener error:', e);
+        }
+      }
+    },
+
+    initRealtime: function () {
+      if (!this.isConfigured() || this.realtimeSocket) return;
+      var cfg = this.getConfig();
+      try {
+        var wsUrl = cfg.url.replace(/^http/, 'ws').replace(/\/+$/, '') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(cfg.anonKey) + '&vsn=1.0.0';
+        var ws = new WebSocket(wsUrl);
+        var self = this;
+
+        ws.onopen = function () {
+          ws.send(JSON.stringify({
+            topic: 'realtime:public',
+            event: 'phx_join',
+            payload: { config: { broadcast: { self: true }, presence: { key: '' }, postgres_changes: [{ event: '*', schema: 'public' }] } },
+            ref: '1'
+          }));
+          self.heartbeatInterval = setInterval(function () {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: Date.now().toString() }));
+            }
+          }, 25000);
+        };
+
+        ws.onmessage = function (event) {
+          try {
+            var msg = JSON.parse(event.data);
+            if (msg && msg.event === 'postgres_changes' && msg.payload && msg.payload.data) {
+              var table = msg.payload.data.table;
+              self.notifyListeners(table, msg.payload.data);
+            }
+          } catch (e) {}
+        };
+
+        ws.onclose = function () {
+          self.realtimeSocket = null;
+          if (self.heartbeatInterval) clearInterval(self.heartbeatInterval);
+          if (self.isConfigured()) {
+            clearTimeout(self.reconnectTimer);
+            self.reconnectTimer = setTimeout(function () { self.initRealtime(); }, 5000);
+          }
+        };
+
+        ws.onerror = function () {
+          try { ws.close(); } catch (e) {}
+        };
+
+        this.realtimeSocket = ws;
+      } catch (err) {
+        console.warn('Could not initialize Supabase Realtime WebSocket:', err);
+      }
     },
 
     request: async function (endpoint, options) {
@@ -279,8 +362,8 @@
       }
     },
 
-    // 3. STORAGE UPLOAD FOR FLOWER PHOTOGRAPHY
-    uploadBouquetImage: async function (dataUrlOrBlob, fileName) {
+    // 3. STORAGE UPLOAD & AUTO-CLEANUP (FLOWER PHOTOGRAPHY CDN)
+    uploadBouquetImage: async function (dataUrlOrBlob, fileName, customId) {
       var cfg = this.getConfig();
       if (!this.isConfigured()) return null;
       try {
@@ -305,7 +388,11 @@
         }
 
         var cleanUrl = cfg.url.replace(/\/+$/, '');
-        var cleanPath = 'bouquets/' + Date.now() + '_' + (fileName || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+        // Deterministic path: If customId is provided, upload in-place to avoid duplicate files!
+        var cleanPath = customId 
+          ? ('bouquets/' + String(customId).replace(/[^a-zA-Z0-9_-]/g, '_') + '.jpg')
+          : ('bouquets/' + Date.now() + '_' + (fileName || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_'));
+
         var uploadUrl = cleanUrl + '/storage/v1/object/bouquet-images/' + cleanPath;
 
         var res = await fetch(uploadUrl, {
@@ -324,10 +411,39 @@
           throw new Error('Upload error [' + res.status + ']: ' + txt);
         }
 
-        return cleanUrl + '/storage/v1/object/public/bouquet-images/' + cleanPath;
+        // Return public URL with timestamp cache-buster so browser displays new image immediately
+        return cleanUrl + '/storage/v1/object/public/bouquet-images/' + cleanPath + '?t=' + Date.now();
       } catch (e) {
         console.error('Supabase uploadBouquetImage error:', e);
         return null;
+      }
+    },
+
+    deleteBouquetImage: async function (imageUrl) {
+      var cfg = this.getConfig();
+      if (!this.isConfigured() || !imageUrl || typeof imageUrl !== 'string') return false;
+      try {
+        var marker = '/bouquet-images/';
+        var idx = imageUrl.indexOf(marker);
+        if (idx === -1) return false; // External URL (e.g. unsplash) - skip deletion
+        
+        var relativePath = imageUrl.substring(idx + marker.length).split('?')[0];
+        if (!relativePath) return false;
+
+        var cleanUrl = cfg.url.replace(/\/+$/, '');
+        var deleteUrl = cleanUrl + '/storage/v1/object/bouquet-images/' + relativePath;
+
+        var res = await fetch(deleteUrl, {
+          method: 'DELETE',
+          headers: {
+            'apikey': cfg.anonKey,
+            'Authorization': 'Bearer ' + cfg.anonKey
+          }
+        });
+        return res.ok;
+      } catch (e) {
+        console.warn('Could not delete old storage image:', e);
+        return false;
       }
     },
 
@@ -441,4 +557,5 @@
   };
 
   window.SupabaseService = SupabaseService;
+  window.BloomsSupabase = SupabaseService;
 })(typeof window !== 'undefined' ? window : this);
