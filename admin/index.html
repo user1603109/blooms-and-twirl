@@ -1793,7 +1793,10 @@ function AdminApp() {
 
           <div className="topbar-actions">
             <a href="../index.html" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }} title="Open live customer storefront in a new tab">
-              🌸 View Live Storefront
+              🌸 Live Storefront
+            </a>
+            <a href="../customer/index.html" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#FFF0F5', borderColor: '#FBCFE8', color: 'var(--primary)' }} title="Open live customer dispatch tracking portal in a new tab">
+              🚚 Client Care Portal
             </a>
             <button 
               type="button" 
@@ -2183,7 +2186,16 @@ function AdminApp() {
                               <td>
                                 <select 
                                   value={o.courier || 'Jom'} 
-                                  onChange={(e) => setOrders(orders.map(ord => ord.id === o.id ? { ...ord, courier: e.target.value } : ord))}
+                                  onChange={(e) => {
+                                    const nextCourier = e.target.value;
+                                    const updated = orders.map(ord => ord.id === o.id ? { ...ord, courier: nextCourier } : ord);
+                                    setOrders(updated);
+                                    saveItem('orders', updated);
+                                    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+                                      window.SupabaseService.updateOrderStatus(o.id, o.status, null, nextCourier);
+                                    }
+                                    showToast(`Assigned ${nextCourier} to order #${o.id}. Realtime customer tracker synced!`, 'success', 'Courier Assigned');
+                                  }}
                                   style={{ padding: '4px 8px', borderRadius: '8px', border: '1px solid var(--border-light)', fontSize: '12px' }}
                                 >
                                   <option value="Jom">Jom (Apayao Van)</option>
