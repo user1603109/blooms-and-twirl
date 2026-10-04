@@ -33,6 +33,8 @@
       document.write('<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>');
     }
   </script>
+  <!-- Supabase Cloud Database & Realtime Sync Engine -->
+  <script src="./src/services/supabase.js"></script>
 
   <style>
     /* Storefront and Customer Portal enhancements */
@@ -722,16 +724,16 @@
         } catch(ex) {}
       };
 
-      // 4. Watchdog timer: If loading splash is still up after 4.5 seconds, display diagnostics
+      // 4. Watchdog timer: If loading splash is still up after 16 seconds on slow mobile, display diagnostics
       setTimeout(function() {
         var splash = document.getElementById('loading-splash');
         if (splash) {
           renderDiagnosticError(
-            'The studio took longer than expected to launch. This may be due to a slow network connection or script initialization delay.',
-            lastErrors.length > 0 ? lastErrors.join('<br>') : 'Babel / React mount timeout after 4.5s'
+            'The studio took longer than expected to launch. This may be due to a slow mobile connection or script initialization delay.',
+            lastErrors.length > 0 ? lastErrors.join('<br>') : 'Babel / React mount timeout after 16s'
           );
         }
-      }, 4500);
+      }, 16000);
     })();
   </script>
 
@@ -1237,7 +1239,7 @@ const BT_IDB = {
 
 // Storage Helpers & Automatic Client-Side Version Updater
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
-const BT_BUILD_STAMP = '20261003_build_v18_clean_featured_sync';
+const BT_BUILD_STAMP = '20261004_build_v19_direct_drive_save';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
@@ -1656,6 +1658,33 @@ function App() {
         });
     }
 
+    // 3. Supabase Cloud Database & Realtime Sync (Instant Laptop <-> Mobile Sync)
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.getArrangements().then(function(cloudArr) {
+        if (Array.isArray(cloudArr) && cloudArr.length > 0) {
+          setArrangements(function(prev) { return deduplicateArrangements(cloudArr); });
+          saveItem('arrangements', cloudArr);
+        }
+      });
+      window.SupabaseService.getOrders().then(function(cloudOrd) {
+        if (Array.isArray(cloudOrd) && cloudOrd.length > 0) {
+          setOrders(cloudOrd);
+          saveItem('orders', cloudOrd);
+        }
+      });
+      window.SupabaseService.subscribe(function(table, data) {
+        if (table === 'arrangements') {
+          window.SupabaseService.getArrangements().then(function(cArr) {
+            if (cArr) { setArrangements(cArr); saveItem('arrangements', cArr); }
+          });
+        } else if (table === 'orders') {
+          window.SupabaseService.getOrders().then(function(cOrd) {
+            if (cOrd) { setOrders(cOrd); saveItem('orders', cOrd); }
+          });
+        }
+      });
+    }
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -2049,6 +2078,15 @@ function App() {
     const updatedOrders = [newOrd, ...orders];
     setOrders(updatedOrders);
     saveItem('orders', updatedOrders);
+
+    // Save directly to Supabase Cloud Database (so mobile orders immediately sync to laptop!)
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.createOrder(newOrd).then(function(ok) {
+        if (ok) console.log('Order #' + newOrd.id + ' successfully synchronized to Supabase Cloud.');
+      }).catch(function(e) {
+        console.warn('Could not sync order to Supabase:', e);
+      });
+    }
 
     // Connected stock deduction: update arrangements and inventory
     try {

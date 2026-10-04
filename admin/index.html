@@ -17,6 +17,8 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Supabase Cloud Database & Realtime Sync Client -->
+  <script src="../src/services/supabase.js"></script>
 
   <style>
     body {
@@ -291,7 +293,7 @@ const BT_IDB = {
 
 // Storage Helpers & Automatic Client-Side Version Updater
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbxng-dNluRmPHqTpf2S14FZHSzIcdvPyuA-0d2fCl5affjBg6UMOLnkVM3SVALGSukb/exec';
-const BT_BUILD_STAMP = '20261003_build_v18_clean_featured_sync';
+const BT_BUILD_STAMP = '20261004_build_v19_direct_drive_save';
 try {
   if (typeof window !== 'undefined' && window.localStorage) {
     const prevStamp = localStorage.getItem('bt_build_stamp');
@@ -1128,6 +1130,37 @@ function AdminApp() {
     }
   };
 
+  // Supabase Cloud Sync & Cross-Device Engine
+  const [supabaseConfig, setSupabaseConfig] = useState(() => {
+    return window.SupabaseService ? window.SupabaseService.getConfig() : { url: '', anonKey: '', enabled: false };
+  });
+  const [supabaseStatus, setSupabaseStatus] = useState('');
+
+  const testSupabaseSync = async () => {
+    if (!window.SupabaseService) return;
+    window.SupabaseService.saveConfig(supabaseConfig);
+    setSupabaseStatus('Connecting to Supabase PostgreSQL & Realtime...');
+    showToast('Testing Supabase Cloud connection...', 'info', 'Supabase');
+    const res = await window.SupabaseService.testConnection();
+    if (res.success) {
+      setSupabaseStatus('✓ ' + res.message);
+      showToast(res.message, 'success', 'Supabase Connected');
+    } else {
+      setSupabaseStatus('✕ ' + res.message);
+      showToast(res.message, 'error', 'Supabase Failed');
+    }
+  };
+
+  const handlePushToSupabase = async () => {
+    if (!window.SupabaseService || !window.SupabaseService.isConfigured()) {
+      showToast('Please enter and test your Supabase Project URL & Anon Key first.', 'warning', 'Setup Required');
+      return;
+    }
+    showToast('Migrating local studio catalogue & orders to Supabase Cloud...', 'info', 'Migration');
+    const res = await window.SupabaseService.migrateLocalToSupabase();
+    showToast(`Successfully uploaded ${res.arrangements} arrangements and ${res.orders} orders to Supabase Cloud!`, 'success', 'Cloud Synced');
+  };
+
   // Inventory CRUD Actions
   const handleOpenNewInventory = () => {
     setEditingInventory(null);
@@ -1203,6 +1236,36 @@ function AdminApp() {
   useEffect(() => saveItem('customers', customers), [customers]);
   useEffect(() => saveItem('promotions', promotions), [promotions]);
   useEffect(() => saveItem('settings', settings), [settings]);
+
+  // Supabase Initial Hydration & Realtime Subscription (Syncs with Mobile View Instantly)
+  useEffect(() => {
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.getArrangements().then(cArr => {
+        if (Array.isArray(cArr) && cArr.length > 0) {
+          setArrangements(cArr);
+          saveItem('arrangements', cArr);
+        }
+      });
+      window.SupabaseService.getOrders().then(cOrd => {
+        if (Array.isArray(cOrd) && cOrd.length > 0) {
+          setOrders(cOrd);
+          saveItem('orders', cOrd);
+        }
+      });
+      const unsubscribe = window.SupabaseService.subscribe((table, data) => {
+        if (table === 'orders') {
+          window.SupabaseService.getOrders().then(cOrd => {
+            if (cOrd) { setOrders(cOrd); saveItem('orders', cOrd); }
+          });
+        } else if (table === 'arrangements') {
+          window.SupabaseService.getArrangements().then(cArr => {
+            if (cArr) { setArrangements(cArr); saveItem('arrangements', cArr); }
+          });
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, []);
 
   // Flower Family Management Actions
   const handleAddFamily = (name) => {
@@ -1304,6 +1367,11 @@ function AdminApp() {
     const updated = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
     setOrders(updated);
     saveItem('orders', updated);
+
+    // Sync to Supabase Realtime so customer's mobile phone updates in real time!
+    if (window.SupabaseService && window.SupabaseService.isConfigured()) {
+      window.SupabaseService.updateOrderStatus(orderId, newStatus);
+    }
 
     const norm = normalizeSubStatus(newStatus);
     if (['Delivered', 'Received by Customer'].includes(norm) && target) {
@@ -3517,6 +3585,84 @@ function AdminApp() {
                 </button>
               </div>
 
+              {/* Supabase Cloud Database & Realtime Sync Card */}
+              <div className="content-card" style={{ border: '2px solid #10B981', background: '#F0FDF4', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ color: '#059669', fontSize: '20px' }}>⚡</div>
+                    <div>
+                      <div className="card-title" style={{ color: '#065F46' }}>Supabase Cloud Database & Realtime Sync (Cross-Device Sync)</div>
+                      <div style={{ fontSize: '11px', color: '#047857', fontWeight: '600' }}>Kills the mobile ↔ laptop discrepancy · Direct Postgres connection · Realtime WebSockets</div>
+                    </div>
+                  </div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', color: '#065F46' }}>
+                    <input 
+                      type="checkbox"
+                      checked={Boolean(supabaseConfig.enabled)}
+                      onChange={(e) => {
+                        const next = { ...supabaseConfig, enabled: e.target.checked };
+                        setSupabaseConfig(next);
+                        if (window.SupabaseService) window.SupabaseService.saveConfig(next);
+                      }}
+                      style={{ width: '18px', height: '18px', accentColor: '#10B981', cursor: 'pointer' }}
+                    />
+                    Enable Supabase Sync
+                  </label>
+                </div>
+                <p style={{ fontSize: '13px', color: '#374151', marginBottom: '18px', lineHeight: '1.5' }}>
+                  Orders and bouquets created on your laptop will sync <strong>instantly</strong> to mobile phones and vice-versa. Bouquet photos are stored on global CDN URLs, ending local IndexedDB isolation.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '6px', color: '#065F46' }}>Supabase Project URL</label>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      placeholder="https://yourprojectid.supabase.co"
+                      value={supabaseConfig.url || ''}
+                      onChange={(e) => setSupabaseConfig({ ...supabaseConfig, url: e.target.value.trim() })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ fontSize: '12px', fontWeight: '700', display: 'block', marginBottom: '6px', color: '#065F46' }}>Supabase Public Anon Key</label>
+                    <input 
+                      type="password" 
+                      className="form-control" 
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={supabaseConfig.anonKey || ''}
+                      onChange={(e) => setSupabaseConfig({ ...supabaseConfig, anonKey: e.target.value.trim() })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #BBF7D0', flexWrap: 'wrap', gap: '10px' }}>
+                  <span style={{ fontSize: '12px', color: supabaseStatus.includes('Error') ? '#DC2626' : '#059669', fontWeight: '600' }}>
+                    {supabaseStatus || (supabaseConfig.enabled ? '✓ Ready to sync with Supabase Cloud.' : 'Disabled (Local Storage fallback active).')}
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      type="button" 
+                      className="btn-secondary" 
+                      style={{ borderColor: '#059669', color: '#065F46', background: '#FFFFFF', padding: '6px 14px', fontSize: '12px' }}
+                      onClick={testSupabaseSync}
+                    >
+                      Test Connection
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn-primary" 
+                      style={{ background: '#059669', borderColor: '#047857', padding: '6px 16px', fontSize: '12px' }}
+                      onClick={handlePushToSupabase}
+                      title="Upload all local bouquets and orders to Supabase"
+                    >
+                      Push Local Data to Supabase ☁️
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Google Sheets Integration Card */}
               <div className="content-card" style={{ border: '2px solid var(--primary-border)', background: '#FFFDFE', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
@@ -3986,28 +4132,12 @@ function AdminApp() {
                 const productName = (fd.get('name') || (editingArrangement ? editingArrangement.name : (modalProductType === 'flowers_only' ? 'Fresh Flower Stems' : 'Artisanal Bouquet'))).trim();
                 let finalImageUrl = newArrangementImage || (editingArrangement ? editingArrangement.image : 'https://images.unsplash.com/photo-1587556930799-8dca6a737e5e?auto=format&fit=crop&w=800&q=80');
                 
-                if (newArrangementImage && newArrangementImage.startsWith('data:image') && settings.googleAppsScriptUrl) {
-                  try {
-                    const uploadPayload = {
-                      action: 'upload_drive_image',
-                      folderName: 'Product-Images',
-                      parentFolderName: 'Blooms&Twirl by Shaira',
-                      fileName: productName.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now() + '.jpg',
-                      base64Data: newArrangementImage
-                    };
-                    fetch(settings.googleAppsScriptUrl, {
-                      method: 'POST',
-                      mode: 'no-cors',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(uploadPayload)
-                    }).catch(() => {});
-                  } catch(err) {}
-                }
-
                 const stockCount = Number(fd.get('coldRoomCount')) || (editingArrangement ? editingArrangement.coldRoomCount : (modalProductType === 'flowers_only' ? 50 : 10));
                 const stemsList = (fd.get('stems') || '').split(',').map(s => s.trim()).filter(Boolean);
                 const unitVal = fd.get('unit') || (modalProductType === 'flowers_only' ? 'per stem' : '');
                 const isFeaturedVal = fd.get('isFeatured') === 'on' || fd.get('isFeatured') === 'true';
+
+                let targetId = editingArrangement ? editingArrangement.id : null;
 
                 if (editingArrangement) {
                   const updated = deduplicateArrangements(arrangements.map(a => a.id === editingArrangement.id ? {
@@ -4037,7 +4167,22 @@ function AdminApp() {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'sync_products', products: updated })
+                        body: JSON.stringify({
+                          action: 'save_product',
+                          product: {
+                            id: targetId,
+                            name: productName,
+                            category: fd.get('category') || 'Signature',
+                            tag: fd.get('tag') || 'Signature',
+                            price: Number(fd.get('price')) || 2450,
+                            coldRoomCount: stockCount,
+                            description: fd.get('description') || '',
+                            stems: stemsList,
+                            isFeatured: isFeaturedVal,
+                            image: finalImageUrl.startsWith('http') ? finalImageUrl : ''
+                          },
+                          base64Data: (newArrangementImage && newArrangementImage.startsWith('data:image')) ? newArrangementImage : ''
+                        })
                       }).catch(() => {});
                     } catch(e) {}
                   }
@@ -4051,7 +4196,6 @@ function AdminApp() {
                   // Duplicate prevention: If item with same name exists, update rather than duplicating
                   const existingMatch = arrangements.find(a => (a.name || '').trim().toLowerCase() === productName.toLowerCase());
                   let updated;
-                  let targetId;
 
                   if (existingMatch) {
                     targetId = existingMatch.id;
@@ -4106,7 +4250,22 @@ function AdminApp() {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'sync_products', products: updated })
+                        body: JSON.stringify({
+                          action: 'save_product',
+                          product: {
+                            id: targetId,
+                            name: productName,
+                            category: fd.get('category') || (modalProductType === 'flowers_only' ? 'Roses' : 'Signature'),
+                            tag: fd.get('tag') || (modalProductType === 'flowers_only' ? 'Fresh Cut' : 'Signature'),
+                            price: Number(fd.get('price')) || (modalProductType === 'flowers_only' ? 85 : 2450),
+                            coldRoomCount: stockCount,
+                            description: fd.get('description') || '',
+                            stems: stemsList,
+                            isFeatured: isFeaturedVal,
+                            image: finalImageUrl.startsWith('http') ? finalImageUrl : ''
+                          },
+                          base64Data: (newArrangementImage && newArrangementImage.startsWith('data:image')) ? newArrangementImage : ''
+                        })
                       }).catch(() => {});
                     } catch(e) {}
                   }

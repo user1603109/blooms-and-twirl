@@ -136,7 +136,95 @@ function doPost(e) {
           }
         }
       }
-      return ContentService.createTextOutput(JSON.stringify({ status: "success", id: targetId, isFeatured: isFeat })).setMimeType(ContentService.MimeType.JSON);
+    if (action === "save_product") {
+      var p = contents.product || {};
+      var base64Data = contents.base64Data || "";
+      var imageUrl = p.image || "";
+      
+      // If base64 image data is provided, upload directly to Google Drive
+      if (base64Data && base64Data.indexOf("data:image") !== -1) {
+        try {
+          var targetFolder = null;
+          if (contents.folderId) {
+            try { targetFolder = DriveApp.getFolderById(contents.folderId); } catch(e) {}
+          }
+          if (!targetFolder) {
+            var allFolders = DriveApp.getFolders();
+            var parentFolder = null;
+            while (allFolders.hasNext()) {
+              var f = allFolders.next();
+              var fname = f.getName().toLowerCase();
+              if (fname.indexOf("blooms") !== -1 && fname.indexOf("twirl") !== -1) {
+                parentFolder = f;
+                break;
+              }
+            }
+            if (!parentFolder) parentFolder = DriveApp.getRootFolder();
+            
+            var subFolders = parentFolder.getFolders();
+            while (subFolders.hasNext()) {
+              var sf = subFolders.next();
+              var sfName = sf.getName().toLowerCase();
+              if (sfName.indexOf("product") !== -1) {
+                targetFolder = sf;
+                break;
+              }
+            }
+            if (!targetFolder) targetFolder = parentFolder.createFolder("Products");
+          }
+          
+          var fileName = (p.name || "arrangement").replace(/[^a-zA-Z0-9]/g, "_") + "_" + Date.now() + ".jpg";
+          var decoded = Utilities.base64Decode(base64Data.split(",")[1] || base64Data);
+          var blob = Utilities.newBlob(decoded, "image/jpeg", fileName);
+          var file = targetFolder.createFile(blob);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          imageUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
+        } catch(driveErr) {
+          imageUrl = "";
+        }
+      }
+      
+      // Save or update in Products sheet
+      var pSheet = ss.getSheetByName("Products");
+      if (!pSheet) { setupDatabase(); pSheet = ss.getSheetByName("Products"); }
+      var targetId = String(p.id || "");
+      var rowIndex = -1;
+      if (pSheet.getLastRow() > 1) {
+        var data = pSheet.getDataRange().getValues();
+        for (var i = 1; i < data.length; i++) {
+          if (String(data[i][0]) === targetId) {
+            rowIndex = i + 1;
+            break;
+          }
+        }
+      }
+      
+      var rowValues = [
+        targetId,
+        p.name || "",
+        p.tag || "",
+        p.category || "",
+        p.price || 0,
+        p.coldRoomCount || 0,
+        p.sold30d || 0,
+        p.rating || 5.0,
+        imageUrl,
+        Array.isArray(p.stems) ? p.stems.join(", ") : (p.stems || ""),
+        p.description || "",
+        p.isFeatured ? "TRUE" : "FALSE"
+      ];
+      
+      if (rowIndex > 1) {
+        pSheet.getRange(rowIndex, 1, 1, 12).setValues([rowValues]);
+      } else {
+        pSheet.appendRow(rowValues);
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({ 
+        status: "success", 
+        id: targetId, 
+        imageUrl: imageUrl 
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
     if (action === "sync_products") {

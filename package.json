@@ -5,7 +5,10 @@
   "description": "Blooms&Twirl by Shaira - Artisanal Floral Studio & E-Commerce Console",
   "scripts": {
     "start": "serve .",
-    "dev": "serve . -p 3000"
+    "dev": "serve . -p 3000",
+    "build": "vite build",
+    "dev:vite": "vite",
+    "preview": "vite preview"
   },
   "keywords": [
     "flower-shop",
@@ -13,13 +16,23 @@
     "e-commerce",
     "react",
     "typescript",
-    "google-sheets-database",
+    "supabase",
+    "realtime-database",
     "vercel"
   ],
   "author": "Shaira / Blooms&Twirl",
   "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
   "devDependencies": {
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
     "serve": "^14.2.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^5.1.3"
   }
 }
