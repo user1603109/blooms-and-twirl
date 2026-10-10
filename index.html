@@ -1899,6 +1899,37 @@
 
       useEffect(() => saveItem('orders', orders), [orders]);
 
+      // Realtime Customer Tracker Bridge: Keep trackedOrder strictly synced whenever orders update (from Admin dispatch or cloud sync)
+      useEffect(() => {
+        if (trackedOrder) {
+          const fresh = orders.find(o => o.id === trackedOrder.id);
+          if (fresh && (fresh.status !== trackedOrder.status || fresh.courier !== trackedOrder.courier || fresh.dueTime !== trackedOrder.dueTime)) {
+            setTrackedOrder(fresh);
+          }
+        }
+      }, [orders, trackedOrder]);
+
+      // Cross-Tab & Multi-Window Realtime Sync: Pick up Admin status changes, courier assignments, and custom commissions instantly
+      useEffect(() => {
+        const handleOrdersStorage = (e) => {
+          if (!e || !e.key || e.key === 'bt_orders_v2') {
+            const fresh = getInitial('orders', null);
+            if (Array.isArray(fresh)) {
+              setOrders(fresh);
+            }
+          }
+          if (!e || !e.key || e.key === 'bt_custom_orders_v2') {
+            const freshCustom = getInitial('custom_orders', null);
+            if (Array.isArray(freshCustom)) {
+              setCustomOrders(freshCustom);
+            }
+          }
+        };
+        window.addEventListener('storage', handleOrdersStorage);
+        window.addEventListener('focus', () => handleOrdersStorage({ key: 'bt_orders_v2' }));
+        return () => window.removeEventListener('storage', handleOrdersStorage);
+      }, []);
+
       // =========================================================================
       // BESPOKE CUSTOM ORDERS STATE & WORKFLOW (SHARED WITH ADMIN STUDIO)
       // =========================================================================
@@ -2365,12 +2396,55 @@
           console.warn('Stock deduction synced with warning:', err);
         }
 
+        // Synchronize delivery dispatch queue in admin
+        try {
+          const currentDeliveries = getInitial('deliveries', []);
+          const newDelivery = {
+            id: 'del-' + Date.now(),
+            time: newOrd.dueTime || '14:00',
+            recipient: newOrd.customerName,
+            location: newOrd.address,
+            courier: 'Unassigned',
+            status: 'Queued',
+            orderId: newOrd.id
+          };
+          saveItem('deliveries', [newDelivery, ...currentDeliveries]);
+        } catch (eDel) { }
+
+        // Synchronize customer directory with updated LTV and order count
+        try {
+          const currentCustomers = getInitial('customers', []);
+          const existingCustIdx = currentCustomers.findIndex(c => c.email && c.email.toLowerCase() === (newOrd.email || '').toLowerCase());
+          if (existingCustIdx >= 0) {
+            currentCustomers[existingCustIdx].ordersCount = (currentCustomers[existingCustIdx].ordersCount || 1) + 1;
+            currentCustomers[existingCustIdx].lifetimeValue = (currentCustomers[existingCustIdx].lifetimeValue || 0) + newOrd.total;
+            currentCustomers[existingCustIdx].lastOrderDate = newOrd.date.slice(0, 10);
+          } else {
+            const newCust = {
+              id: 'c-' + Date.now(),
+              name: newOrd.customerName,
+              initials: newOrd.customerInitials,
+              email: newOrd.email,
+              phone: newOrd.phone,
+              segment: 'Online Store',
+              ordersCount: 1,
+              lifetimeValue: newOrd.total,
+              lastOrderDate: newOrd.date.slice(0, 10),
+              customerSinceDate: newOrd.date.slice(0, 10)
+            };
+            currentCustomers.unshift(newCust);
+          }
+          saveItem('customers', currentCustomers);
+        } catch (eCust) { }
+
         setCart([]);
         setIsCheckoutOpen(false);
         setIsCartOpen(false);
         setTrackedOrder(newOrd);
         setLookupOrderNumber(newOrd.id);
         setViewMode('customer_dashboard');
+        setCustomerDashboardTab('orders');
+        setCustomerTrackerTab('standard');
         showToast('Thank you, ' + checkoutData.name + '! Your order #' + newOrd.id + ' has been confirmed and submitted to Shaira’s atelier.', 'success', 'Order Confirmed');
       };
 

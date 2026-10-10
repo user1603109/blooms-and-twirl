@@ -1319,6 +1319,52 @@ function AdminApp() {
   useEffect(() => saveItem('promotions', promotions), [promotions]);
   useEffect(() => saveItem('settings', settings), [settings]);
 
+  // Cross-Tab & Multi-Window Realtime Sync: Pick up new customer orders, custom commissions, and deliveries instantly
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'bt_orders_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (Array.isArray(fresh)) {
+            setOrders(fresh);
+            showToast('🔔 New customer order received in the studio registry!', 'info', 'New Order Live Sync');
+          }
+        } catch(err) {}
+      }
+      if (e.key === 'bt_custom_orders_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (Array.isArray(fresh)) {
+            setCustomOrders(fresh);
+            showToast('✨ New bespoke commission inquiry received!', 'info', 'New Custom Order');
+          }
+        } catch(err) {}
+      }
+      if (e.key === 'bt_deliveries_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (Array.isArray(fresh)) setDeliveries(fresh);
+        } catch(err) {}
+      }
+      if (e.key === 'bt_customers_v2' && e.newValue) {
+        try {
+          const fresh = JSON.parse(e.newValue);
+          if (Array.isArray(fresh)) setCustomers(fresh);
+        } catch(err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', () => {
+      const ords = getInitial('orders', null);
+      if (Array.isArray(ords)) setOrders(ords);
+      const cust = getInitial('custom_orders', null);
+      if (Array.isArray(cust)) setCustomOrders(cust);
+      const dels = getInitial('deliveries', null);
+      if (Array.isArray(dels)) setDeliveries(dels);
+    });
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   // Supabase Initial Hydration & Realtime Subscription (Syncs with Mobile View Instantly)
   useEffect(() => {
     if (window.SupabaseService && window.SupabaseService.isConfigured()) {
@@ -1456,6 +1502,20 @@ function AdminApp() {
     }
 
     const norm = normalizeSubStatus(newStatus);
+    let deliveryStatus = 'Queued';
+    if (['Delivered', 'Received by Customer'].includes(norm)) deliveryStatus = 'Done';
+    else if (['Handed to Courier', 'In Hub Transit', 'Out for Delivery'].includes(norm)) deliveryStatus = 'Rolling';
+
+    setDeliveries(prev => {
+      const match = prev.find(d => d.orderId === orderId);
+      if (match) {
+        const updatedDels = prev.map(d => d.orderId === orderId ? { ...d, status: deliveryStatus } : d);
+        saveItem('deliveries', updatedDels);
+        return updatedDels;
+      }
+      return prev;
+    });
+
     if (['Delivered', 'Received by Customer'].includes(norm) && target) {
       showToast(`✉️ Delivery confirmed! Automatic success email and review invitation sent to ${target.customerName} (${target.email || 'customer@ph.com'})!`, 'success', 'Delivery Success Emailed');
     }
@@ -2212,6 +2272,11 @@ function AdminApp() {
                                     const updated = orders.map(ord => ord.id === o.id ? { ...ord, courier: nextCourier } : ord);
                                     setOrders(updated);
                                     saveItem('orders', updated);
+                                    setDeliveries(prev => {
+                                      const updatedDels = prev.map(d => d.orderId === o.id ? { ...d, courier: nextCourier } : d);
+                                      saveItem('deliveries', updatedDels);
+                                      return updatedDels;
+                                    });
                                     if (window.SupabaseService && window.SupabaseService.isConfigured()) {
                                       window.SupabaseService.updateOrderStatus(o.id, o.status, null, nextCourier);
                                     }
