@@ -39,6 +39,25 @@
       document.write('<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>');
     }
   </script>
+  <script>
+    function configureBabelClassicRuntime() {
+      try {
+        if (window.Babel && typeof Babel.registerPreset === 'function') {
+          var reactPreset = Babel.availablePresets && (Babel.availablePresets['react'] || Babel.availablePresets.react);
+          if (reactPreset) {
+            Babel.registerPreset('react-classic', {
+              presets: [
+                [reactPreset, { runtime: 'classic' }]
+              ]
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Could not register react-classic preset:', err);
+      }
+    }
+    configureBabelClassicRuntime();
+  </script>
   <!-- Supabase Cloud Database & Realtime Sync Engine -->
   <script src="./src/services/supabase.js"></script>
 
@@ -864,10 +883,13 @@
         }
       }, 16000);
     })();
+  <script>
+    if (typeof configureBabelClassicRuntime === 'function') {
+      configureBabelClassicRuntime();
+    }
   </script>
-
-  <!-- Inline Babel script configured with data-presets="react" for rapid transpilation -->
-  <script type="text/babel" data-presets="react">
+  <!-- Inline Babel script configured with data-presets="react-classic" for rapid transpilation without module imports -->
+  <script type="text/babel" data-presets="react-classic">
     const { useState, useEffect, useMemo } = React;
 
     // --- Philippines Smart Address Lookup Database (Luzon to Visayas) ---

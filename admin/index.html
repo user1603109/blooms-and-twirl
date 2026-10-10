@@ -17,6 +17,25 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script>
+    function configureBabelClassicRuntime() {
+      try {
+        if (window.Babel && typeof Babel.registerPreset === 'function') {
+          var reactPreset = Babel.availablePresets && (Babel.availablePresets['react'] || Babel.availablePresets.react);
+          if (reactPreset) {
+            Babel.registerPreset('react-classic', {
+              presets: [
+                [reactPreset, { runtime: 'classic' }]
+              ]
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Could not register react-classic preset:', err);
+      }
+    }
+    configureBabelClassicRuntime();
+  </script>
   <!-- Supabase Cloud Database & Realtime Sync Client -->
   <script src="../src/services/supabase.js"></script>
 
@@ -112,7 +131,12 @@
     </div>
   </div>
 
-  <script type="text/babel">
+  <script>
+    if (typeof configureBabelClassicRuntime === 'function') {
+      configureBabelClassicRuntime();
+    }
+  </script>
+  <script type="text/babel" data-presets="react-classic">
 const { useState, useEffect, useMemo } = React;
 
 const IconsBase = {
