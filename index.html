@@ -218,6 +218,95 @@
       font-weight: 800;
     }
 
+    /* Enhanced High-Contrast Button & Switcher Styling for Customer Hub */
+    .switcher-btn {
+      padding: 10px 18px !important;
+      border-radius: var(--radius-pill) !important;
+      border: 1.5px solid #F0D5DD !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      color: #36222C !important;
+      background: #FFFFFF !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .switcher-btn:hover {
+      background: #FFF0F5 !important;
+      color: var(--primary) !important;
+      border-color: #F472B6 !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 10px rgba(247, 0, 119, 0.12) !important;
+    }
+
+    .switcher-btn.active {
+      background: var(--primary) !important;
+      color: #FFFFFF !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 4px 14px rgba(247, 0, 119, 0.35) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* Floating dock override (keeps dark dock styling intact on landing page) */
+    .floating-dock .switcher-btn {
+      border: none !important;
+      background: transparent !important;
+      color: #F8DFE5 !important;
+      box-shadow: none !important;
+    }
+    .floating-dock .switcher-btn:hover {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+    .floating-dock .switcher-btn.active {
+      background: var(--primary) !important;
+      color: #FFFFFF !important;
+      box-shadow: var(--shadow-pill) !important;
+    }
+
+    .btn-secondary {
+      background: #FFFFFF !important;
+      color: #36222C !important;
+      border: 1.5px solid #E5C4CF !important;
+      font-weight: 700 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .btn-secondary:hover {
+      background: #FFF5F8 !important;
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(247, 0, 119, 0.15) !important;
+    }
+
+    .filter-pill {
+      background: #FFFFFF !important;
+      color: #36222C !important;
+      border: 1.5px solid #E5C4CF !important;
+      font-weight: 700 !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .filter-pill:hover {
+      border-color: var(--primary) !important;
+      color: var(--primary) !important;
+      background: #FFF0F5 !important;
+    }
+
+    .filter-pill.active {
+      background: var(--primary) !important;
+      color: #FFFFFF !important;
+      border-color: var(--primary) !important;
+      box-shadow: 0 4px 12px rgba(247, 0, 119, 0.3) !important;
+    }
+
     /* 3D Flip Card for Auth Module */
     .flip-scene {
       perspective: 1200px;
@@ -4092,15 +4181,17 @@
                             type="button"
                             onClick={() => handleSendChatMessage(prompt)}
                             style={{
-                              padding: '4px 12px',
+                              padding: '6px 14px',
                               borderRadius: '9999px',
                               background: '#FFFFFF',
-                              border: '1px solid var(--border-light)',
+                              border: '1.5px solid #E5C4CF',
                               fontSize: '11px',
-                              color: 'var(--text-main)',
+                              color: '#36222C',
                               cursor: 'pointer',
                               whiteSpace: 'nowrap',
-                              fontWeight: '600'
+                              fontWeight: '700',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                              transition: 'all 0.15s ease'
                             }}
                           >
                             {prompt}
@@ -4186,21 +4277,23 @@
                               setLookupCustomOrderId(co.id);
                             }}
                             style={{
-                              padding: '6px 14px',
+                              padding: '7px 16px',
                               borderRadius: '9999px',
-                              border: isSelected ? '1.5px solid var(--primary)' : '1px solid var(--border-light)',
-                              background: isSelected ? '#FFF0F5' : '#FFFFFF',
-                              color: isSelected ? 'var(--primary)' : 'var(--text-main)',
+                              border: isSelected ? '1.5px solid var(--primary)' : '1.5px solid #E5C4CF',
+                              background: isSelected ? 'var(--primary)' : '#FFFFFF',
+                              color: isSelected ? '#FFFFFF' : '#36222C',
                               fontSize: '12px',
                               fontWeight: '700',
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '6px'
+                              gap: '6px',
+                              boxShadow: isSelected ? '0 4px 12px rgba(247,0,119,0.3)' : '0 1px 3px rgba(0,0,0,0.03)',
+                              transition: 'all 0.15s ease'
                             }}
                           >
                             <span>{co.id}</span>
-                            <span style={{ fontSize: '11px', color: isSelected ? 'var(--primary)' : 'var(--text-muted)', fontWeight: '500' }}>
+                            <span style={{ fontSize: '11px', color: isSelected ? 'rgba(255,255,255,0.9)' : '#785A6A', fontWeight: '600' }}>
                               · {co.customerName.split(' ')[0]} ({co.status})
                             </span>
                           </button>
@@ -4628,21 +4721,23 @@
                             setLookupOrderNumber(o.id);
                           }}
                           style={{
-                            padding: '5px 12px',
+                            padding: '7px 16px',
                             borderRadius: '9999px',
-                            border: (trackedOrder && trackedOrder.id === o.id) ? '1.5px solid var(--primary)' : '1px solid var(--border-light)',
-                            background: (trackedOrder && trackedOrder.id === o.id) ? 'var(--primary-subtle)' : '#FFFFFF',
-                            color: (trackedOrder && trackedOrder.id === o.id) ? 'var(--primary)' : 'var(--text-main)',
+                            border: (trackedOrder && trackedOrder.id === o.id) ? '1.5px solid var(--primary)' : '1.5px solid #E5C4CF',
+                            background: (trackedOrder && trackedOrder.id === o.id) ? 'var(--primary)' : '#FFFFFF',
+                            color: (trackedOrder && trackedOrder.id === o.id) ? '#FFFFFF' : '#36222C',
                             fontSize: '12px',
                             fontWeight: '700',
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            boxShadow: (trackedOrder && trackedOrder.id === o.id) ? '0 4px 12px rgba(247,0,119,0.3)' : '0 1px 3px rgba(0,0,0,0.03)',
+                            transition: 'all 0.15s ease'
                           }}
                         >
                           <span>{o.id}</span>
-                          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500' }}>· {o.customerName.split(' ')[0]}</span>
+                          <span style={{ fontSize: '11px', color: (trackedOrder && trackedOrder.id === o.id) ? 'rgba(255,255,255,0.9)' : '#785A6A', fontWeight: '600' }}>· {o.customerName.split(' ')[0]}</span>
                         </button>
                       ))}
                     </div>
